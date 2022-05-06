@@ -37,6 +37,11 @@ begin
   exact congr (congr_arg has_div.div h) g,
 end
 
+example (r s t: ℝ) (h: s = t): r * s = r * t :=
+begin
+  exact congr_arg (has_mul.mul r) (h),
+end
+
 -- part 2 of https://proofwiki.org/wiki/Stirling%27s_Formula
 
 noncomputable def wallis_inside_prod (n : ℕ) : ℝ :=
@@ -91,6 +96,76 @@ begin
   end,
   rw tendsto_congr h_prod,
   exact tendsto_prod_pi_div_two,
+end
+
+
+lemma aux2 (r : ℝ) (d : ℕ):
+1 / ↑(2 * d.succ + 1) * (
+  r
+   * (↑((2 * d.succ) ^ 2) / (↑(2 * d.succ) - 1) ^ 2)) =
+   (1 / ↑(2 * d + 1) *
+   r
+   ) * (↑(2 * d.succ) / (↑(2 * d.succ) - 1)
+   * (↑(2 * d.succ) / ↑(2 * d.succ + 1)))
+ :=
+begin
+  rw ←mul_assoc _ r _,
+  rw mul_comm _ r,
+  rw mul_comm _ r,
+  rw mul_assoc r _ _,
+  rw mul_assoc r _ _,
+  rw congr_arg (has_mul.mul r) _,
+  repeat {rw succ_eq_add_one},
+  repeat {rw mul_add},
+  simp only [mul_one, cast_add, cast_mul, cast_bit0,
+  cast_one, one_div, cast_pow],
+  repeat {rw pow_two},
+  repeat {rw ←(add_sub _ _ _)},
+  have two_sub_one: (2:ℝ ) - 1 = 1 := by ring,
+  rw two_sub_one,
+  norm_cast,
+  repeat {rw div_eq_inv_mul},
+  rw mul_comm (↑(2 * d + 1))⁻¹,
+  rw mul_comm _ ↑((2 * d + 2) * (2 * d + 2)),
+  rw mul_comm (↑(2 * d + 2 + 1))⁻¹ _,
+  rw cast_mul,
+  rw mul_comm (↑(2 * d + 1))⁻¹ ↑(2 * d + 2),
+  rw mul_comm (↑(2 * d + 2 + 1))⁻¹ _,
+  repeat {rw mul_assoc},
+  rw congr_arg (has_mul.mul _) _,
+  rw mul_comm (↑(2 * d + 1))⁻¹ _,
+  repeat {rw mul_assoc},
+  rw congr_arg (has_mul.mul _) _,
+  rw mul_comm _ (↑(2 * d + 2 + 1))⁻¹,
+  repeat {rw mul_assoc},
+  rw congr_arg (has_mul.mul _) _,
+  simp only [cast_mul, cast_add, cast_bit0, cast_one],
+  repeat {rw ←div_eq_inv_mul},
+  ring_nf,
+  simp only [inv_pow₀, inv_inj],
+  ring,
+end
+
+lemma equation3 (n : ℕ):  ∏ k in Ico 1 n.succ,
+    wallis_inside_prod k =
+    (1:ℝ)/(2 * n + 1) * ∏ k in Ico 1 n.succ,
+    ((2 : ℝ) * k)^2/(2 * k - 1)^2 :=
+begin
+  induction n with d hd,
+  simp only [Ico_self, prod_empty, cast_zero, mul_zero,
+  zero_add, div_one, mul_one],
+  rw succ_eq_add_one,
+  norm_cast,
+  rw prod_Ico_succ_top,
+  rw hd,
+  rw wallis_inside_prod,
+  symmetry,
+  rw prod_Ico_succ_top,
+  {norm_cast,
+    rw aux2,
+  },
+  apply zero_lt_succ,
+  apply zero_lt_succ,
 end
 
 lemma wallis_consequence: tendsto (λ (n : ℕ),

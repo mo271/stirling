@@ -6,8 +6,8 @@ import algebra.big_operators.intervals
 import data.finset.sum
 
 open_locale big_operators -- notation ∑ for finite sums
-open real 
-open finset 
+open real
+open finset
 open nat
 
 example (n : ℕ) : 2 ≤ n.succ.succ :=
@@ -23,23 +23,23 @@ begin
   rw nat.factorial,
 end
 
-lemma log_sum (n : ℕ) : 
-(real.log n.factorial)  = 
+lemma log_sum (n : ℕ) :
+(real.log n.factorial)  =
 (∑ k in (Ico 2 (n.succ) ), real.log k) :=
 begin
   cases n,
-  simp only [nat.factorial_zero, nat.cast_one, log_one, 
-  Ico_eq_empty_of_le, nat.one_le_bit0_iff, 
+  simp only [nat.factorial_zero, nat.cast_one, log_one,
+  Ico_eq_empty_of_le, nat.one_le_bit0_iff,
   nat.lt_one_iff, sum_empty],
   induction n with d hd,
-  simp only [nat.factorial_one, nat.cast_one, 
+  simp only [nat.factorial_one, nat.cast_one,
   log_one, Ico_self, sum_empty],
   rw nat.factorial,
   simp only [nat.cast_mul],
   rw log_mul,
   {
   rw hd,
-  have ha:  2 ≤ d.succ.succ := 
+  have ha:  2 ≤ d.succ.succ :=
   begin
     rw succ_eq_add_one,
     rw succ_eq_add_one,
