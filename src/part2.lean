@@ -277,7 +277,7 @@ begin
   rw ←mul_assoc,
   {let hd' := (congr_arg (has_mul.mul (2 * (d:ℝ) + 1)) hd),
    rw ←mul_assoc at hd',
-   have hnezero: (2 * (d:ℝ) + 1) ≠ 0 := 
+   have hnezero: (2 * (d:ℝ) + 1) ≠ 0 :=
    begin
      norm_cast,
      apply succ_ne_zero,

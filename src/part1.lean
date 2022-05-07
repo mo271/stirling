@@ -14,7 +14,7 @@ open_locale big_operators -- notation ∑ for finite sums
 
 open_locale classical real topological_space nnreal ennreal filter big_operators
 
-open real 
+open real
 open finset
 open filter
 open nat
@@ -28,22 +28,22 @@ begin
   simp only [le_add_iff_nonneg_left, zero_le'],
 end
 
-lemma const_zero: tendsto (λ (n : ℕ) , 0) 
-    at_top (𝓝  0) := 
+lemma const_zero: tendsto (λ (n : ℕ) , 0)
+    at_top (𝓝  0) :=
 begin
   exact tendsto_const_nhds,
 end
 
-lemma one_div_succ: tendsto (λ (n : ℝ) , (n:ℝ )^(-(1:ℝ))) 
-    at_top (𝓝  0) := 
+lemma one_div_succ: tendsto (λ (n : ℝ) , (n:ℝ )^(-(1:ℝ)))
+    at_top (𝓝  0) :=
 begin
   refine tendsto_rpow_neg_at_top _,
   exact one_pos,
 end
 
 
-lemma one_div_succ': tendsto (λ (n : ℕ) , (n:ℝ )^(-(1:ℝ))) 
-    at_top (𝓝  0) := 
+lemma one_div_succ': tendsto (λ (n : ℕ) , (n:ℝ )^(-(1:ℝ)))
+    at_top (𝓝  0) :=
 begin
   norm_cast,
   rw tendsto,
@@ -53,12 +53,12 @@ end
 
 -- part 1 of https://proofwiki.org/wiki/Stirling%27s_Formula
 
-noncomputable def an (n : ℕ) : ℝ  := (n.factorial :ℝ ) 
-/ ((real.sqrt(2*n)*((n/(exp 1)))^n)) 
+noncomputable def an (n : ℕ) : ℝ  := (n.factorial :ℝ )
+/ ((real.sqrt(2*n)*((n/(exp 1)))^n))
 
-lemma power_series_ln (n : ℕ): tendsto 
-(λ (m : ℕ),  (2:ℝ)*(∑ k in range m, 
-(((1/(2*↑k + 1))*((1/(2*((↑n + 1))^(2*↑k + 1)))))))) at_top 
+lemma power_series_ln (n : ℕ): tendsto
+(λ (m : ℕ),  (2:ℝ)*(∑ k in range m,
+(((1/(2*↑k + 1))*((1/(2*((↑n + 1))^(2*↑k + 1)))))))) at_top
 (𝓝 (log (↑n.succ / ↑n)) ):=
  begin
   sorry,
@@ -66,7 +66,7 @@ lemma power_series_ln (n : ℕ): tendsto
 
 noncomputable def bn (n : ℕ) :ℝ := log (an n)
 
-lemma bn_formula (n : ℕ): bn n = (log ↑n.factorial) - 
+lemma bn_formula (n : ℕ): bn n = (log ↑n.factorial) -
 1/(2:ℝ)*(log (2*↑n)) - ↑n*log (↑n/(exp 1)) :=
 begin
   sorry,
@@ -82,14 +82,21 @@ begin
   sorry,
 end
 
-lemma bn_has_limit_b: ∃ (b : ℝ), tendsto 
+lemma bn_has_limit_b: ∃ (b : ℝ), tendsto
 (λ (n : ℕ),  bn n)
   at_top (𝓝  b) :=
 begin
   sorry,
-end 
+end
 
-lemma an_has_limit_a: ∃ (a : ℝ), tendsto 
+lemma an_has_limit_a: ∃ (a : ℝ), tendsto
+(λ (n : ℕ),  an n)
+  at_top (𝓝  a) :=
+begin
+  sorry,
+end
+
+lemma an_has_pos_limit_a: ∃ (a : ℝ), 0 < a ∧ tendsto
 (λ (n : ℕ),  an n)
   at_top (𝓝  a) :=
 begin

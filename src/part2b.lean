@@ -34,12 +34,54 @@ begin
  exact tendsto.mul hA hB,
 end
 
+example: tendsto (λ (x : ℕ), ((x : ℝ))⁻¹) at_top (𝓝 0)
+:=tendsto_inverse_at_top_nhds_0_nat
+
+
+
+example: tendsto (λ (x : ℕ), ((2 : ℝ))) at_top (𝓝 2):=
+ tendsto_const_nhds
+
+example (a : ℕ → ℝ) (A : ℝ)
+(h: tendsto (λ (k : ℕ), a (k + 1)) at_top (𝓝 (A))):
+tendsto (λ (k : ℕ), a (k)) at_top (𝓝 (A)) :=
+begin
+  exact (tendsto_add_at_top_iff_nat 1).mp h,
+end
+
+
+
+lemma tendsto_inv' (a : ℕ → ℝ) (A : ℝ) (hA: 0≠A)
+ (h: tendsto (λ (k : ℕ), a k) at_top (𝓝 (A))) :
+  (tendsto (λ (k : ℕ), (a k)⁻¹) at_top (𝓝 (A⁻¹))) :=
+begin
+  exact tendsto.inv₀ h (ne.symm hA),
+end
+
+lemma const_tendsto (a : ℕ → ℝ) (A : ℝ):
+ tendsto (λ (k : ℕ), (0 : ℝ)) at_top (𝓝 (0)) :=
+begin
+  simp only [tendsto_const_nhds],
+end
+
+-- is this or something like it not in library?
 lemma unique_limit (a : (ℕ → ℝ)) (A B: ℝ)
 (hA: tendsto (λ (k : ℕ), a k) at_top (𝓝 (A)))
 (hB: tendsto (λ (k : ℕ), a k) at_top (𝓝 (B))) :
 A = B :=
 begin
- sorry,
+  have h: tendsto
+  (λ (k : ℕ), a k - (a k)) at_top (𝓝 (A - B)) :=
+  begin
+    exact tendsto.sub hA hB,
+  end,
+  simp only [sub_self] at h,
+  have hAB: (0 : ℝ) = A - B :=
+  begin
+    -- how to use tendsto_const_iff here?
+    sorry,
+  end,
+  exact eq_of_sub_eq_zero (symm hAB),
 end
 
 example (x y : ℝ) (hx: 0 ≤ x) (hy: 0 ≤ y) (hxy: x^2 = y^2):
@@ -54,10 +96,66 @@ noncomputable def cn (n : ℕ) : ℝ  :=
 ((real.sqrt(2*n)*((n/(exp 1)))^n))^4 * 2^(4*n) /
 ((sqrt(4*n)*(2*n/(exp 1)^(2*n))^2) * (2*n + 1))
 
+lemma rest_cancel (n : ℕ):
+ (n : ℝ) / (2*n + 1) = cn n :=
+ begin
+   rw cn,
+   have hodd : (2 : ℝ) * ↑n + 1 ≠ 0 :=
+   begin
+    sorry,
+   end,
+   have hmisc: (exp (1:ℝ) ^ n) ^ 4 * (sqrt 4 * sqrt ↑n * (2 * ↑n) ^ 2 * (2 * ↑n + 1)) ≠ 0 :=
+   begin
+     sorry,
+   end,
+   norm_cast,
+   field_simp,
+   sorry,
+ end
+
 lemma rest_has_limit_one_half: tendsto
 (λ (n:ℕ), cn n) at_top (𝓝 (1/2)) :=
 begin
- sorry,
+ apply (tendsto.congr rest_cancel),
+ have h: tendsto (λ (x : ℕ), (((x:ℝ )/ (2 * ↑x + 1))⁻¹))
+ at_top (𝓝 (((1:ℝ ) / 2))⁻¹):=
+ begin
+  have hsucc: tendsto (λ (x : ℕ), (((x.succ:ℝ )/ (2 * ↑x.succ + 1))⁻¹))
+  at_top (𝓝 (((1:ℝ ) / 2))⁻¹):=
+  begin
+    -- this indirection (considering the succ) is taken,
+    -- becuase otherwise we would have a hard time
+    -- proving hxne
+    have hx: ∀ (x:ℕ), (2:ℝ) + x.succ⁻¹ = ((x.succ : ℝ) / (2 * x.succ + 1))⁻¹  :=
+    begin
+      intro x,
+      have hxne: (x.succ :ℝ ) ≠ (0:ℝ):=
+      begin
+        exact nonzero_of_invertible ↑(succ x),
+      end,
+      field_simp,
+    end,
+    simp only [one_div, inv_inv],
+    apply (tendsto.congr (hx)),
+    have h_right: tendsto (λ (x : ℕ), ((x : ℝ))⁻¹) at_top (𝓝 0)
+      :=tendsto_inverse_at_top_nhds_0_nat,
+    have h_left: tendsto (λ (x : ℕ), ((2 : ℝ))) at_top (𝓝 2):=
+  tendsto_const_nhds,
+    have g:= tendsto.add h_left ((tendsto_add_at_top_iff_nat 1).mpr h_right),
+    simp only [add_zero] at g,
+    exact g,
+  end,
+  exact (tendsto_add_at_top_iff_nat 1).mp hsucc,
+ end,
+ have h2: ((1:ℝ )/2)⁻¹ ≠ 0 :=
+ begin
+   simp only [one_div, inv_inv, ne.def, bit0_eq_zero,
+   one_ne_zero, not_false_iff],
+ end,
+ have g:= tendsto.inv₀ h h2,
+ simp only [inv_inv, one_div] at g,
+ simp only [one_div],
+ exact g,
 end
 
 lemma an_aux1 (a: ℝ) (ha: tendsto
@@ -95,7 +193,7 @@ begin
   rw an,
   rw cn,
   rw wn,
-  -- do some generalize here?,
+  -- do some "generalize" here?,
   sorry,
 end
 
@@ -113,7 +211,8 @@ begin
     have g := tendsto.mul  haleft haright,
     have a_pow : a ^ 4 * (1 / a) ^ 2  = a ^ 2 :=
     begin
-      sorry,
+      field_simp,
+      ring,
     end,
     rw a_pow at g,
     exact g,
@@ -136,20 +235,18 @@ end
 lemma an_has_limit_sqrt_pi: tendsto
 (λ (n : ℕ),  an n) at_top (𝓝  (sqrt π)) :=
 begin
-  have ha: ∃ (a : ℝ), tendsto
-(λ (n : ℕ),  an n) at_top (𝓝  a) := an_has_limit_a,
+  have ha:= an_has_pos_limit_a,
   cases ha with a ha,
-  have hπ: π/2 = a^2/2 := pi_and_a a _  ha,
+  cases ha with hapos halimit,
+  have hπ: π/2 = a^2/2 := pi_and_a a _ halimit,
   field_simp at hπ,
   have zero_le_pi: 0 ≤ π :=
   begin
-    sorry,
+    exact le_of_lt pi_pos,
   end,
   rw ←(sq_sqrt zero_le_pi) at hπ,
-  have h:= (sq_eq_sq _ _).mp hπ,
-  rw ←h at ha,
-  exact ha,
-  sorry,
-  sorry,
-  sorry,
+  have h:= (sq_eq_sq (sqrt_nonneg π) (le_of_lt hapos)).mp hπ,
+  rw ←h at halimit,
+  exact halimit,
+  exact ne_of_gt hapos,
 end
