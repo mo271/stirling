@@ -54,7 +54,7 @@ end
 -- part 1 of https://proofwiki.org/wiki/Stirling%27s_Formula
 
 noncomputable def an (n : ℕ) : ℝ  := (n.factorial :ℝ ) 
-/ ((real.sqrt(2*(n))*((n/(exp 1)))^n)) 
+/ ((real.sqrt(2*n)*((n/(exp 1)))^n)) 
 
 lemma power_series_ln (n : ℕ): tendsto 
 (λ (m : ℕ),  (2:ℝ)*(∑ k in range m, 

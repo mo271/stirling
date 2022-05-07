@@ -286,7 +286,8 @@ begin
    simp only [cast_succ, one_div, factorial_succ, cast_mul],
    have hsucc: 2*d.succ = (2*d).succ.succ :=
    begin
-     sorry,
+     repeat {rw succ_eq_add_one},
+     ring,
    end,
    rw hsucc,
    repeat {rw factorial_succ},
@@ -298,8 +299,7 @@ begin
    repeat {rw succ_eq_add_one},
    simp,
    rw one_add_one_eq_two,
-     field_simp,
-
+   sorry,
    },
   exact le_add_self,  
 end
@@ -318,10 +318,4 @@ begin
   rw tendsto_congr equation5' at h,
   rw tendsto_congr equation6 at h,
   exact h,
-end
-
-lemma an_has_limit_sqrt_pi: tendsto
-(λ (n : ℕ),  an n) at_top (𝓝  (sqrt π)) :=
-begin
-  sorry,
 end
