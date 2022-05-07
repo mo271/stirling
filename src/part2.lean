@@ -24,7 +24,8 @@ open finset
 open filter
 open nat
 
-
+example (n:ℕ ): n + 1 ≠ 0 :=
+succ_ne_zero n
 
 example (a b : (ℕ →  ℝ)) (h:∀ (k:ℕ), a k = b k ):
 tendsto (λ (k : ℕ), a k) at_top (𝓝 (π/2)) ↔ tendsto (λ (k : ℕ),b k) at_top (𝓝 (π/2)):=
@@ -276,9 +277,10 @@ begin
   rw ←mul_assoc,
   {let hd' := (congr_arg (has_mul.mul (2 * (d:ℝ) + 1)) hd),
    rw ←mul_assoc at hd',
-   have hnezero: (2 * (d:ℝ) + 1) ≠ 0 :=
+   have hnezero: (2 * (d:ℝ) + 1) ≠ 0 := 
    begin
-     sorry,
+     norm_cast,
+     apply succ_ne_zero,
    end,
    rw (mul_one_div_cancel hnezero) at hd',
    rw one_mul at hd',
