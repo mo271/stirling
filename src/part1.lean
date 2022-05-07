@@ -66,15 +66,79 @@ lemma power_series_ln (n : ℕ): tendsto
 
 noncomputable def bn (n : ℕ) :ℝ := log (an n)
 
-lemma bn_formula (n : ℕ): bn n = (log ↑n.factorial) -
+lemma zero_lt_sqrt_two_n (n : ℕ) : (n ≠ 0) → 0 < real.sqrt (2 * ↑n)  :=
+begin
+exact pow_ne_zero n,
+rw zero_lt_mul_left, 
+end
+
+lemma test (n : ℕ) : n+1 ≠ 0 :=
+begin
+library_search,
+apply real.sqrt_pos.mpr,
+norm_cast,
+have hn : 0<n, from zero_lt_iff.mpr hn,
+apply mul_pos two_pos ,
+assumption,
+exact nat.nontrivial,
+end
+
+lemma n_div_exp1_pow_gt_zero(n : ℕ) :  (↑n / exp 1) ^ n >0 :=
+begin
+cases n,
+rw pow_zero,
+exact one_pos,
+have hsucc : n.succ > 0, from nat.succ_pos n,
+apply gt_iff_lt.mpr,
+
+apply pow_pos  _ n.succ,
+apply div_pos_iff.mpr,
+left, split,
+norm_cast, rw ←gt_iff_lt,
+exact hsucc,
+exact (1:ℝ).exp_pos,
+end
+
+lemma bn_formula (n : ℕ):(n ≠ 0)→  bn n = (log ↑n.factorial) - 
 1/(2:ℝ)*(log (2*↑n)) - ↑n*log (↑n/(exp 1)) :=
 begin
+
+have h3, from  (lt_iff_le_and_ne.mp (zero_lt_sqrt_two_n n H)),
+have h4, from  (lt_iff_le_and_ne.mp (n_div_exp1_pow_gt_zero n )),
+
+rw [bn, an],
+rw [log_div, log_mul],
+rw [sqrt_eq_rpow, log_rpow, log_pow],
+ring,
+
+rw zero_lt_mul_left, 
+norm_cast,
+exact zero_lt_iff.mpr H,
+exact zero_lt_two,
+
+
+
+exact h3.right.symm,
+
+exact h4.right.symm,
+
+norm_cast,
+exact (n.factorial_ne_zero),
+
+apply (mul_ne_zero h3.right.symm h4.right.symm),
+end
+
+
+lemma bn_strictly_decreasing: ∀ (n : ℕ), (n ≠ 0) →  bn n > bn n.succ :=
+begin
+  intros n hn,
+  rw bn_formula n hn, rw bn_formula (n+1) n.succ_ne_zero ,
   sorry,
 end
 
-lemma bn_strictly_decreasing: ∀ (n : ℕ), bn n > bn n.succ :=
+lemma test (n : ℕ) : n+1 ≠ 0 :=
 begin
-  sorry,
+library_search,
 end
 
 lemma bn_bounded_below: ∀ (n : ℕ), bn n > 3/(4:ℝ) - 1/2*log 2 :=
