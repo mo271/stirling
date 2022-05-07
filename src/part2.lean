@@ -60,7 +60,7 @@ begin
   rw  log_rpow hn _,
 end
 
-lemma sqrt_eq_pow_half' (r : ℝ) (hr : 0 ≤ r): r^(1/2:ℝ) = sqrt r 
+lemma sqrt_eq_pow_half' (r : ℝ) (hr : 0 ≤ r): r^(1/2:ℝ) = sqrt r
 :=
 begin
   rw sqrt_eq_rpow,
@@ -195,8 +195,8 @@ begin
   apply zero_lt_succ,
 end
 
-lemma equation4 (k : ℕ) (hk: k ≠ 0): 
-((2 : ℝ) * k)^2/(2 * k - 1)^2 = 
+lemma equation4 (k : ℕ) (hk: k ≠ 0):
+((2 : ℝ) * k)^2/(2 * k - 1)^2 =
 ((2 : ℝ) * k)^2/(2 * k - 1)^2 * ((2*k)^2/(2*k)^2) :=
 begin
   have h : (((2:ℝ)*k)^2/(2*k)^2) = 1 :=
@@ -204,7 +204,7 @@ begin
     have hk2 : ((2:ℝ)*k)^2 ≠ 0:=
     begin
       simp only [ne.def, pow_eq_zero_iff, succ_pos',
-       mul_eq_zero, bit0_eq_zero, one_ne_zero, cast_eq_zero, 
+       mul_eq_zero, bit0_eq_zero, one_ne_zero, cast_eq_zero,
        false_or],
       exact hk,
     end,
@@ -215,10 +215,10 @@ begin
   simp only [mul_one],
 end
 
-lemma equation4' (n : ℕ): 
-1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ, 
-((2 : ℝ) * k)^2/(2 * k - 1)^2 = 
-1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ, 
+lemma equation4' (n : ℕ):
+1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
+((2 : ℝ) * k)^2/(2 * k - 1)^2 =
+1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
 ((2 : ℝ) * k)^2/(2 * k - 1)^2 * ((2*k)^2/(2*k)^2) :=
 begin
   rw prod_congr,
@@ -231,11 +231,11 @@ begin
 end
 
 lemma equation5 (k : ℕ):
-((2 : ℝ) * k)^2/(2 * k - 1)^2 * ((2*k)^2/(2*k)^2) = 
+((2 : ℝ) * k)^2/(2 * k - 1)^2 * ((2*k)^2/(2*k)^2) =
 ((2 : ℝ)^4 * k^4)/(((2*k - 1)*(2*k))^2) :=
 begin
  ring_nf,
- simp only [mul_eq_mul_right_iff, pow_eq_zero_iff, 
+ simp only [mul_eq_mul_right_iff, pow_eq_zero_iff,
  succ_pos', cast_eq_zero],
  left,
  norm_cast,
@@ -249,9 +249,9 @@ begin
 end
 
 lemma equation5' (n : ℕ):
-1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ, 
-((2 : ℝ) * k)^2/(2 * k - 1)^2 * ((2*k)^2/(2*k)^2) = 
-1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ, 
+1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
+((2 : ℝ) * k)^2/(2 * k - 1)^2 * ((2*k)^2/(2*k)^2) =
+1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
 ((2 : ℝ)^4 * k^4)/(((2*k - 1)*(2*k))^2) :=
 begin
   rw prod_congr,
@@ -261,9 +261,9 @@ begin
 end
 
 lemma equation6 (n : ℕ):
-1/((2 : ℝ) * n + 1) * 
-∏  (k : ℕ) in Ico 1 n.succ, 
-((2 : ℝ)^4 * k^4)/(((2*k - 1)*(2*k))^2) = 
+1/((2 : ℝ) * n + 1) *
+∏  (k : ℕ) in Ico 1 n.succ,
+((2 : ℝ)^4 * k^4)/(((2*k - 1)*(2*k))^2) =
 ((2: ℝ)^(4*n) * n.factorial^4)/(((2*n).factorial^2)*(2*n + 1)) :=
 begin
   induction n with d hd,
@@ -301,14 +301,14 @@ begin
    rw one_add_one_eq_two,
    sorry,
    },
-  exact le_add_self,  
+  exact le_add_self,
 end
 
-
+noncomputable def wn (n : ℕ) : ℝ  :=
+((2:ℝ)^(4*n)*(n.factorial)^4)/((((2*n).factorial)^2)*(2*↑n + 1))
 
 lemma wallis_consequence: tendsto (λ (n : ℕ),
-((2:ℝ)^(4*n)*(n.factorial)^4)/((((2*n).factorial)^2)*(2*↑n + 1)))
-at_top (𝓝 (π/2)) :=
+wn n) at_top (𝓝 (π/2)) :=
 begin
   have h: tendsto (λ (k : ℕ), ∏ i in Ico 1 k.succ,
     wallis_inside_prod i)
