@@ -121,7 +121,7 @@ end
 lemma bn_strictly_decreasing: ∀ (n : ℕ), (n ≠ 0) →  bn n > bn n.succ :=
 begin
   intros n hn,
-  rw bn_formula n hn, rw bn_formula (n+1) n.succ_ne_zero ,
+  rw bn_formula n hn, rw bn_formula (n+1) n.succ_ne_zero,
   sorry,
 end
 

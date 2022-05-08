@@ -74,19 +74,16 @@ end
 
 -- part 2b of https://proofwiki.org/wiki/Stirling%27s_Formula
 
--- from Kalle Kytölä at zulip
+
+
 lemma sub_seq_tendsto {an : ℕ → ℝ} {A : ℝ}
- (h: tendsto (λ (n : ℕ), an n) at_top (𝓝 (A))):
- tendsto (λ (n : ℕ), an (2*n)) at_top (𝓝 (A)) :=
+ (h: tendsto an at_top (𝓝 A)):
+ tendsto (λ (n : ℕ), an (2*n)) at_top (𝓝 A) :=
 begin
-  have aux : tendsto (λ (n : ℕ), 2*n) at_top at_top,
-  { apply tendsto_at_top.mpr,
-    intro N,
-    filter_upwards [Ici_mem_at_top N],
-    intros n n_large,
-    rw [set.mem_Ici] at n_large,
-    linarith, },
-  exact h.comp aux,
+  refine tendsto.comp _ _,
+  exact at_top,
+  exact h,
+  exact tendsto.const_mul_at_top' (two_pos) tendsto_id,
 end
 
 noncomputable def cn (n : ℕ) : ℝ  :=
