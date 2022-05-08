@@ -104,26 +104,16 @@ begin
 intro H,
 have h3, from  (lt_iff_le_and_ne.mp (zero_lt_sqrt_two_n n H)),
 have h4, from  (lt_iff_le_and_ne.mp (n_div_exp1_pow_gt_zero n )),
-
-rw [bn, an],
-rw [log_div, log_mul],
-rw [sqrt_eq_rpow, log_rpow, log_pow],
+rw [bn, an, log_div, log_mul, sqrt_eq_rpow, log_rpow, log_pow],
 ring,
-
 rw zero_lt_mul_left, 
 norm_cast,
 exact zero_lt_iff.mpr H,
 exact zero_lt_two,
-
-
-
 exact h3.right.symm,
-
 exact h4.right.symm,
-
 norm_cast,
 exact (n.factorial_ne_zero),
-
 apply (mul_ne_zero h3.right.symm h4.right.symm),
 end
 
@@ -135,14 +125,19 @@ begin
   sorry,
 end
 
-lemma test (n : ℕ) : n+1 ≠ 0 :=
-begin
-library_search,
-end
-
 lemma bn_bounded_below: ∀ (n : ℕ), bn n > 3/(4:ℝ) - 1/2*log 2 :=
 begin
   sorry,
+end
+
+lemma monotone_convergence (bn : ℕ → ℝ) (c : ℝ)
+(h_sd: ∀ (n : ℕ),  bn n > bn n.succ) 
+(h_bounded: ∀ (n:ℕ), bn n > c):
+∃ (b : ℝ), tendsto (λ (n : ℕ),  bn n)
+ at_top (𝓝  b)  :=
+begin
+ use (Inf {(bn n : ℝ)| (n:ℕ)}),
+ sorry,
 end
 
 lemma bn_has_limit_b: ∃ (b : ℝ), tendsto 
@@ -150,7 +145,13 @@ lemma bn_has_limit_b: ∃ (b : ℝ), tendsto
   at_top (𝓝  b) :=
 begin
   sorry,
-end 
+end
+
+lemma an_bounded_by_pos_constant: 
+∀ (n : ℕ), an n > exp(3/(4:ℝ) - 1/2*log 2) :=
+begin
+  sorry,
+end
 
 lemma an_has_limit_a: ∃ (a : ℝ), tendsto 
 (λ (n : ℕ),  an n)

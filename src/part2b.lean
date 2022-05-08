@@ -64,6 +64,25 @@ begin
   simp only [tendsto_const_nhds],
 end
 
+
+
+
+
+example (x y : ℝ) (hx: 0 ≤ x) (hy: 0 ≤ y) (hxy: x^2 = y^2):
+x = y:=
+begin
+  exact (sq_eq_sq hx hy).mp hxy,
+end
+
+-- part 2b of https://proofwiki.org/wiki/Stirling%27s_Formula
+
+lemma sub_seq_tendsto {an : ℕ → ℝ} {A : ℝ}
+ (h: tendsto (λ (n : ℕ), an n) at_top (𝓝 (A))):
+ tendsto (λ (n : ℕ), an (2*n)) at_top (𝓝 (A)) :=
+begin
+  sorry,
+end
+
 -- is this or something like it not in library?
 lemma unique_limit (a : (ℕ → ℝ)) (A B: ℝ)
 (hA: tendsto (λ (k : ℕ), a k) at_top (𝓝 (A)))
@@ -84,33 +103,31 @@ begin
   exact eq_of_sub_eq_zero (symm hAB),
 end
 
-example (x y : ℝ) (hx: 0 ≤ x) (hy: 0 ≤ y) (hxy: x^2 = y^2):
-x = y:=
-begin
-  exact (sq_eq_sq hx hy).mp hxy,
-end
-
--- part 2b of https://proofwiki.org/wiki/Stirling%27s_Formula
-
 noncomputable def cn (n : ℕ) : ℝ  :=
-((real.sqrt(2*n)*((n/(exp 1)))^n))^4 * 2^(4*n) /
-((sqrt(4*n)*(2*n/(exp 1)^(2*n))^2) * (2*n + 1))
+ ((real.sqrt(2*n)*((n/(exp 1))^n))^4) * 2^(4*n) /
+ (((real.sqrt(4*n)*(((2*n)/(exp 1)))^(2*n)))^2 * (2*n + 1))
 
 lemma rest_cancel (n : ℕ):
  (n : ℝ) / (2*n + 1) = cn n :=
  begin
    rw cn,
-   have hodd : (2 : ℝ) * ↑n + 1 ≠ 0 :=
-   begin
-    sorry,
-   end,
-   have hmisc: (exp (1:ℝ) ^ n) ^ 4 * (sqrt 4 * sqrt ↑n * (2 * ↑n) ^ 2 * (2 * ↑n + 1)) ≠ 0 :=
-   begin
-     sorry,
-   end,
-   norm_cast,
+   have h1: 2 * (n : ℝ) + 1 ≠ 0 := by sorry,
+   have h2: (sqrt (4 * (n : ℝ)) * (2 * ↑n / exp 1) ^ (2 * n)) ^ 2 * 
+   (2 * ↑n + 1) ≠ 0 := by sorry,
    field_simp,
-   sorry,
+   have h3: (exp 1 ^ n) ^ 4 * ((sqrt 4 * sqrt ↑n * (2 * ↑n) ^ (2 * n)) ^ 2 * (2 * ↑n + 1)) ≠ 0 := by sorry,
+   field_simp,
+   norm_cast,
+   ring,
+   have h4: real.sqrt n ^ 4 = n^2 := by sorry,
+   have h5: real.sqrt ↑n ^ 2 = n := by sorry,
+   have h6: real.sqrt 2 ^ 4 = sqrt 4 ^ 2 := by sorry,
+   have h7: (exp 1 ^ n) ^ 4 = (exp 1 ^ (2*n)) ^ 2 := by sorry,
+   have h8: ((n:ℝ) ^ n) ^ 4 * ↑(2 ^ (4 * n)) = 
+    ↑((2 * n) ^ (2 * n)) ^ 2 := by sorry,
+   rw [h4, h5, h6, h7, ←h8],
+   field_simp,
+   ring,
  end
 
 lemma rest_has_limit_one_half: tendsto
@@ -129,7 +146,7 @@ begin
     have hx: ∀ (x:ℕ), (2:ℝ) + x.succ⁻¹ = ((x.succ : ℝ) / (2 * x.succ + 1))⁻¹  :=
     begin
       intro x,
-      have hxne: (x.succ :ℝ ) ≠ (0:ℝ):=
+      have hxne: (x.succ : ℝ) ≠ 0 :=
       begin
         exact nonzero_of_invertible ↑(succ x),
       end,
@@ -165,6 +182,8 @@ begin
  exact tendsto.pow ha 4,
 end
 
+
+
 lemma an_aux2 (a: ℝ) (hane: a≠0) (ha: tendsto
 (λ (n : ℕ),  an n) at_top (𝓝  a)):
 tendsto (λ (n : ℕ),  (an n)⁻¹) at_top (𝓝  ((a)⁻¹)) :=
@@ -187,14 +206,38 @@ begin
  apply tendsto.pow h_congr 2,
 end
 
-lemma expand_in_limit (n : ℕ):
- (an n)^4 * (1/(an n))^(2) * cn n = wn n:=
+lemma an_aux4 (a: ℝ) (hane: a≠0) (ha: tendsto
+(λ (n : ℕ),  an n) at_top (𝓝  a)):
+tendsto  (λ (n: ℕ), (1/(an (2*n)))^(2)) at_top (𝓝 ((1/a)^(2))):=
 begin
+  have h := an_aux3 a hane ha,
+  exact sub_seq_tendsto h,
+end
+
+lemma expand_in_limit (n : ℕ):
+ (an n)^4 * (1/(an (2 * n)))^(2) * cn n = wn n:=
+begin
+  rw an,
   rw an,
   rw cn,
   rw wn,
-  -- do some "generalize" here?,
-  sorry,
+  generalize : (((2 * n).factorial) :ℝ) = x2,
+  generalize : (((n).factorial) :ℝ) = x,
+  generalize : (2 * (n : ℝ) + 1) = y,
+  norm_cast,
+  have h1:  sqrt (2 * (n : ℝ)) * (↑n / exp 1) ^ n ≠ 0 := by sorry,
+  have h2 : x2 / (sqrt ↑(2 * (2 * n)) * (↑(2 * n) / exp 1) ^ (2 * n)) ≠ 0 := by sorry,
+  have h3: real.sqrt ↑(2 * (2 * n)) * (↑(2 * n) / exp 1) ^ (2 * n) ≠ 0 := sorry,
+  have h4 : x2 ^ 2 * y ≠ 0 := by sorry,
+  have h5: (real.sqrt 2 * sqrt ↑n * ↑n ^ n) ^ 4 * (x2 * exp 1 ^ (2 * n)) ^ 2 *
+  ((exp 1 ^ n) ^ 4 * ((sqrt 4 * sqrt ↑n * (2 * ↑n) ^ (2 * n)) ^ 2 * y)) ≠ 0 := by sorry,
+  field_simp,
+  ring,
+  have h6: real.sqrt 4 ^ 2 = 4 := by sorry,
+  have h7: real.sqrt 2 ^ 8 = 2 ^ 4 := by sorry,
+  have h8: real.sqrt 2 ^ 4 = 2 ^ 2 := by sorry,
+  rw [h6, h7, h8],
+  ring,
 end
 
 lemma second_wallis_limit (a: ℝ) (hane: a≠0) (ha: tendsto
@@ -204,9 +247,9 @@ begin
   apply tendsto.congr expand_in_limit,
   have hcn := rest_has_limit_one_half,
   have has : tendsto (λ (n : ℕ),
-  an n ^ 4 * (1 / an n) ^ 2) at_top (𝓝 (a ^ 2)) :=
+  an n ^ 4 * (1 / an (2*n)) ^ 2) at_top (𝓝 (a ^ 2)) :=
   begin
-    have haright := an_aux3 a hane ha,
+    have haright := an_aux4 a hane ha,
     have haleft := an_aux1 a ha,
     have g := tendsto.mul  haleft haright,
     have a_pow : a ^ 4 * (1 / a) ^ 2  = a ^ 2 :=
