@@ -304,10 +304,10 @@ begin
    field_simp,
    ring_nf,
    repeat {rw pow_mul},
-   have h3: (2:ℝ)^4 = 16 := by sorry,
+   have h3: (2:ℝ)^4 = 16 := by linarith,
    have h4: (16 : ℝ)^(d + 1) = 16*16^d := by sorry,
    rw [h3, h4],
-   ring,
+   linarith,
    },
   exact le_add_self,
 end

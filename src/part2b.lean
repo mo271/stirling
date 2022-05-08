@@ -113,7 +113,7 @@ lemma rest_cancel (n : ℕ):
     ↑((2 * n) ^ (2 * n)) ^ 2 := by sorry,
    rw [h4, h5, h6, h7, ←h8],
    field_simp,
-   ring,
+   linarith,
  end
 
 lemma rest_has_limit_one_half: tendsto
