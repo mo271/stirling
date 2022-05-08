@@ -24,8 +24,6 @@ open finset
 open filter
 open nat
 
-
-
 example (a b : (ℕ →  ℝ)) (A B : ℝ)
 (hA: tendsto (λ (k : ℕ), a k) at_top (𝓝 (A)))
 (hB: tendsto (λ (k : ℕ), b k) at_top (𝓝 (B))) :
@@ -81,26 +79,6 @@ lemma sub_seq_tendsto {an : ℕ → ℝ} {A : ℝ}
  tendsto (λ (n : ℕ), an (2*n)) at_top (𝓝 (A)) :=
 begin
   sorry,
-end
-
--- is this or something like it not in library?
-lemma unique_limit (a : (ℕ → ℝ)) (A B: ℝ)
-(hA: tendsto (λ (k : ℕ), a k) at_top (𝓝 (A)))
-(hB: tendsto (λ (k : ℕ), a k) at_top (𝓝 (B))) :
-A = B :=
-begin
-  have h: tendsto
-  (λ (k : ℕ), a k - (a k)) at_top (𝓝 (A - B)) :=
-  begin
-    exact tendsto.sub hA hB,
-  end,
-  simp only [sub_self] at h,
-  have hAB: (0 : ℝ) = A - B :=
-  begin
-    -- how to use tendsto_const_iff here?
-    sorry,
-  end,
-  exact eq_of_sub_eq_zero (symm hAB),
 end
 
 noncomputable def cn (n : ℕ) : ℝ  :=
@@ -233,7 +211,7 @@ begin
   ((exp 1 ^ n) ^ 4 * ((sqrt 4 * sqrt ↑n * (2 * ↑n) ^ (2 * n)) ^ 2 * y)) ≠ 0 := by sorry,
   field_simp,
   ring,
-  have h6: real.sqrt 4 ^ 2 = 4 := by sorry,
+  have h6: real.sqrt 4 ^ 2 = 4 := by simp only [sq_sqrt, zero_le_bit0, zero_le_one],
   have h7: real.sqrt 2 ^ 8 = 2 ^ 4 := by sorry,
   have h8: real.sqrt 2 ^ 4 = 2 ^ 2 := by sorry,
   rw [h6, h7, h8],
@@ -272,7 +250,7 @@ lemma pi_and_a (a: ℝ) (hane: a≠0) (ha: tendsto
 begin
   have h := second_wallis_limit a hane ha,
   have g := wallis_consequence,
-  exact unique_limit wn (π/2) (a^2/2) g h,
+  exact tendsto_nhds_unique g h,
 end
 
 lemma an_has_limit_sqrt_pi: tendsto
