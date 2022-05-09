@@ -75,16 +75,11 @@ end
 -- part 2b of https://proofwiki.org/wiki/Stirling%27s_Formula
 
 
-
 lemma sub_seq_tendsto {an : ℕ → ℝ} {A : ℝ}
  (h: tendsto an at_top (𝓝 A)):
  tendsto (λ (n : ℕ), an (2*n)) at_top (𝓝 A) :=
-begin
-  refine tendsto.comp _ _,
-  exact at_top,
-  exact h,
-  exact tendsto.const_mul_at_top' (two_pos) tendsto_id,
-end
+h.comp (tendsto_id.const_mul_at_top' two_pos)
+
 
 noncomputable def cn (n : ℕ) : ℝ  :=
  ((real.sqrt(2*n)*((n/(exp 1))^n))^4) * 2^(4*n) /
