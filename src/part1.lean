@@ -122,8 +122,47 @@ lemma bn_strictly_decreasing: ∀ (n : ℕ), (n ≠ 0) →  bn n > bn n.succ :=
 begin
   intros n hn,
   rw bn_formula n hn, rw bn_formula (n+1) n.succ_ne_zero,
+  apply sub_pos.mp,
+  ring_nf,
+  push_cast,
+  have hreorder :∀ { a b c d e f : ℝ}, a + (b + ( c + ( d + ( e + f))))
+      = (a + d) + (e + b) + (f + c) :=
+      begin
+        intros,
+        ring_nf,
+      end,
+  rw hreorder,
+  
+  repeat {rw ←sub_eq_add_neg} ,
+  rw ←mul_sub, 
+  have hreorder₂ : ∀{x y z : ℝ }, x*(y+1)-z*y = (x-z)*y+x:=
+    begin
+      intros,
+      ring_nf,
+    end,
+  rw hreorder₂,
+  repeat {rw ←log_div},
+  simp only[factorial_succ],
+  rw div_mul_eq_div_mul_one_div _ 2 (n:ℝ),
+  
+  
+  --simp only [cast_mul, cast_add, cast_one, one_div],
+  sorry,
+  sorry,
+  sorry, 
+  sorry,
+  sorry,
+  sorry,
+  sorry,
+  sorry,
   sorry,
 end
+
+lemma test (a b c: ℝ ) :b≠ 0→ c≠ 0→  (a/(b*c)) = a/b/c :=
+begin
+  sorry,
+end
+
 
 lemma bn_bounded_below: ∀ (n : ℕ), bn n > 3/(4:ℝ) - 1/2*log 2 :=
 begin
