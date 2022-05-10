@@ -14,7 +14,7 @@ open_locale big_operators -- notation ∑ for finite sums
 
 open_locale classical real topological_space nnreal ennreal filter big_operators
 
-open real 
+open real
 open finset
 open filter
 open nat
@@ -28,22 +28,22 @@ begin
   simp only [le_add_iff_nonneg_left, zero_le'],
 end
 
-lemma const_zero: tendsto (λ (n : ℕ) , 0) 
-    at_top (𝓝  0) := 
+lemma const_zero: tendsto (λ (n : ℕ) , 0)
+    at_top (𝓝  0) :=
 begin
   exact tendsto_const_nhds,
 end
 
-lemma one_div_succ: tendsto (λ (n : ℝ) , (n:ℝ )^(-(1:ℝ))) 
-    at_top (𝓝  0) := 
+lemma one_div_succ: tendsto (λ (n : ℝ) , (n:ℝ )^(-(1:ℝ)))
+    at_top (𝓝  0) :=
 begin
   refine tendsto_rpow_neg_at_top _,
   exact one_pos,
 end
 
 
-lemma one_div_succ': tendsto (λ (n : ℕ) , (n:ℝ )^(-(1:ℝ))) 
-    at_top (𝓝  0) := 
+lemma one_div_succ': tendsto (λ (n : ℕ) , (n:ℝ )^(-(1:ℝ)))
+    at_top (𝓝  0) :=
 begin
   norm_cast,
   rw tendsto,
@@ -53,12 +53,12 @@ end
 
 -- part 1 of https://proofwiki.org/wiki/Stirling%27s_Formula
 
-noncomputable def an (n : ℕ) : ℝ  := (n.factorial :ℝ ) 
-/ ((real.sqrt(2*(n))*((n/(exp 1)))^n)) 
+noncomputable def an (n : ℕ) : ℝ  := (n.factorial :ℝ )
+/ ((real.sqrt(2*(n))*((n/(exp 1)))^n))
 
-lemma power_series_ln (n : ℕ): tendsto 
-(λ (m : ℕ),  (2:ℝ)*(∑ k in range m, 
-(((1/(2*↑k + 1))*((1/(2*((↑n + 1))^(2*↑k + 1)))))))) at_top 
+lemma power_series_ln (n : ℕ): tendsto
+(λ (m : ℕ),  (2:ℝ)*(∑ k in range m,
+(((1/(2*↑k + 1))*((1/(2*((↑n + 1))^(2*↑k + 1)))))))) at_top
 (𝓝 (log (↑n.succ / ↑n)) ):=
  begin
   sorry,
@@ -98,7 +98,7 @@ exact hsucc,
 exact (1:ℝ).exp_pos,
 end
 
-lemma bn_formula (n : ℕ):(n ≠ 0)→  bn n = (log ↑n.factorial) - 
+lemma bn_formula (n : ℕ):(n ≠ 0)→  bn n = (log ↑n.factorial) -
 1/(2:ℝ)*(log (2*↑n)) - ↑n*log (↑n/(exp 1)) :=
 begin
 intro H,
@@ -106,7 +106,7 @@ have h3, from  (lt_iff_le_and_ne.mp (zero_lt_sqrt_two_n n H)),
 have h4, from  (lt_iff_le_and_ne.mp (n_div_exp1_pow_gt_zero n )),
 rw [bn, an, log_div, log_mul, sqrt_eq_rpow, log_rpow, log_pow],
 ring,
-rw zero_lt_mul_left, 
+rw zero_lt_mul_left,
 norm_cast,
 exact zero_lt_iff.mpr H,
 exact zero_lt_two,
@@ -131,7 +131,7 @@ begin
 end
 
 lemma monotone_convergence (bn : ℕ → ℝ) (c : ℝ)
-(h_sd: ∀ (n : ℕ),  bn n > bn n.succ) 
+(h_sd: ∀ (n : ℕ),  bn n > bn n.succ)
 (h_bounded: ∀ (n:ℕ), bn n > c):
 ∃ (b : ℝ), tendsto (λ (n : ℕ),  bn n)
  at_top (𝓝  b)  :=
@@ -140,20 +140,20 @@ begin
  sorry,
 end
 
-lemma bn_has_limit_b: ∃ (b : ℝ), tendsto 
+lemma bn_has_limit_b: ∃ (b : ℝ), tendsto
 (λ (n : ℕ),  bn n)
   at_top (𝓝  b) :=
 begin
   sorry,
 end
 
-lemma an_bounded_by_pos_constant: 
+lemma an_bounded_by_pos_constant:
 ∀ (n : ℕ), an n > exp(3/(4:ℝ) - 1/2*log 2) :=
 begin
   sorry,
 end
 
-lemma an_has_limit_a: ∃ (a : ℝ), tendsto 
+lemma an_has_limit_a: ∃ (a : ℝ), tendsto
 (λ (n : ℕ),  an n)
   at_top (𝓝  a) :=
 begin

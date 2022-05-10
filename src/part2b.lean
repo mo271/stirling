@@ -63,7 +63,8 @@ begin
 end
 
 
-
+example (x y :ℝ) (hx: x≠0) (hy: y≠0):
+ x*y ≠ 0 := mul_ne_zero hx hy
 
 
 example (x y : ℝ) (hx: 0 ≤ x) (hy: 0 ≤ y) (hxy: x^2 = y^2):
@@ -89,20 +90,59 @@ lemma rest_cancel (n : ℕ):
  (n : ℝ) / (2*n + 1) = cn n :=
  begin
    rw cn,
-   have h1: 2 * (n : ℝ) + 1 ≠ 0 := by sorry,
-   have h2: (sqrt (4 * (n : ℝ)) * (2 * ↑n / exp 1) ^ (2 * n)) ^ 2 * 
-   (2 * ↑n + 1) ≠ 0 := by sorry,
+   have h1: 2 * (n : ℝ) + 1 ≠ 0 :=
+   begin
+     norm_cast,
+     rw ←succ_eq_add_one,
+     exact succ_ne_zero (2*n),
+   end,
+  -- mmh, do we have to do `cases n` here?
+   have h2: (sqrt (4 * (n : ℝ)) * (2 * ↑n / exp 1) ^ (2 * n)) ^ 2 *
+   (2 * ↑n + 1) ≠ 0 :=
+   begin
+     sorry,
+   end,
    field_simp,
    have h3: (exp 1 ^ n) ^ 4 * ((sqrt 4 * sqrt ↑n * (2 * ↑n) ^ (2 * n)) ^ 2 * (2 * ↑n + 1)) ≠ 0 := by sorry,
    field_simp,
    norm_cast,
    ring,
-   have h4: real.sqrt n ^ 4 = n^2 := by sorry,
-   have h5: real.sqrt ↑n ^ 2 = n := by sorry,
-   have h6: real.sqrt 2 ^ 4 = sqrt 4 ^ 2 := by sorry,
-   have h7: (exp 1 ^ n) ^ 4 = (exp 1 ^ (2*n)) ^ 2 := by sorry,
-   have h8: ((n:ℝ) ^ n) ^ 4 * ↑(2 ^ (4 * n)) = 
-    ↑((2 * n) ^ (2 * n)) ^ 2 := by sorry,
+   have h4: real.sqrt n ^ 4 = n^2 :=
+   begin
+     rw sqrt_eq_rpow,
+     have h:= (rpow_mul (cast_nonneg n) (1/2) 4),
+     norm_cast at h,
+     rw ←h,
+     ring,
+     norm_cast,
+   end,
+   have h5: real.sqrt ↑n ^ 2 = n := sq_sqrt (cast_nonneg n),
+   have h6: real.sqrt 2 ^ 4 = sqrt 4 ^ 2 :=
+   begin
+     rw sq_sqrt,
+     {
+     have h4eq2mul2: 4 = 2 * 2 := by linarith,
+     have h:= rpow_mul ((2:ℝ).sqrt_nonneg) 2 2,
+     norm_cast at h,
+     rw h4eq2mul2,
+     rw h,
+     rw sq_sqrt,
+     ring,
+     simp only [zero_le_bit0, zero_le_one],
+     },
+     norm_cast,
+     exact cast_nonneg 4,
+   end,
+   have h7: (exp 1 ^ n) ^ 4 = (exp 1 ^ (2*n)) ^ 2 :=
+   begin
+     have h: 0 ≤ exp 1 := by sorry,
+     sorry,
+   end,
+   have h8: ((n:ℝ) ^ n) ^ 4 * ↑(2 ^ (4 * n)) =
+    ↑((2 * n) ^ (2 * n)) ^ 2 :=
+   begin
+    sorry,
+   end,
    rw [h4, h5, h6, h7, ←h8],
    field_simp,
    linarith,
@@ -199,16 +239,26 @@ begin
   rw an,
   rw cn,
   rw wn,
-  generalize : (((2 * n).factorial) :ℝ) = x2,
   generalize : (((n).factorial) :ℝ) = x,
-  generalize : (2 * (n : ℝ) + 1) = y,
   norm_cast,
+  -- mmh, do we have to do `cases n` here?
   have h1:  sqrt (2 * (n : ℝ)) * (↑n / exp 1) ^ n ≠ 0 := by sorry,
-  have h2 : x2 / (sqrt ↑(2 * (2 * n)) * (↑(2 * n) / exp 1) ^ (2 * n)) ≠ 0 := by sorry,
-  have h3: real.sqrt ↑(2 * (2 * n)) * (↑(2 * n) / exp 1) ^ (2 * n) ≠ 0 := sorry,
-  have h4 : x2 ^ 2 * y ≠ 0 := by sorry,
-  have h5: (real.sqrt 2 * sqrt ↑n * ↑n ^ n) ^ 4 * (x2 * exp 1 ^ (2 * n)) ^ 2 *
-  ((exp 1 ^ n) ^ 4 * ((sqrt 4 * sqrt ↑n * (2 * ↑n) ^ (2 * n)) ^ 2 * y)) ≠ 0 := by sorry,
+  have h2 : (((2 * n).factorial) :ℝ) / (sqrt ↑(2 * (2 * n))
+    * (↑(2 * n) / exp 1) ^ (2 * n)) ≠ 0 := by sorry,
+  have h3: real.sqrt ↑(2 * (2 * n)) * (↑(2 * n) / exp 1) ^ (2 * n) ≠ 0 :=
+  begin
+    sorry,
+  end,
+  have h4 : (((2 * n).factorial) :ℝ) ^ 2 *  (2 * n + 1) ≠ 0 :=
+  begin
+    refine mul_ne_zero _ _,
+    sorry,
+    sorry,
+  end,
+  have h5: (real.sqrt 2 * sqrt ↑n * ↑n ^ n) ^ 4 *
+   ((((2 * n).factorial)) * exp 1 ^ (2 * n)) ^ 2 *
+   ((exp 1 ^ n) ^ 4 * ((sqrt 4 * sqrt ↑n *
+   (2 * ↑n) ^ (2 * n)) ^ 2 * (2*n + 1))) ≠ 0 := by sorry,
   field_simp,
   ring,
   have h6: real.sqrt 4 ^ 2 = 4 := by simp only [sq_sqrt, zero_le_bit0, zero_le_one],

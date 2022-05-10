@@ -10,6 +10,11 @@ open real
 open finset
 open nat
 
+ example: (2:ℝ) - 1 = 1 :=
+ begin
+   linarith,
+ end
+
 example (n : ℕ) : 2 ≤ n.succ.succ :=
 begin
   rw succ_eq_add_one,
