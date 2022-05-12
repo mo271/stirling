@@ -56,6 +56,68 @@ end
 noncomputable def an (n : ℕ) : ℝ  := (n.factorial :ℝ )
 / ((real.sqrt(2*(n))*((n/(exp 1)))^n))
 
+lemma power_series_log_add_one (x:ℝ) (hx: |x| < 1):
+tendsto (λ m, ∑ n in range m, (-(1 : ℝ))^(n - 1) * x^n / n)
+at_top (𝓝 (log (1 + x))) :=
+begin
+  sorry,
+end
+
+lemma aux_log (n : ℕ) (hn: n ≠ 0):
+log (n.succ/n) = log (1 + 1 / (2*n + 1)) - log (1 - 1/(2*n +1)):=
+begin
+  have h₁: (2:ℝ)*n + 1 ≠ 0 :=
+  begin
+    norm_cast,
+    exact succ_ne_zero (2*n),
+  end,
+  have h₂: (2:ℝ)*n + 1 = (2:ℝ)*n + 1 := by refl,
+  calc log (n.succ/n) = log(n.succ) - log(n) :
+    log_div (cast_ne_zero.mpr (succ_ne_zero n)) (cast_ne_zero.mpr hn)
+  ... = log(n.succ) - log(n) +  log 2 - log 2: by simp only [add_tsub_cancel_right]
+  ... = log 2 + log(n.succ) - (log 2 + log n): by linarith
+  ... = log 2 + log(n.succ) - log(2*n) :
+    by rw log_mul (two_ne_zero) (cast_ne_zero.mpr hn)
+  ... = log(2 * n.succ) - log(2*n) :
+    by rw log_mul (two_ne_zero) (cast_ne_zero.mpr (succ_ne_zero n))
+  ... = log(2*n.succ) - log(2*n) - log (2*n + 1) + log (2*n + 1) : by simp only [sub_add_cancel]
+  ... = log(2*n.succ) - log (2*n + 1) - (log (2*n) - log (2*n + 1)) : by linarith
+  ... = log ((2*n.succ)/(2*n + 1))  - (log (2*n) - log (2*n + 1))  :
+    begin
+      rw log_div,
+      simp only [cast_succ, ne.def, mul_eq_zero, bit0_eq_zero, one_ne_zero, false_or],
+      exact cast_ne_zero.mpr (succ_ne_zero n),
+      norm_cast,
+      exact succ_ne_zero (2*n),
+    end
+  ... =  log ((2*n.succ)/(2*n + 1))  - log ((2*n)/(2*n + 1)) :
+    begin
+      rw ←log_div,
+      simp only [ne.def, mul_eq_zero, bit0_eq_zero, one_ne_zero,
+      cast_eq_zero, false_or],
+      exact hn,
+      norm_cast,
+      exact succ_ne_zero (2*n),
+    end
+  ... = log(((2*n + 1) + 1)/(2*n + 1)) - log ((2*n)/(2*n + 1)) :
+  begin
+     have h: (2 : ℝ)*n.succ =  2*n + 1 + 1 :=
+      begin
+      rw succ_eq_add_one,
+      norm_cast,
+      end,
+    rw h,
+  end
+  ... = log(((2*n + 1) + 1)/(2*n + 1)) - log ((2*n + 1 - 1)/(2*n + 1)) :
+    by simp only [add_sub_cancel]
+  ... = log (1 + 1 / (2*n + 1)) - log ((2*n + 1 - 1)/(2*n + 1))  : _
+  ... = log (1 + 1 / (2*n + 1)) - log (1 - 1/(2*n +1)) : _,
+  rw add_div _ (1 : ℝ),
+  rw (div_eq_one_iff_eq h₁).mpr h₂,
+  rw sub_div _ (1 : ℝ),
+  rw (div_eq_one_iff_eq h₁).mpr h₂,
+end
+
 lemma power_series_ln (n : ℕ): tendsto
 (λ (m : ℕ),  (2:ℝ)*(∑ k in range m,
 (((1/(2*↑k + 1))*((1/(2*((↑n + 1))^(2*↑k + 1)))))))) at_top
