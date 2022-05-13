@@ -8,6 +8,7 @@ import data.real.basic
 import topology.instances.real
 import topology.instances.ennreal
 import order.filter
+import order.bounded_order
 import analysis.special_functions.pow
 open_locale filter topological_space classical
 open_locale big_operators -- notation ∑ for finite sums
@@ -52,6 +53,38 @@ begin
 end
 
 -- part 1 of https://proofwiki.org/wiki/Stirling%27s_Formula
+
+
+lemma finset_sum_even_odd  {f : ℕ → ℝ} (n : ℕ):
+∑ k in range n, f k =
+(∑ l in (range n).filter(odd), f l) +
+(∑ m in (range n).filter(even), f m) :=
+begin
+  have h_union: range n  =
+  (range n).filter(odd) ∪ (range n).filter(even) :=
+  begin
+    sorry,
+  end,
+  nth_rewrite 0 h_union,
+  have h_disjoint: disjoint  ((range n).filter(odd))
+     ((range n).filter(even)) :=
+  begin
+    sorry,
+  end,
+  rw sum_union h_disjoint,
+end
+
+lemma finset_reindex_odd {f : ℕ → ℝ} (n : ℕ):
+∑ l in (range (2*n)).filter(odd), f l = ∑ l in (range n), f (2*l + 1) :=
+begin
+  sorry,
+end
+
+lemma finset_reindex_even {f : ℕ → ℝ} (n : ℕ):
+∑ l in (range (2*n)).filter(even), f l = ∑ l in (range n), f (2*l) :=
+begin
+  sorry,
+end
 
 noncomputable def an (n : ℕ) : ℝ  := (n.factorial :ℝ )
 / ((real.sqrt(2*(n))*((n/(exp 1)))^n))
@@ -126,7 +159,7 @@ lemma power_series_ln (n : ℕ): tendsto
   sorry,
  end
 
-noncomputable def bn (n : ℕ) :ℝ := log (an n)
+noncomputable def bn (n : ℕ) : ℝ := log (an n)
 
 lemma pow_neq_zero_if (n : ℕ) (x : ℝ) : (x ≠ 0 → x^n ≠ 0) :=
 begin
@@ -194,9 +227,9 @@ begin
         ring_nf,
       end,
   rw hreorder,
-  
+
   repeat {rw ←sub_eq_add_neg} ,
-  rw ←mul_sub, 
+  rw ←mul_sub,
   have hreorder₂ : ∀{x y z : ℝ }, x*(y+1)-z*y = (x-z)*y+x:=
     begin
       intros,
@@ -206,8 +239,8 @@ begin
   repeat {rw ←log_div},
   simp only [factorial_succ],
   rw div_mul_eq_div_mul_one_div _ 2 (n:ℝ),
-  
-  
+
+
   --simp only [cast_mul, cast_add, cast_one, one_div],
   sorry,
   simp only [ne.def, div_eq_zero_iff],
@@ -216,7 +249,7 @@ begin
   norm_cast,
   exact succ_ne_zero n,
   exact (1:ℝ).exp_ne_zero,
-  simp only [ne.def, div_eq_zero_iff, cast_eq_zero], 
+  simp only [ne.def, div_eq_zero_iff, cast_eq_zero],
   push_neg,
   split,
   exact hn,
@@ -232,11 +265,6 @@ begin
   exact factorial_ne_zero (n + 1),
   exact real.add_group,
   exact covariant_swap_add_lt_of_covariant_add_lt ℝ,
-end
-
-lemma test (a b c: ℝ ) :b≠ 0→ c≠ 0→  (a/(b*c)) = a/b/c :=
-begin
-  sorry,
 end
 
 

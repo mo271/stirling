@@ -11,8 +11,9 @@ open nat
 
 open_locale filter topological_space
 
-example: covariant_class ℝ ℝ (function.swap has_add.add) has_lt.lt 
-:= covariant_swap_add_lt_of_covariant_add_lt ℝ
+example: covariant_class ℝ ℝ (function.swap has_add.add) has_lt.lt
+:= covariant_swap_add_lt_of_covariant_add_lt
+
 
 lemma monotone_convergence (a : ℕ → ℝ) (c : ℝ)
 (h_strictly_increasing: strict_mono a)

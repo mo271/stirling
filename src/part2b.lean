@@ -96,14 +96,18 @@ lemma rest_cancel (n : ℕ):
      rw ←succ_eq_add_one,
      exact succ_ne_zero (2*n),
    end,
-  -- mmh, do we have to do `cases n` here?
+  -- mmh, do we have to do `cases n` here and for h3 as well?
    have h2: (sqrt (4 * (n : ℝ)) * (2 * ↑n / exp 1) ^ (2 * n)) ^ 2 *
    (2 * ↑n + 1) ≠ 0 :=
    begin
      sorry,
    end,
    field_simp,
-   have h3: (exp 1 ^ n) ^ 4 * ((sqrt 4 * sqrt ↑n * (2 * ↑n) ^ (2 * n)) ^ 2 * (2 * ↑n + 1)) ≠ 0 := by sorry,
+   have h3: (exp 1 ^ n) ^ 4 * ((sqrt 4 * sqrt ↑n *
+   (2 * ↑n) ^ (2 * n)) ^ 2 * (2 * ↑n + 1)) ≠ 0 :=
+   begin
+    sorry,
+   end,
    field_simp,
    norm_cast,
    ring,
@@ -135,13 +139,23 @@ lemma rest_cancel (n : ℕ):
    end,
    have h7: (exp 1 ^ n) ^ 4 = (exp 1 ^ (2*n)) ^ 2 :=
    begin
-     have h: 0 ≤ exp 1 := by sorry,
-     sorry,
+     repeat {rw ←pow_mul},
+     rw mul_assoc 2,
+     rw mul_comm 2,
+     rw mul_assoc,
+     ring,
    end,
    have h8: ((n:ℝ) ^ n) ^ 4 * ↑(2 ^ (4 * n)) =
     ↑((2 * n) ^ (2 * n)) ^ 2 :=
    begin
-    sorry,
+    norm_cast,
+    repeat {rw mul_pow},
+    repeat {rw ←pow_mul},
+    rw mul_assoc 2,
+    rw mul_comm 2,
+    rw mul_assoc,
+    norm_num,
+    simp only [mul_comm],
    end,
    rw [h4, h5, h6, h7, ←h8],
    field_simp,
@@ -241,7 +255,7 @@ begin
   rw wn,
   generalize : (((n).factorial) :ℝ) = x,
   norm_cast,
-  -- mmh, do we have to do `cases n` here?
+  -- mmh, do we have to do `cases n` here for h1, h2 and h3?
   have h1:  sqrt (2 * (n : ℝ)) * (↑n / exp 1) ^ n ≠ 0 := by sorry,
   have h2 : (((2 * n).factorial) :ℝ) / (sqrt ↑(2 * (2 * n))
     * (↑(2 * n) / exp 1) ^ (2 * n)) ≠ 0 := by sorry,
@@ -252,8 +266,11 @@ begin
   have h4 : (((2 * n).factorial) :ℝ) ^ 2 *  (2 * n + 1) ≠ 0 :=
   begin
     refine mul_ne_zero _ _,
-    sorry,
-    sorry,
+    norm_cast,
+    simp only [pow_eq_zero_iff, succ_pos'],
+    exact factorial_ne_zero (2*n),
+    norm_cast,
+    exact succ_ne_zero (2*n),
   end,
   have h5: (real.sqrt 2 * sqrt ↑n * ↑n ^ n) ^ 4 *
    ((((2 * n).factorial)) * exp 1 ^ (2 * n)) ^ 2 *
