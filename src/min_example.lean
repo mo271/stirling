@@ -1,26 +1,26 @@
 import tactic
 import topology.instances.nnreal
+import analysis.special_functions.log
 import data.real.basic
 import data.nat.basic
+import data.fintype.basic
 import order.filter
 import topology.basic
+import data.finset.sum
 
 open real
 open filter
 open nat
+open finset
 
-open_locale filter topological_space
+open_locale filter
+open_locale big_operators -- notation ∑ for finite sums
+open_locale topological_space
 
-example: covariant_class ℝ ℝ (function.swap has_add.add) has_lt.lt
-:= covariant_swap_add_lt_of_covariant_add_lt
 
-
-lemma monotone_convergence (a : ℕ → ℝ) (c : ℝ)
-(h_strictly_increasing: strict_mono a)
-(h_bounded: ∀ (n : ℕ), a n < c):
-∃ (b : ℝ), tendsto (λ (n : ℕ),  a n) at_top (𝓝  b) :=
+lemma power_series_log_add_one (x:ℝ) (hx: |x| < 1):
+tendsto (λ m, ∑ n in range m, (-(1 : ℝ))^(n - 1) * x^n / n)
+at_top (𝓝 (log (1 + x))) :=
 begin
- use (set.range a),
- sorry,
+  sory,
 end
-
