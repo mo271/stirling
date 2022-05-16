@@ -1,5 +1,6 @@
 import tactic
 import analysis.special_functions.log
+import analysis.special_functions.log_deriv
 import data.fintype.basic
 import algebra.big_operators.basic
 import algebra.big_operators.intervals
@@ -96,6 +97,7 @@ begin
   sorry,
 end
 
+
 lemma aux_log (n : ℕ) (hn: n ≠ 0):
 log (n.succ/n) = log (1 + 1 / (2*n + 1)) - log (1 - 1/(2*n +1)):=
 begin
@@ -151,12 +153,43 @@ begin
   rw (div_eq_one_iff_eq h₁).mpr h₂,
 end
 
-lemma power_series_ln (n : ℕ): tendsto
-(λ (m : ℕ),  (2:ℝ)*(∑ k in range m,
-(((1/(2*↑k + 1))*((1/(2*((↑n + 1))^(2*↑k + 1)))))))) at_top
-(𝓝 (log (↑n.succ / ↑n)) ):=
+lemma power_series_ln (n : ℕ): has_sum
+(λ (k : ℕ),
+(2:ℝ) * (((1/(2*↑k + 1))*((1/(2*((↑n + 1))^(2*↑k + 1)))))))
+(log (↑n.succ / ↑n)) :=
  begin
-  sorry,
+  rw aux_log,
+  have h₁: |(1:ℝ) / (2 * ↑n + 1)| < 1 := by sorry,
+  let f_left : ℕ → ℝ := λ k, (1 / (2 * n + 1)) ^ (k + 1) / (k + 1),
+  have h_left : has_sum f_left (-log (1 - 1 / (2 * ↑n + 1)))
+  := has_sum_pow_div_log_of_abs_lt_1 h₁,
+  let f_right : ℕ → ℝ := λ k, ((-1) / (2 * n + 1)) ^ (k + 1) / (k + 1),
+  have h₂: | ((-1:ℝ) / (2 * ↑n + 1))| < 1 := by sorry,
+  have h_right: has_sum f_right (-log (1 - (-1) / (2 * ↑n + 1)))
+  := has_sum_pow_div_log_of_abs_lt_1 h₂,
+  let f : ℕ → ℝ := λ k, (f_left k) + (f_right k),
+  have h: has_sum f
+  ((-log (1 - 1 / (2 * ↑n + 1))) + (-log (1 - (-1) / (2 * ↑n + 1)))) :=
+  has_sum.add h_left h_right,
+  have h_sum : summable f :=
+  begin
+    use ((-log (1 - 1 / (2 * ↑n + 1))) + (-log (1 - (-1) / (2 * ↑n + 1)))),
+    exact h,
+  end,
+  have h_even: has_sum (λ k, f (2*k)) 0 := by sorry,
+  have h_even_sum: summable (λ k, f (2*k)) := by sorry,
+  have h_odd_sum: summable (λ k, f (2*k + 1)) := by sorry,
+  have g := tsum_even_add_odd h_even_sum h_odd_sum,
+  have h' := has_sum.tsum_eq h,
+  rw ←g at h',
+  have h_even' := has_sum.tsum_eq h_even,
+  simp only at h_even',
+  rw h_even' at h',
+  simp only [zero_add] at h',
+  --rw summable.has_sum_iff,
+  --
+  --:= has_sum_pow_div_log_of_abs_lt_1 h₂,
+
  end
 
 noncomputable def bn (n : ℕ) : ℝ := log (an n)
@@ -215,7 +248,8 @@ end
 
 lemma bn_strictly_decreasing: ∀ (n : ℕ), (n ≠ 0) →  bn n > bn n.succ :=
 begin
-  intros n hn,
+  sorry,
+ /- intros n hn,
   rw bn_formula n hn, rw bn_formula (n+1) n.succ_ne_zero,
   apply sub_pos.mp,
   ring_nf,
@@ -264,9 +298,6 @@ begin
 
   squeeze_simp,
   sorry,
-  simp only [ne.def, div_eq_zero_iff],
-  push_neg,
-  split,
   norm_cast,
   exact succ_ne_zero n,
   exact (1:ℝ).exp_ne_zero,
@@ -286,6 +317,7 @@ begin
   exact factorial_ne_zero (n + 1),
   exact real.add_group,
   exact covariant_swap_add_lt_of_covariant_add_lt ℝ,
+  -/
 end
 
 

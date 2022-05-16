@@ -22,5 +22,5 @@ lemma power_series_log_add_one (x:ℝ) (hx: |x| < 1):
 tendsto (λ m, ∑ n in range m, (-(1 : ℝ))^(n - 1) * x^n / n)
 at_top (𝓝 (log (1 + x))) :=
 begin
-  sory,
+  sorry,
 end
