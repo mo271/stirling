@@ -75,11 +75,44 @@ begin
   rw sum_union h_disjoint,
 end
 
+
 lemma finset_reindex_odd {f : ℕ → ℝ} (n : ℕ):
 ∑ l in (range (2*n)).filter(odd), f l = ∑ l in (range n), f (2*l + 1) :=
 begin
-  sorry,
+  induction n with d hd,
+  simp only [mul_zero, range_zero, filter_true_of_mem, not_mem_empty, forall_false_left, forall_const, sum_empty],
+  rw [mul_succ, add_succ, add_succ, add_zero],
+  repeat {rw range_succ}, 
+  repeat {rewrite [finset.sum_insert]},
+  repeat {rewrite [finset.filter_insert]},
+  have h₁ : ¬ odd ( 2* d), by
+    simp only [odd_iff_not_even, even.mul_right, even_two, not_true, not_false_iff],
+  have h₂: odd (2 * d).succ, by 
+    {simp only [odd_iff_not_even, h₁, even_succ],
+    rw ←odd_iff_not_even,
+    assumption},
+
+  rw [if_neg h₁, if_pos h₂],
+  
+  repeat {rw finset.sum_insert},
+  simp only [add_right_inj],
+  exact hd,
+  rw [mem_filter],
+  suffices :(2 * d).succ ∉ range (2 * d),
+  begin
+  apply not_and.mpr,
+  exact not.elim this,
+    end,
+  
+  rw mem_range,
+  exact not_succ_lt_self,
+
+  rw mem_range,
+  exact irrefl d,
+
 end
+
+
 
 lemma finset_reindex_even {f : ℕ → ℝ} (n : ℕ):
 ∑ l in (range (2*n)).filter(even), f l = ∑ l in (range n), f (2*l) :=
@@ -90,9 +123,18 @@ end
 noncomputable def an (n : ℕ) : ℝ  := (n.factorial :ℝ )
 / ((real.sqrt(2*(n))*((n/(exp 1)))^n))
 
-lemma power_series_log_add_one (x:ℝ) (hx: |x| < 1):
+--Not needed: already in mathlib
+/-lemma power_series_log_add_one (x:ℝ) (hx: |x| < 1):
 tendsto (λ m, ∑ n in range m, (-(1 : ℝ))^(n - 1) * x^n / n)
 at_top (𝓝 (log (1 + x))) :=
+begin
+  sorry,
+end-/
+
+lemma log_sum_plus_minus (x : ℝ) (hx: |x| < 1) : tendsto
+(λ (m : ℕ),  (2:ℝ)*(∑ k in range m,
+(((1/(2*↑k + 1))*(x^(2*↑k + 1)))))) at_top
+(𝓝 (log (1+x) -log(1-x)) ):=
 begin
   sorry,
 end
