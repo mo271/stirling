@@ -117,7 +117,27 @@ end
 lemma finset_reindex_even {f : ℕ → ℝ} (n : ℕ):
 ∑ l in (range (2*n)).filter(even), f l = ∑ l in (range n), f (2*l) :=
 begin
-  sorry,
+  induction n with d hd,
+  simp only [mul_zero, range_zero, filter_true_of_mem, not_mem_empty, forall_false_left, forall_const, sum_empty],
+  rw [mul_succ, add_succ, add_succ, add_zero],
+  repeat {rw range_succ}, 
+  repeat {rewrite [finset.sum_insert]},
+  repeat {rewrite [finset.filter_insert]},
+  have h₁ : even ( 2 * d), by exact even_two_mul d,
+  have h₂ : ¬(even ((2 * d).succ)), by  {simp only [even_succ, h₁], tautology},
+
+  rw [if_neg h₂, if_pos h₁],
+  rw finset.sum_insert,
+  simp only [add_right_inj],
+  exact hd,
+
+  rw [mem_filter],
+  suffices :(2 * d) ∉ range (2 * d), by tauto,
+  rw mem_range,
+  exact irrefl (2*d),
+
+  rw mem_range,
+  exact irrefl d,
 end
 
 noncomputable def an (n : ℕ) : ℝ  := (n.factorial :ℝ )
