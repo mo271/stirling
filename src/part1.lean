@@ -56,21 +56,54 @@ end
 -- part 1 of https://proofwiki.org/wiki/Stirling%27s_Formula
 
 
+
+--can one do this with is_compl_even_odd?
 lemma finset_sum_even_odd  {f : ℕ → ℝ} (n : ℕ):
 ∑ k in range n, f k =
 (∑ l in (range n).filter(odd), f l) +
 (∑ m in (range n).filter(even), f m) :=
 begin
-  have h_union: range n  =
+ 
+  have h_union: ∀ ( n : ℕ), range n  =
   (range n).filter(odd) ∪ (range n).filter(even) :=
   begin
-    sorry,
+    intro n,
+    induction n with d hd,
+    simp only [range_zero, filter_true_of_mem, not_mem_empty, forall_false_left, forall_const, empty_union],
+    repeat {rw [range_succ]},
+    repeat {rw [filter_insert]},
+
+    by_cases h: even d,
+      rw [if_pos h, if_neg (even_iff_not_odd.mp h)],
+      rw union_insert,
+      exact congr_arg (insert d) hd,
+    rw [if_neg h, if_pos (odd_iff_not_even.mpr h)],
+    rw insert_union,
+    exact congr_arg (insert d) hd,
   end,
   nth_rewrite 0 h_union,
-  have h_disjoint: disjoint  ((range n).filter(odd))
+  have h_disjoint: ∀ (n : ℕ), disjoint  ((range n).filter(odd))
      ((range n).filter(even)) :=
   begin
-    sorry,
+    intro n,
+    induction n with d hd,
+    simp only [range_zero, filter_true_of_mem, not_mem_empty, forall_false_left, forall_const, disjoint_empty_right],
+    repeat {rw range_succ},
+    repeat {rw filter_insert},
+    by_cases h: even d,
+      rw [if_pos h, if_neg (even_iff_not_odd.mp h)],
+      rw disjoint_insert_right,
+      split,
+        rw [mem_filter, not_and], 
+        intro h₂,
+        exact absurd h₂ not_mem_range_self,
+      assumption,
+    rw [if_neg h, if_pos (odd_iff_not_even.mpr h)],
+      rw disjoint_insert_left,
+      split,
+        rw [mem_filter, not_and],
+        tauto,
+      assumption,
   end,
   rw sum_union h_disjoint,
 end
