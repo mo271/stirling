@@ -17,6 +17,23 @@ open_locale filter
 open_locale big_operators -- notation ∑ for finite sums
 open_locale topological_space
 
+example: real.sqrt 2 ^ 8 = 2 ^ 4 :=
+begin
+  have h: 8 = 2 * 4 := by linarith,
+  rw h,
+  rw pow_mul,
+  have g: (0 : ℝ) ≤ 2 := zero_le_two,
+  rw sq_sqrt g,
+end
+
+example:  real.sqrt 2 ^ 4 = 2 ^ 2 :=
+begin
+  have h: 4 = 2 * 2 := by linarith,
+  rw h,
+  rw pow_mul,
+  have g: (0 : ℝ) ≤ 2 := zero_le_two,
+  rw sq_sqrt g,
+end
 
 lemma tendsto_succ (an : ℕ → ℝ) (a:ℝ): tendsto an at_top (𝓝 a) ↔
 tendsto (λ n : ℕ, (an n.succ)) at_top (𝓝 a) :=
