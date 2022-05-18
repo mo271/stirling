@@ -165,7 +165,7 @@ begin
   exact hd,
 
   rw [mem_filter],
-  suffices :(2 * d) ∉ range (2 * d), by tauto,
+  suffices : (2 * d) ∉ range (2 * d), by tauto,
   rw mem_range,
   exact irrefl (2*d),
 

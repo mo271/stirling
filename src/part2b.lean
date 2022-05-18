@@ -90,37 +90,77 @@ lemma rest_cancel (n : ℕ):
  (n : ℝ) / (2*n + 1) = cn n :=
  begin
    rw cn,
-   have h1: 2 * (n : ℝ) + 1 ≠ 0 :=
+   cases n,
+   simp only [cast_zero, mul_zero, zero_div, real.sqrt_zero, zero_mul, zero_pow', ne.def, bit0_eq_zero, nat.one_ne_zero,
+  not_false_iff],
+   have h1: 2 * (n.succ : ℝ) + 1 ≠ 0 :=
    begin
      norm_cast,
      rw ←succ_eq_add_one,
-     exact succ_ne_zero (2*n),
+     exact succ_ne_zero (2*n.succ),
    end,
   -- mmh, do we have to do `cases n` here and for h3 as well?
-   have h2: (sqrt (4 * (n : ℝ)) * (2 * ↑n / exp 1) ^ (2 * n)) ^ 2 *
-   (2 * ↑n + 1) ≠ 0 :=
+   have h2: (sqrt (4 * (n.succ : ℝ)) * (2 * ↑n.succ / exp 1) ^ (2 * n.succ)) ^ 2 *
+   (2 * ↑n.succ + 1) ≠ 0 :=
    begin
-     sorry,
+     norm_cast,
+     simp only [cast_mul, cast_bit0, cast_one, cast_succ, sqrt_mul, zero_le_bit0, zero_le_one, div_pow, cast_add, mul_eq_zero,
+  pow_eq_zero_iff, succ_pos', real.sqrt_eq_zero, bit0_eq_zero, one_ne_zero, false_or, div_eq_zero_iff,
+  canonically_ordered_comm_semiring.mul_pos, and_self],
+     norm_num,
+     push_neg,
+     split,
+     split,
+     rw sqrt_ne_zero _,
+     norm_cast,
+     exact succ_ne_zero n,
+     norm_cast,
+     exact zero_le (n + 1),
+     split,
+     norm_cast,
+     exact succ_ne_zero n,
+     exact (1:ℝ).exp_ne_zero,
+     norm_cast,
+     exact (2 * (n + 1)).succ_ne_zero,
    end,
    field_simp,
-   have h3: (exp 1 ^ n) ^ 4 * ((sqrt 4 * sqrt ↑n *
-   (2 * ↑n) ^ (2 * n)) ^ 2 * (2 * ↑n + 1)) ≠ 0 :=
+   have h3: (exp 1 ^ n.succ) ^ 4 * ((sqrt 4 * sqrt ↑n.succ *
+   (2 * ↑n.succ) ^ (2 * n.succ)) ^ 2 * (2 * ↑n.succ + 1)) ≠ 0 :=
    begin
-    sorry,
+     simp only [cast_succ, ne.def, mul_eq_zero, pow_eq_zero_iff, succ_pos', real.sqrt_eq_zero, zero_le_bit0, zero_le_one,
+  bit0_eq_zero, one_ne_zero, false_or, canonically_ordered_comm_semiring.mul_pos, and_self],
+    push_neg,
+    split,
+    exact (1:ℝ).exp_ne_zero,
+    split,
+    split,
+    rw sqrt_ne_zero _,
+    norm_cast,
+    exact succ_ne_zero n,
+    norm_cast,
+    exact zero_le (n + 1),
+    norm_cast,
+    exact succ_ne_zero n,
+    norm_cast,
+    exact (2 * (n + 1)).succ_ne_zero,
    end,
    field_simp,
+
    norm_cast,
+   rw add_comm n 1,
+   rw ←succ_eq_one_add n,
+   generalize:  n.succ = m,
    ring,
-   have h4: real.sqrt n ^ 4 = n^2 :=
+   have h4: real.sqrt m ^ 4 = m^2 :=
    begin
      rw sqrt_eq_rpow,
-     have h:= (rpow_mul (cast_nonneg n) (1/2) 4),
+     have h:= (rpow_mul (cast_nonneg m) (1/2) 4),
      norm_cast at h,
      rw ←h,
      ring,
      norm_cast,
    end,
-   have h5: real.sqrt ↑n ^ 2 = n := sq_sqrt (cast_nonneg n),
+   have h5: real.sqrt ↑m ^ 2 = m := sq_sqrt (cast_nonneg m),
    have h6: real.sqrt 2 ^ 4 = sqrt 4 ^ 2 :=
    begin
      rw sq_sqrt,
@@ -137,7 +177,7 @@ lemma rest_cancel (n : ℕ):
      norm_cast,
      exact cast_nonneg 4,
    end,
-   have h7: (exp 1 ^ n) ^ 4 = (exp 1 ^ (2*n)) ^ 2 :=
+   have h7: (exp 1 ^ m) ^ 4 = (exp 1 ^ (2*m)) ^ 2 :=
    begin
      repeat {rw ←pow_mul},
      rw mul_assoc 2,
@@ -145,8 +185,8 @@ lemma rest_cancel (n : ℕ):
      rw mul_assoc,
      ring,
    end,
-   have h8: ((n:ℝ) ^ n) ^ 4 * ↑(2 ^ (4 * n)) =
-    ↑((2 * n) ^ (2 * n)) ^ 2 :=
+   have h8: ((m:ℝ) ^ m) ^ 4 * ↑(2 ^ (4 * m)) =
+    ↑((2 * m) ^ (2 * m)) ^ 2 :=
    begin
     norm_cast,
     repeat {rw mul_pow},
@@ -275,11 +315,17 @@ begin
   have h5: (real.sqrt 2 * sqrt ↑n * ↑n ^ n) ^ 4 *
    ((((2 * n).factorial)) * exp 1 ^ (2 * n)) ^ 2 *
    ((exp 1 ^ n) ^ 4 * ((sqrt 4 * sqrt ↑n *
-   (2 * ↑n) ^ (2 * n)) ^ 2 * (2*n + 1))) ≠ 0 := by sorry,
+   (2 * ↑n) ^ (2 * n)) ^ 2 * (2*n + 1))) ≠ 0 :=
+   begin
+     sorry,
+   end,
   field_simp,
   ring,
   have h6: real.sqrt 4 ^ 2 = 4 := by simp only [sq_sqrt, zero_le_bit0, zero_le_one],
-  have h7: real.sqrt 2 ^ 8 = 2 ^ 4 := by sorry,
+  have h7: real.sqrt 2 ^ 8 = 2 ^ 4 :=
+  begin
+    sorry,
+  end,
   have h8: real.sqrt 2 ^ 4 = 2 ^ 2 := by sorry,
   rw [h6, h7, h8],
   ring,
