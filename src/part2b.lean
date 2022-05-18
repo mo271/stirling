@@ -295,9 +295,7 @@ begin
   rw an,
   rw cn,
   rw wn,
-  --generalize : (((n).factorial) :ℝ) = x,
   norm_cast,
-  -- mmh, do we have to do `cases n` here for h1, h2 and h3?
   have h1:  sqrt (2 * (n : ℝ)) * (↑n / exp 1) ^ n ≠ 0 :=
   begin
     simp only [sqrt_mul', cast_nonneg, div_pow, ne.def, mul_eq_zero, real.sqrt_eq_zero, zero_le_bit0, zero_le_one, bit0_eq_zero,
@@ -310,6 +308,11 @@ begin
     exact ne_of_gt (pow_pos (zero_lt_iff.mpr hn) n),
     exact ne_of_gt (pow_pos (1:ℝ).exp_pos n),
   end,
+  have hn2: 0 < 2*n :=
+    begin
+      simp only [canonically_ordered_comm_semiring.mul_pos, succ_pos', true_and],
+      exact zero_lt_iff.mpr hn,
+    end,
   have h2 : (((2 * n).factorial) :ℝ) / (sqrt ↑(2 * (2 * n))
     * (↑(2 * n) / exp 1) ^ (2 * n)) ≠ 0 :=
   begin
@@ -322,17 +325,21 @@ begin
     exact hn,
     split,
     norm_cast,
-    have hn2: 0 < 2*n :=
-    begin
-      simp only [canonically_ordered_comm_semiring.mul_pos, succ_pos', true_and],
-      exact zero_lt_iff.mpr hn,
-    end,
     exact ne_of_gt (pow_pos hn2 (2*n)),
     exact ne_of_gt (pow_pos (1:ℝ).exp_pos (2*n)),
   end,
   have h3: real.sqrt ↑(2 * (2 * n)) * (↑(2 * n) / exp 1) ^ (2 * n) ≠ 0 :=
   begin
-    sorry,
+    norm_cast,
+    simp only [cast_mul, cast_bit0, cast_one, zero_le_mul_left, zero_lt_bit0, zero_lt_one, cast_nonneg, div_pow, mul_eq_zero,
+  real.sqrt_eq_zero, bit0_eq_zero, one_ne_zero, cast_eq_zero, false_or, div_eq_zero_iff],
+    push_neg,
+    split,
+    exact hn,
+    split,
+    norm_cast,
+    exact ne_of_gt (pow_pos hn2 (2*n)),
+    exact ne_of_gt (pow_pos (1:ℝ).exp_pos (2*n)),
   end,
   have h4 : (((2 * n).factorial) :ℝ) ^ 2 *  (2 * n + 1) ≠ 0 :=
   begin
@@ -348,7 +355,13 @@ begin
    ((exp 1 ^ n) ^ 4 * ((sqrt 4 * sqrt ↑n *
    (2 * ↑n) ^ (2 * n)) ^ 2 * (2*n + 1))) ≠ 0 :=
    begin
-     sorry,
+    norm_cast,
+    simp only [cast_pow, cast_mul, cast_bit0, cast_one, cast_add, mul_eq_zero, pow_eq_zero_iff, succ_pos', real.sqrt_eq_zero,
+  zero_le_bit0, zero_le_one, bit0_eq_zero, one_ne_zero, cast_nonneg, cast_eq_zero, false_or],
+    push_neg,
+    split,
+    sorry,
+    sorry,
    end,
   field_simp,
   ring,
@@ -362,22 +375,26 @@ begin
   ring,
 end
 
-lemma tendsto_succ (an : ℕ → ℝ) (a:ℝ) (h: tendsto  (λ n : ℕ, (an n.succ)) at_top (𝓝 a)):
-tendsto an at_top (𝓝 a) :=
-begin
-  intro,
-  intro,
-  simp only [filter.mem_map, mem_at_top_sets, ge_iff_le, set.mem_preimage],
-  sorry,
-end
+lemma expand_in_limit' (n : ℕ):
+ (an n.succ)^4 * (1/(an (2 * n.succ)))^(2) * cn n.succ = wn n.succ:=
+ begin
+   have hn: n.succ ≠ 0 := succ_ne_zero n,
+   exact expand_in_limit n.succ hn,
+ end
+
+lemma tendsto_succ (an : ℕ → ℝ) (a:ℝ): tendsto an at_top (𝓝 a) ↔
+tendsto (λ n : ℕ, (an n.succ)) at_top (𝓝 a) := by sorry,
 
 lemma second_wallis_limit (a: ℝ) (hane: a≠0) (ha: tendsto
-(λ (n : ℕ),  an n) at_top (𝓝  a)):
+an at_top (𝓝  a)):
 tendsto wn at_top (𝓝 (a^2/2)):=
 begin
-  apply tendsto_succ wn (a^2/2),
-  --hier weitermachen
-  apply tendsto.congr expand_in_limit,
+  rw tendsto_succ wn (a^2/2),
+  apply tendsto.congr expand_in_limit',
+  let qn := λ (x:ℕ), an x ^ 4 * (1 / an (2 * x)) ^ 2 * cn x,
+  have hqn: ∀  (x:ℕ), qn x.succ = an x.succ ^ 4 * (1 / an (2 * x.succ)) ^ 2 * cn x.succ := by tauto,
+  apply tendsto.congr hqn,
+  rw ←tendsto_succ qn (a^2/2),
   have hcn := rest_has_limit_one_half,
   have has : tendsto (λ (n : ℕ),
   an n ^ 4 * (1 / an (2*n)) ^ 2) at_top (𝓝 (a ^ 2)) :=
