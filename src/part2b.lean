@@ -286,19 +286,50 @@ begin
   exact sub_seq_tendsto h,
 end
 
-lemma expand_in_limit (n : ℕ):
+-- added the assumption hn. Without that the statement is false (I think).
+-- With the new assumption, the lemma below does not work anymore...
+lemma expand_in_limit (n : ℕ) (hn: n ≠ 0):
  (an n)^4 * (1/(an (2 * n)))^(2) * cn n = wn n:=
 begin
   rw an,
   rw an,
   rw cn,
   rw wn,
-  generalize : (((n).factorial) :ℝ) = x,
+  --generalize : (((n).factorial) :ℝ) = x,
   norm_cast,
   -- mmh, do we have to do `cases n` here for h1, h2 and h3?
-  have h1:  sqrt (2 * (n : ℝ)) * (↑n / exp 1) ^ n ≠ 0 := by sorry,
+  have h1:  sqrt (2 * (n : ℝ)) * (↑n / exp 1) ^ n ≠ 0 :=
+  begin
+    simp only [sqrt_mul', cast_nonneg, div_pow, ne.def, mul_eq_zero, real.sqrt_eq_zero, zero_le_bit0, zero_le_one, bit0_eq_zero,
+  one_ne_zero, cast_eq_zero, false_or, div_eq_zero_iff],
+    push_neg,
+    split,
+    exact hn,
+    split,
+    norm_cast,
+    exact ne_of_gt (pow_pos (zero_lt_iff.mpr hn) n),
+    exact ne_of_gt (pow_pos (1:ℝ).exp_pos n),
+  end,
   have h2 : (((2 * n).factorial) :ℝ) / (sqrt ↑(2 * (2 * n))
-    * (↑(2 * n) / exp 1) ^ (2 * n)) ≠ 0 := by sorry,
+    * (↑(2 * n) / exp 1) ^ (2 * n)) ≠ 0 :=
+  begin
+    simp only [cast_mul, cast_bit0, cast_one, zero_le_mul_left, zero_lt_bit0, zero_lt_one, cast_nonneg, div_pow, ne.def,
+  div_eq_zero_iff, cast_eq_zero, mul_eq_zero, real.sqrt_eq_zero, bit0_eq_zero, one_ne_zero, false_or],
+    push_neg,
+    split,
+    exact factorial_ne_zero (2*n),
+    split,
+    exact hn,
+    split,
+    norm_cast,
+    have hn2: 0 < 2*n :=
+    begin
+      simp only [canonically_ordered_comm_semiring.mul_pos, succ_pos', true_and],
+      exact zero_lt_iff.mpr hn,
+    end,
+    exact ne_of_gt (pow_pos hn2 (2*n)),
+    exact ne_of_gt (pow_pos (1:ℝ).exp_pos (2*n)),
+  end,
   have h3: real.sqrt ↑(2 * (2 * n)) * (↑(2 * n) / exp 1) ^ (2 * n) ≠ 0 :=
   begin
     sorry,
@@ -331,10 +362,21 @@ begin
   ring,
 end
 
+lemma tendsto_succ (an : ℕ → ℝ) (a:ℝ) (h: tendsto  (λ n : ℕ, (an n.succ)) at_top (𝓝 a)):
+tendsto an at_top (𝓝 a) :=
+begin
+  intro,
+  intro,
+  simp only [filter.mem_map, mem_at_top_sets, ge_iff_le, set.mem_preimage],
+  sorry,
+end
+
 lemma second_wallis_limit (a: ℝ) (hane: a≠0) (ha: tendsto
 (λ (n : ℕ),  an n) at_top (𝓝  a)):
-tendsto (λ (n : ℕ), wn n) at_top (𝓝 (a^2/2)):=
+tendsto wn at_top (𝓝 (a^2/2)):=
 begin
+  apply tendsto_succ wn (a^2/2),
+  --hier weitermachen
   apply tendsto.congr expand_in_limit,
   have hcn := rest_has_limit_one_half,
   have has : tendsto (λ (n : ℕ),
@@ -357,7 +399,7 @@ begin
   exact h,
 end
 
-lemma pi_and_a (a: ℝ) (hane: a≠0) (ha: tendsto
+lemma pi_and_a (a: ℝ) (hane: a ≠ 0) (ha: tendsto
 (λ (n : ℕ),  an n) at_top (𝓝  a)):
 π/2 = a^2/2 :=
 begin

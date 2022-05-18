@@ -18,9 +18,11 @@ open_locale big_operators -- notation ∑ for finite sums
 open_locale topological_space
 
 
-lemma power_series_log_add_one (x:ℝ) (hx: |x| < 1):
-tendsto (λ m, ∑ n in range m, (-(1 : ℝ))^(n - 1) * x^n / n)
-at_top (𝓝 (log (1 + x))) :=
+lemma tendsto_succ (an : ℕ → ℝ) (a:ℝ) (h: tendsto an at_top (𝓝 a)):
+tendsto (λ n : ℕ, (an n.succ)) at_top (𝓝 a) :=
 begin
+  intro,
+  intro,
+  simp only [filter.mem_map, mem_at_top_sets, ge_iff_le, set.mem_preimage],
   sorry,
 end
