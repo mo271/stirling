@@ -24,54 +24,6 @@ open finset
 open filter
 open nat
 
-example (n:ℕ ): n + 1 ≠ 0 :=
-succ_ne_zero n
-
-example (a b : (ℕ →  ℝ)) (h:∀ (k:ℕ), a k = b k ):
-tendsto (λ (k : ℕ), a k) at_top (𝓝 (π/2)) ↔ tendsto (λ (k : ℕ),b k) at_top (𝓝 (π/2)):=
-begin
- exact tendsto_congr h,
-end
-
-example (a b c d :ℝ) (h:a = c) (g : b = d): a / b = c / d:=
-begin
-  exact congr (congr_arg has_div.div h) g,
-end
-
-example (r s t: ℝ) (h: s = t): r * s = r * t :=
-begin
-  exact congr_arg (has_mul.mul r) (h),
-end
-
-example (r: ℝ) (h: r ≠ 0): r/r = 1 :=
-begin
-  ring,
-  rw inv_mul_cancel h,
-end
-
-example (r s : ℝ) (hr: r ≠ 0) (hs: s ≠ 0): (r*s)⁻¹ = r⁻¹ * s⁻¹
- :=
-begin
-  rw mul_inv₀,
-end
-
-lemma log_sqrt (n : ℝ) (hn : 0 < n) : real.log (n^(1/2:ℝ))
- = (1/2:ℝ)*(log n):=
-begin
-  rw  log_rpow hn _,
-end
-
-lemma sqrt_eq_pow_half' (r : ℝ) (hr : 0 ≤ r): r^(1/2:ℝ) = sqrt r
-:=
-begin
-  rw sqrt_eq_rpow,
-end
-
-lemma mul_left' (f s t: ℝ) (hf: 0≠f) (h: s = t): f*s = f*t :=
-begin
-  exact congr_arg (has_mul.mul f) h,
-end
-
 -- part 2 of https://proofwiki.org/wiki/Stirling%27s_Formula
 
 noncomputable def wallis_inside_prod (n : ℕ) : ℝ :=

@@ -17,6 +17,29 @@ open_locale filter
 open_locale big_operators -- notation ∑ for finite sums
 open_locale topological_space
 
+lemma monotone_convergence (bn : ℕ → ℝ) (c : ℝ) (h_sd: ∀ (a b : ℕ), a ≤ b →  bn b ≤ bn a)
+(h_bounded: ∀ (n:ℕ), bn n>= c): ∃ (b : ℝ), tendsto bn at_top (𝓝  b)  :=
+begin
+ have c_is_lower_bound: (lower_bounds (set.range bn)).nonempty :=
+ begin
+   use c,
+   intros,
+   rw lower_bounds,
+   simp only [set.mem_range, forall_exists_index, forall_apply_eq_imp_iff', set.mem_set_of_eq],
+   exact h_bounded,
+ end,
+ let x := (Inf (set.range bn)),
+ have h: is_glb (set.range bn) x :=
+ begin
+   refine real.is_glb_Inf (set.range bn) (set.range_nonempty bn) c_is_lower_bound,
+ end,
+ use x,
+ refine tendsto_at_top_is_glb _ _,
+ rw antitone,
+ exact h_sd,
+ exact h,
+end
+
 example: real.sqrt 2 ^ 8 = 2 ^ 4 :=
 begin
   have h: 8 = 2 * 4 := by linarith,

@@ -63,7 +63,7 @@ lemma finset_sum_even_odd  {f : ℕ → ℝ} (n : ℕ):
 (∑ l in (range n).filter(odd), f l) +
 (∑ m in (range n).filter(even), f m) :=
 begin
- 
+
   have h_union: ∀ ( n : ℕ), range n  =
   (range n).filter(odd) ∪ (range n).filter(even) :=
   begin
@@ -94,7 +94,7 @@ begin
       rw [if_pos h, if_neg (even_iff_not_odd.mp h)],
       rw disjoint_insert_right,
       split,
-        rw [mem_filter, not_and], 
+        rw [mem_filter, not_and],
         intro h₂,
         exact absurd h₂ not_mem_range_self,
       assumption,
@@ -115,18 +115,18 @@ begin
   induction n with d hd,
   simp only [mul_zero, range_zero, filter_true_of_mem, not_mem_empty, forall_false_left, forall_const, sum_empty],
   rw [mul_succ, add_succ, add_succ, add_zero],
-  repeat {rw range_succ}, 
+  repeat {rw range_succ},
   repeat {rewrite [finset.sum_insert]},
   repeat {rewrite [finset.filter_insert]},
   have h₁ : ¬ odd ( 2* d), by
     simp only [odd_iff_not_even, even.mul_right, even_two, not_true, not_false_iff],
-  have h₂: odd (2 * d).succ, by 
+  have h₂: odd (2 * d).succ, by
     {simp only [odd_iff_not_even, h₁, even_succ],
     rw ←odd_iff_not_even,
     assumption},
 
   rw [if_neg h₁, if_pos h₂],
-  
+
   repeat {rw finset.sum_insert},
   simp only [add_right_inj],
   exact hd,
@@ -136,7 +136,7 @@ begin
   apply not_and.mpr,
   exact not.elim this,
     end,
-  
+
   rw mem_range,
   exact not_succ_lt_self,
 
@@ -153,7 +153,7 @@ begin
   induction n with d hd,
   simp only [mul_zero, range_zero, filter_true_of_mem, not_mem_empty, forall_false_left, forall_const, sum_empty],
   rw [mul_succ, add_succ, add_succ, add_zero],
-  repeat {rw range_succ}, 
+  repeat {rw range_succ},
   repeat {rewrite [finset.sum_insert]},
   repeat {rewrite [finset.filter_insert]},
   have h₁ : even ( 2 * d), by exact even_two_mul d,
@@ -415,27 +415,44 @@ begin
   -/
 end
 
-
-lemma bn_bounded_below: ∀ (n : ℕ), bn n > 3/(4:ℝ) - 1/2*log 2 :=
+lemma bn_antitone: ∀ (a b : ℕ), a ≤ b → bn b ≤ bn a :=
 begin
   sorry,
 end
 
-lemma monotone_convergence (bn : ℕ → ℝ) (c : ℝ)
-(h_sd: ∀ (n : ℕ),  bn n > bn n.succ)
-(h_bounded: ∀ (n:ℕ), bn n > c):
-∃ (b : ℝ), tendsto (λ (n : ℕ),  bn n)
- at_top (𝓝  b)  :=
+lemma bn_has_lower_bound:(lower_bounds (set.range bn)).nonempty :=
 begin
- use (Inf {(bn n : ℝ)| (n:ℕ)}),
- sorry,
+  let c :=  3/(4:ℝ) - 1/2*log 2,
+  have hn: ∀  (n : ℕ), bn n >= c :=
+  begin
+    sorry,
+  end,
+   use c,
+   intros,
+   rw lower_bounds,
+   simp only [set.mem_range, forall_exists_index, forall_apply_eq_imp_iff', set.mem_set_of_eq],
+   exact hn,
 end
 
-lemma bn_has_limit_b: ∃ (b : ℝ), tendsto
-(λ (n : ℕ),  bn n)
-  at_top (𝓝  b) :=
+lemma monotone_convergence (bn : ℕ → ℝ) (h_sd: ∀ (a b : ℕ), a ≤ b → bn b ≤ bn a)
+(h_bounded: (lower_bounds (set.range bn)).nonempty): ∃ (b : ℝ), tendsto bn at_top (𝓝  b)  :=
 begin
-  sorry,
+ let x := (Inf (set.range bn)),
+ have h: is_glb (set.range bn) x :=
+ begin
+   refine real.is_glb_Inf (set.range bn) (set.range_nonempty bn) h_bounded,
+ end,
+ use x,
+ refine tendsto_at_top_is_glb _ _,
+ rw antitone,
+ exact h_sd,
+ exact h,
+end
+
+lemma bn_has_limit_b: ∃ (b : ℝ),
+tendsto (λ (n : ℕ),  bn n)  at_top (𝓝  b) :=
+begin
+  exact monotone_convergence bn bn_antitone bn_has_lower_bound,
 end
 
 lemma an_bounded_by_pos_constant:
