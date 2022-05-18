@@ -370,7 +370,10 @@ begin
   begin
     sorry,
   end,
-  have h8: real.sqrt 2 ^ 4 = 2 ^ 2 := by sorry,
+  have h8: real.sqrt 2 ^ 4 = 2 ^ 2 :=
+  begin
+    sorry,
+  end,
   rw [h6, h7, h8],
   ring,
 end
@@ -383,7 +386,41 @@ lemma expand_in_limit' (n : ℕ):
  end
 
 lemma tendsto_succ (an : ℕ → ℝ) (a:ℝ): tendsto an at_top (𝓝 a) ↔
-tendsto (λ n : ℕ, (an n.succ)) at_top (𝓝 a) := by sorry,
+tendsto (λ n : ℕ, (an n.succ)) at_top (𝓝 a) :=
+begin
+  split,
+  {
+    intro h,
+    -- rw tendsto at h,
+    rw tendsto_at_top' at h,
+    rw tendsto_at_top',
+    intros,
+    have g := h s H,
+    cases g with m gm,
+    use m,
+    intro b,
+    intro hb,
+    have hbsucc: b.succ >= m := le_succ_of_le hb,
+    exact gm b.succ hbsucc,
+  },
+  { intro h,
+    -- rw tendsto at h,
+    rw tendsto_at_top' at h,
+    rw tendsto_at_top',
+    intros,
+    have g := h s H,
+    cases g with m gm,
+    use m.succ,
+    intro b,
+    intro hb,
+    cases b,
+    exfalso,
+    exact not_succ_le_zero m hb,
+    have hbm: b >= m := succ_le_succ_iff.mp hb,
+    exact gm b hbm,
+  },
+end
+
 
 lemma second_wallis_limit (a: ℝ) (hane: a≠0) (ha: tendsto
 an at_top (𝓝  a)):
@@ -426,7 +463,7 @@ begin
 end
 
 lemma an_has_limit_sqrt_pi: tendsto
-(λ (n : ℕ),  an n) at_top (𝓝  (sqrt π)) :=
+(λ (n : ℕ),  an n) at_top (𝓝 (sqrt π)) :=
 begin
   have ha:= an_has_pos_limit_a,
   cases ha with a ha,
