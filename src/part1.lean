@@ -455,6 +455,8 @@ begin
   exact monotone_convergence bn bn_antitone bn_has_lower_bound,
 end
 
+/-an_pos can not be proven if we allow n = 0
+corrected version below, but dependent lemmas need to be adjusted-/
 lemma  an_pos: ∀ (n : ℕ), 0 < an n :=
 begin
   intro n,
@@ -467,6 +469,39 @@ begin
   have h₃: 0 ≤ sqrt (2 :ℝ) * sqrt ↑n * ↑n ^ n := by sorry,
   sorry,
 end
+
+/-lemma  an_pos: ∀ (n : ℕ),(n ≠ 0) → 0 < an n :=
+begin
+  intro n,
+  assume hn: n ≠ 0,
+  rw an,
+  norm_cast,
+  simp only [sqrt_mul', cast_nonneg, div_pow],
+  field_simp,
+  have h₁: 0 < (n.factorial : ℝ) :=
+  begin
+    norm_cast,
+    exact factorial_pos n,
+  end,
+  have h₂: 0 < exp(1)^n := (pow_pos ((1:ℝ).exp_pos)) n,
+  have h₃: 0 < sqrt (2 :ℝ) * sqrt ↑n * ↑n ^ n :=
+  begin
+    apply mul_pos,
+    apply mul_pos,
+    simp only [real.sqrt_pos, zero_lt_bit0, zero_lt_one],
+    simp only [real.sqrt_pos, cast_pos],
+    rw pos_iff_ne_zero,
+    exact hn,
+    apply pow_pos,
+    norm_cast,
+    rw pos_iff_ne_zero,
+    exact hn,
+  end,
+  apply mul_pos,
+  apply mul_pos h₁ h₂,
+  simp only [inv_pos],
+  exact h₃,
+end -/
 
 lemma an_bounded_by_pos_constant:
 ∀ (n : ℕ), exp(3/(4:ℝ) - 1/2*log 2) ≤ an n:=
