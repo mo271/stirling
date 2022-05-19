@@ -420,18 +420,18 @@ begin
   sorry,
 end
 
+lemma bn_bounded_by_constant: ∀  (n : ℕ), bn n ≥  3/(4:ℝ) - 1/2*log 2 :=
+begin
+  sorry,
+end
+
 lemma bn_has_lower_bound:(lower_bounds (set.range bn)).nonempty :=
 begin
-  let c :=  3/(4:ℝ) - 1/2*log 2,
-  have hn: ∀  (n : ℕ), bn n >= c :=
-  begin
-    sorry,
-  end,
-   use c,
+   use  3/(4:ℝ) - 1/2*log 2 ,
    intros,
    rw lower_bounds,
    simp only [set.mem_range, forall_exists_index, forall_apply_eq_imp_iff', set.mem_set_of_eq],
-   exact hn,
+   exact bn_bounded_by_constant,
 end
 
 lemma monotone_convergence (bn : ℕ → ℝ) (h_sd: ∀ (a b : ℕ), a ≤ b → bn b ≤ bn a)
@@ -455,22 +455,61 @@ begin
   exact monotone_convergence bn bn_antitone bn_has_lower_bound,
 end
 
-lemma an_bounded_by_pos_constant:
-∀ (n : ℕ), an n > exp(3/(4:ℝ) - 1/2*log 2) :=
+lemma  an_pos: ∀ (n : ℕ), 0 < an n :=
 begin
+  intro n,
+  rw an,
+  norm_cast,
+  simp only [sqrt_mul', cast_nonneg, div_pow],
+  field_simp,
+  have h₁: 0 < (n.factorial : ℝ) := by sorry,
+  have h₂: 0 < exp(1)^n := (pow_pos ((1:ℝ).exp_pos)) n,
+  have h₃: 0 ≤ sqrt (2 :ℝ) * sqrt ↑n * ↑n ^ n := by sorry,
   sorry,
+end
+
+lemma an_bounded_by_pos_constant:
+∀ (n : ℕ), exp(3/(4:ℝ) - 1/2*log 2) ≤ an n:=
+begin
+  intro n,
+  rw  ←(le_log_iff_exp_le (an_pos n)),
+  exact bn_bounded_by_constant n,
+end
+
+lemma an_antitone: ∀ (a b : ℕ), a ≤ b → an b ≤ an a :=
+begin
+  intros a b,
+  intro hab,
+  have h := bn_antitone a b hab,
+  rw bn at h,
+  rw bn at h,
+  exact (log_le_log (an_pos b) (an_pos a)).mp h,
+end
+
+lemma an_has_lower_bound:(lower_bounds (set.range an)).nonempty :=
+begin
+   use  exp(3/(4:ℝ) - 1/2*log 2),
+   intros,
+   rw lower_bounds,
+   simp only [set.mem_range, forall_exists_index, forall_apply_eq_imp_iff', set.mem_set_of_eq],
+   exact an_bounded_by_pos_constant,
 end
 
 lemma an_has_limit_a: ∃ (a : ℝ), tendsto
 (λ (n : ℕ),  an n)
   at_top (𝓝  a) :=
 begin
-  sorry,
+  exact monotone_convergence an an_antitone an_has_lower_bound,
 end
 
 lemma an_has_pos_limit_a: ∃ (a : ℝ), 0 < a ∧ tendsto
 (λ (n : ℕ),  an n)
   at_top (𝓝  a) :=
 begin
+  have h:= an_has_limit_a,
+  cases h with a ha,
+  use a,
+  split,
   sorry,
+  exact ha,
 end

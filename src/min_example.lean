@@ -17,6 +17,11 @@ open_locale filter
 open_locale big_operators -- notation ∑ for finite sums
 open_locale topological_space
 
+example (a b : ℝ) (ha: 0 < a) (hb: 0 < b) (hab: log a ≤ log b): a ≤ b :=
+begin
+  exact (log_le_log ha hb).mp hab,
+end
+
 lemma monotone_convergence (bn : ℕ → ℝ) (c : ℝ) (h_sd: ∀ (a b : ℕ), a ≤ b →  bn b ≤ bn a)
 (h_bounded: ∀ (n:ℕ), bn n>= c): ∃ (b : ℝ), tendsto bn at_top (𝓝  b)  :=
 begin
