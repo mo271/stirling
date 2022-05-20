@@ -194,7 +194,6 @@ lemma log_sum_plus_minus (x : ℝ) (hx: |x| < 1) : tendsto
 (λ (m : ℕ),  (∑ k in range m,
 (((2:ℝ)*(1/(2*↑k + 1))*(x^(2*↑k + 1)))))) at_top
 (𝓝 (log (1+x) -log(1-x)) ):=
-
 begin
   have min_one_not_zero : (-1 : ℝ) ≠ ( 0 : ℝ), by
       simp only [ne.def, neg_eq_zero, one_ne_zero, not_false_iff],
@@ -208,7 +207,7 @@ begin
 
   let term := (λ b : ℕ, ((-1)*(-x)^(b + 1) / ((b : ℝ) + 1)) + (x^(b + 1)/((b:ℝ) + 1))),
   have h_min_one_ne_one: ((-1:ℝ) ≠ (1:ℝ)), by linarith,
-  
+
   have h_odd_n: (∀ n : ℕ, (odd n) → (term n) = 0),
   begin
     intros n hn,
@@ -223,17 +222,17 @@ begin
   have h_even_n: (∀ n : ℕ, (even n) → (term n) = ((2 : ℝ) * x ^ (n+1) / ( (n : ℝ) + 1))),
   begin
     intros n hn,
-    simp only [term], 
+    simp only [term],
     rw [neg_pow],
     have h_min_one_ne_one: ((-1:ℝ) ≠ (1:ℝ)), by linarith,
     rw pow_succ (-1:ℝ) n,
     rw (neg_one_pow_eq_one_iff_even h_min_one_ne_one).mpr hn,
     ring_nf,
   end,
-  
+
   have h₄:= has_sum_imp_tendsto h₃,
   rw tendsto_congr finset_sum_even_odd at h₄,
-  
+
   have h_sum_odd : ∀ (m : ℕ), ∑ (n : ℕ) in filter odd (range m),
    term n = 0 :=
   begin
@@ -293,11 +292,11 @@ begin
       simp only [ne.def, mul_eq_zero, bit0_eq_zero, one_ne_zero,
       cast_eq_zero, false_or],
       exact hn,
-    
-    
-    
-    
-    
+
+
+
+
+
       norm_cast,
       exact succ_ne_zero (2*n),
     end
@@ -521,7 +520,7 @@ end
 lemma has_sum_consecutive_inverses:
   has_sum (λ (k: ℕ), 1/(k.succ*(k.succ.succ)))  1 :=
 begin
-  library_search,
+  sorry,
 end
 
 -- some lemma in library that splits off a finite part of an all-positive converging sum?
