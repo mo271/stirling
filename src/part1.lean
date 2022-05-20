@@ -262,6 +262,11 @@ begin
       simp only [ne.def, mul_eq_zero, bit0_eq_zero, one_ne_zero,
       cast_eq_zero, false_or],
       exact hn,
+    
+    
+    
+    
+    
       norm_cast,
       exact succ_ne_zero (2*n),
     end
@@ -289,13 +294,35 @@ lemma power_series_ln (n : ℕ): has_sum
 (2:ℝ) * (((1/(2*↑k + 1))*((1/(2*((↑n + 1))^(2*↑k + 1)))))))
 (log (↑n.succ / ↑n)) :=
  begin
+  have hn : 0 < n:= by sorry,
   rw aux_log,
-  have h₁: |(1:ℝ) / (2 * ↑n + 1)| < 1 := by sorry,
+  have h₀: 0 <  (2 * n +1) := by exact succ_pos',
+  have h₁: |(1:ℝ) / (2 * ↑n + 1)| < 1 :=
+  begin
+    norm_cast,
+    rw abs_of_pos,
+    rw div_lt_one,
+    norm_cast,
+    rw add_comm,
+    apply lt_add_of_zero_lt_left,
+    simp only [canonically_ordered_comm_semiring.mul_pos, succ_pos', true_and, hn],
+    norm_cast,
+    exact h₀,
+    simp only [cast_add, cast_mul, cast_bit0, cast_one, one_div, inv_pos],
+    norm_cast,
+    exact h₀,
+  end,
   let f_left : ℕ → ℝ := λ k, (1 / (2 * n + 1)) ^ (k + 1) / (k + 1),
   have h_left : has_sum f_left (-log (1 - 1 / (2 * ↑n + 1)))
   := has_sum_pow_div_log_of_abs_lt_1 h₁,
   let f_right : ℕ → ℝ := λ k, ((-1) / (2 * n + 1)) ^ (k + 1) / (k + 1),
-  have h₂: | ((-1:ℝ) / (2 * ↑n + 1))| < 1 := by sorry,
+  have h₂: | ((-1:ℝ) / (2 * ↑n + 1))| < 1 :=
+  begin
+    rw abs_div,
+    rw abs_neg,
+    rw abs_div at h₁,
+    exact h₁,
+  end,
   have h_right: has_sum f_right (-log (1 - (-1) / (2 * ↑n + 1)))
   := has_sum_pow_div_log_of_abs_lt_1 h₂,
   let f : ℕ → ℝ := λ k, (f_left k) + (f_right k),
