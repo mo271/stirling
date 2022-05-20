@@ -320,7 +320,7 @@ lemma power_series_ln (n : ℕ): has_sum
   --rw summable.has_sum_iff,
   --
   --:= has_sum_pow_div_log_of_abs_lt_1 h₂,
-  sorry,
+  sorry, sorry,
  end
 
 noncomputable def bn (n : ℕ) : ℝ := log (an n)
