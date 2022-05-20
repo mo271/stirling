@@ -17,6 +17,7 @@ open_locale filter
 open_locale big_operators -- notation ∑ for finite sums
 open_locale topological_space
 
+
 example (a b : ℝ) (ha: 0 < a) (hb: 0 < b) (hab: log a ≤ log b): a ≤ b :=
 begin
   exact (log_le_log ha hb).mp hab,

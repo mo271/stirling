@@ -193,18 +193,18 @@ lemma log_sum_plus_minus (x : ℝ) (hx: |x| < 1) : tendsto
 (𝓝 (log (1+x) -log(1-x)) ):=
 
 begin
-  have min_one_not_zero : (-1 : ℝ) ≠ ( 0 : ℝ), by 
+  have min_one_not_zero : (-1 : ℝ) ≠ ( 0 : ℝ), by
       simp only [ne.def, neg_eq_zero, one_ne_zero, not_false_iff],
   have h₁, from has_sum_pow_div_log_of_abs_lt_1 hx,
   have h₂', from has_sum_pow_div_log_of_abs_lt_1 (eq.trans_lt (abs_neg x) hx),
   have h₂, from (has_sum_mul_left_iff min_one_not_zero).mp h₂',
-  rw [neg_one_mul, neg_neg, sub_neg_eq_add 1 x] at h₂, 
+  rw [neg_one_mul, neg_neg, sub_neg_eq_add 1 x] at h₂,
   --rw ←neg_eq_neg_one_mul at h₂, somehow doesn't work..
   have h₃, from has_sum.add h₂ h₁,
   rw [tactic.ring.add_neg_eq_sub] at h₃,
 
   let term := (λ b : ℕ, ((-1)*(-x)^(b + 1) / ((b : ℝ) + 1)) + (x^(b + 1)/((b:ℝ) + 1))),
-  have h_odd_n: (∀ n : ℕ, (odd n) → (term n) = 0), 
+  have h_odd_n: (∀ n : ℕ, (odd n) → (term n) = 0),
   begin
     intros,
     sorry,
@@ -384,27 +384,26 @@ exact hsucc,
 exact (1:ℝ).exp_pos,
 end
 
-lemma bn_formula (n : ℕ):(n ≠ 0)→  bn n = (log ↑n.factorial) -
-1/(2:ℝ)*(log (2*↑n)) - ↑n*log (↑n/(exp 1)) :=
+lemma bn_formula (n : ℕ):  bn n.succ = (log ↑n.succ.factorial) -
+1/(2:ℝ)*(log (2*↑n.succ)) - ↑n.succ*log (↑n.succ/(exp 1)) :=
 begin
-intro H,
-have h3, from  (lt_iff_le_and_ne.mp (zero_lt_sqrt_two_n n H)),
-have h4, from  (lt_iff_le_and_ne.mp (n_div_exp1_pow_gt_zero n )),
+have h3, from  (lt_iff_le_and_ne.mp (zero_lt_sqrt_two_n n.succ (succ_ne_zero n))),
+have h4, from  (lt_iff_le_and_ne.mp (n_div_exp1_pow_gt_zero n.succ )),
 rw [bn, an, log_div, log_mul, sqrt_eq_rpow, log_rpow, log_pow],
 ring,
 rw zero_lt_mul_left,
 norm_cast,
-exact zero_lt_iff.mpr H,
+exact succ_pos n,
 exact zero_lt_two,
 exact h3.right.symm,
 exact h4.right.symm,
 norm_cast,
-exact (n.factorial_ne_zero),
+exact n.succ.factorial_ne_zero,
 apply (mul_ne_zero h3.right.symm h4.right.symm),
 end
 
 
-lemma bn_strictly_decreasing: ∀ (n : ℕ), (n ≠ 0) →  bn n > bn n.succ :=
+lemma bn_strictly_decreasing: ∀ (n : ℕ), bn n.succ > bn n.succ.succ :=
 begin
   sorry,
  /- intros n hn,
@@ -483,9 +482,78 @@ begin
   sorry,
 end
 
-lemma bn_bounded_by_constant: ∀  (n : ℕ), bn n.succ ≥  3/(4:ℝ) - 1/2*log 2 :=
+lemma bn_sub_bn_succ: ∀ (n : ℕ), bn n.succ - bn n.succ.succ = 1/(4*n.succ*(n.succ.succ)) :=
 begin
   sorry,
+end
+-- in library?
+lemma has_sum_consecutive_inverses:
+  has_sum (λ (k: ℕ), 1/(k.succ*(k.succ.succ)))  1 :=
+begin
+  library_search,
+end
+
+-- some lemma in library that splits off a finite part of an all-positive converging sum?
+
+lemma partial_sum_consecutive_reciprocals:
+ ∀ n, ∑ i in range n, (1:ℝ)/(i.succ*(i.succ.succ)) ≤ 1 :=
+ begin
+   sorry,
+ end
+
+lemma bn_bounded_aux: ∀ (n : ℕ), bn 1 - bn n.succ ≤ 1/4 :=
+begin
+  let bn': (ℕ → ℝ) :=  λ (k : ℕ), bn k.succ,
+  intro n,
+  calc
+  bn 1 - bn n.succ = bn' 0 - bn' n : rfl
+   ... = ∑ i in range n, (bn' i - bn' (i + 1)) : by rw ←(sum_range_sub' bn' n)
+   ... = ∑ i in range n, (bn i.succ - bn i.succ.succ) : rfl
+   ... = ∑ i in range n, 1/(4*i.succ*(i.succ.succ)) :
+   begin
+     refine sum_congr (rfl) _,
+     intros k hk,
+     exact bn_sub_bn_succ k,
+   end
+   ... = ∑ i in range n, (1/4)*(1/(i.succ*(i.succ.succ))) :
+   begin
+     have hi: ∀ (i:ℕ), (1 : ℝ)/(4*i.succ*(i.succ.succ)) = (1/4)*(1/(i.succ*(i.succ.succ))) :=
+     begin
+       intro i,
+       norm_cast,
+       field_simp,
+       simp only [one_div, inv_inj],
+       ring,
+     end,
+    refine sum_congr rfl _,
+    intros k hk,
+    exact hi k,
+   end
+   ... = 1/4 * ∑ i in range n, 1/(i.succ*(i.succ.succ)) :
+   begin
+     rw mul_sum,
+   end
+   ... ≤ 1/4 * 1 :
+   begin
+     refine (mul_le_mul_left _).mpr _,
+     simp only [one_div, inv_pos, zero_lt_bit0, zero_lt_one],
+     exact partial_sum_consecutive_reciprocals n,
+   end
+   ... = 1/4 : by rw mul_one,
+end
+
+lemma bn_bounded_by_constant: ∀  (n : ℕ), bn n.succ ≥ 3/(4:ℝ) - 1/2*log 2 :=
+begin
+  intro n,
+  calc
+  bn n.succ ≥ bn 1 - 1/4 :sub_le.mp (bn_bounded_aux n)
+   ... = (log((1:ℕ).factorial) - 1/2*log(2 * (1 : ℕ)) - (1:ℕ)*log((1:ℕ)/(exp 1))) - 1/4:
+   by rw bn_formula 0
+   ... = 0 - 1/2*log(2) - log(1/(exp 1)) - 1/4 : by simp only [factorial_one, cast_one, log_one, one_div, mul_one, log_inv, log_exp, mul_neg]
+   ... = -1/2*log(2) - log(1/(exp 1)) - 1/4: by ring
+   ... = -1/2*log(2) + 1 - 1/4: by simp only [one_div, log_inv, log_exp, sub_neg_eq_add]
+   ... =  -1/2*log(2) + 3/4: by ring
+   ... =  3/(4:ℝ) - 1/2*log 2: by ring,
 end
 
 lemma bn_has_lower_bound:(lower_bounds (set.range (λ (k:ℕ), bn k.succ))).nonempty :=
