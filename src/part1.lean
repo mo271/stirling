@@ -43,7 +43,7 @@ begin
   exact one_pos,
 end
 
-
+--outdated?
 lemma one_div_succ': tendsto (λ (n : ℕ) , (n:ℝ )^(-(1:ℝ)))
     at_top (𝓝  0) :=
 begin
@@ -105,7 +105,7 @@ begin
         tauto,
       assumption,
   end,
-  rw sum_union h_disjoint,
+  rw sum_union (h_disjoint n),
 end
 
 
@@ -188,7 +188,41 @@ lemma log_sum_plus_minus (x : ℝ) (hx: |x| < 1) : tendsto
 (λ (m : ℕ),  (2:ℝ)*(∑ k in range m,
 (((1/(2*↑k + 1))*(x^(2*↑k + 1)))))) at_top
 (𝓝 (log (1+x) -log(1-x)) ):=
+
 begin
+  have min_one_not_zero : (-1 : ℝ) ≠ ( 0 : ℝ), by 
+      simp only [ne.def, neg_eq_zero, one_ne_zero, not_false_iff],
+  have h₁, from has_sum_pow_div_log_of_abs_lt_1 hx,
+  have h₂', from has_sum_pow_div_log_of_abs_lt_1 (eq.trans_lt (abs_neg x) hx),
+  have h₂, from (has_sum_mul_left_iff min_one_not_zero).mp h₂',
+  rw [neg_one_mul, neg_neg, sub_neg_eq_add 1 x] at h₂, 
+  --rw ←neg_eq_neg_one_mul at h₂, somehow doesn't work..
+  have h₃, from has_sum.add h₂ h₁,
+  rw [tactic.ring.add_neg_eq_sub] at h₃,
+
+  let term := (λ b : ℕ, ((-1)*(-x)^(b + 1) / ((b : ℝ) + 1)) + (x^(b + 1)/((b:ℝ) + 1))),
+  have h_odd_n: (∀ n : ℕ, (odd n) → (term n) = 0), 
+  begin
+    intros,
+    unfold term,
+    squeeze_simp,
+  end
+
+  -- has_sum at h₁ h₂,
+  --apply tendsto.add h₁ h₁,
+  --apply tendsto.sub  (tendsto (λ (m : ℕ), -(∑ k in range m, ((-x)^(k+1)/(k+1)))) at_top (𝓝 (log (1+x))))
+  --    (tendsto (λ (m : ℕ), -(∑ k in range m, ((-x)^(k+1)/(k+1)))) at_top (𝓝 (log (1-x)))),
+
+  --apply tendsto,
+  --rw tendsto,
+  /- --rw ← has_sum,
+
+  --rw has_sum.even_add_odd
+  rw has_sum at h₁,
+  rw at_top_finset_
+  --rw finset_sum_even_odd
+  rw tendsto.sub_sub,
+  rw tendsto.tendsto_add_at_top_iff_nat,-/
   sorry,
 end
 
