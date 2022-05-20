@@ -451,17 +451,17 @@ begin
   -/
 end
 
-lemma bn_antitone: ∀ (a b : ℕ), a ≤ b → bn b ≤ bn a :=
+lemma bn_antitone: ∀ (a b : ℕ), a ≤ b → bn b.succ ≤ bn a.succ :=
 begin
   sorry,
 end
 
-lemma bn_bounded_by_constant: ∀  (n : ℕ), bn n ≥  3/(4:ℝ) - 1/2*log 2 :=
+lemma bn_bounded_by_constant: ∀  (n : ℕ), bn n.succ ≥  3/(4:ℝ) - 1/2*log 2 :=
 begin
   sorry,
 end
 
-lemma bn_has_lower_bound:(lower_bounds (set.range bn)).nonempty :=
+lemma bn_has_lower_bound:(lower_bounds (set.range (λ (k:ℕ), bn k.succ))).nonempty :=
 begin
    use  3/(4:ℝ) - 1/2*log 2 ,
    intros,
@@ -486,9 +486,9 @@ begin
 end
 
 lemma bn_has_limit_b: ∃ (b : ℝ),
-tendsto (λ (n : ℕ),  bn n)  at_top (𝓝  b) :=
+tendsto (λ (n : ℕ),  bn n.succ)  at_top (𝓝  b) :=
 begin
-  exact monotone_convergence bn bn_antitone bn_has_lower_bound,
+  exact monotone_convergence (λ (k:ℕ), bn k.succ) bn_antitone bn_has_lower_bound,
 end
 
 /-an_pos can not be proven if we allow n = 0
@@ -532,7 +532,7 @@ lemma an'_bounded_by_pos_constant:
 begin
   intro n,
   rw  ←(le_log_iff_exp_le (an'_pos n)),
-  exact bn_bounded_by_constant n.succ,
+  exact bn_bounded_by_constant n,
 end
 
 lemma an'_antitone: ∀ (a b : ℕ), a ≤ b → an b.succ ≤ an a.succ :=
