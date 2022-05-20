@@ -459,6 +459,15 @@ lemma bn_sub_bn_succ: ∀ (n : ℕ), bn n.succ - bn n.succ.succ = 1/(4*n.succ*(n
 begin
   sorry,
 end
+-- in library?
+lemma has_sum_consecutive_inverses:
+  has_sum (λ (k: ℕ), 1/(k.succ*(k.succ.succ)))  1 :=
+begin
+  library_search,
+end
+
+-- some lemma in library that splits off a finite part of an all-positive converging sum?
+
 lemma partial_sum_consecutive_reciprocals:
  ∀ n, ∑ i in range n, (1:ℝ)/(i.succ*(i.succ.succ)) ≤ 1 :=
  begin
