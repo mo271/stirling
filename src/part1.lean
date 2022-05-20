@@ -22,40 +22,43 @@ open filter
 open nat
 
 
-example (n : ℕ) : 2 ≤ n.succ.succ :=
-begin
-  rw succ_eq_add_one,
-  rw succ_eq_add_one,
-  rw add_assoc,
-  simp only [le_add_iff_nonneg_left, zero_le'],
-end
-
-lemma const_zero: tendsto (λ (n : ℕ) , 0)
-    at_top (𝓝  0) :=
-begin
-  exact tendsto_const_nhds,
-end
-
-lemma one_div_succ: tendsto (λ (n : ℝ) , (n:ℝ )^(-(1:ℝ)))
-    at_top (𝓝  0) :=
-begin
-  refine tendsto_rpow_neg_at_top _,
-  exact one_pos,
-end
-
---outdated?
-lemma one_div_succ': tendsto (λ (n : ℕ) , (n:ℝ )^(-(1:ℝ)))
-    at_top (𝓝  0) :=
-begin
-  norm_cast,
-  rw tendsto,
-  rw filter.map,
-  sorry,
-end
-
 -- part 1 of https://proofwiki.org/wiki/Stirling%27s_Formula
 
-
+lemma tendsto_succ (an : ℕ → ℝ) (a:ℝ): tendsto an at_top (𝓝 a) ↔
+tendsto (λ n : ℕ, (an n.succ)) at_top (𝓝 a) :=
+begin
+  split,
+  {
+    intro h,
+    -- rw tendsto at h,
+    rw tendsto_at_top' at h,
+    rw tendsto_at_top',
+    intros,
+    have g := h s H,
+    cases g with m gm,
+    use m,
+    intro b,
+    intro hb,
+    have hbsucc: b.succ >= m := le_succ_of_le hb,
+    exact gm b.succ hbsucc,
+  },
+  { intro h,
+    -- rw tendsto at h,
+    rw tendsto_at_top' at h,
+    rw tendsto_at_top',
+    intros,
+    have g := h s H,
+    cases g with m gm,
+    use m.succ,
+    intro b,
+    intro hb,
+    cases b,
+    exfalso,
+    exact not_succ_le_zero m hb,
+    have hbm: b >= m := succ_le_succ_iff.mp hb,
+    exact gm b hbm,
+  },
+end
 
 --can one do this with is_compl_even_odd?
 lemma finset_sum_even_odd  {f : ℕ → ℝ} (n : ℕ):
@@ -204,9 +207,8 @@ begin
   have h_odd_n: (∀ n : ℕ, (odd n) → (term n) = 0), 
   begin
     intros,
-    unfold term,
-    squeeze_simp,
-  end
+    sorry,
+  end,
 
   -- has_sum at h₁ h₂,
   --apply tendsto.add h₁ h₁,
@@ -318,7 +320,7 @@ lemma power_series_ln (n : ℕ): has_sum
   --rw summable.has_sum_iff,
   --
   --:= has_sum_pow_div_log_of_abs_lt_1 h₂,
-
+  sorry,
  end
 
 noncomputable def bn (n : ℕ) : ℝ := log (an n)
@@ -489,51 +491,87 @@ begin
   exact monotone_convergence bn bn_antitone bn_has_lower_bound,
 end
 
-lemma  an_pos: ∀ (n : ℕ), 0 < an n :=
+/-an_pos can not be proven if we allow n = 0
+corrected version below, but dependent lemmas need to be adjusted-/
+
+lemma  an'_pos: ∀ (n : ℕ), 0 < an n.succ :=
 begin
   intro n,
   rw an,
   norm_cast,
   simp only [sqrt_mul', cast_nonneg, div_pow],
   field_simp,
-  have h₁: 0 < (n.factorial : ℝ) := by sorry,
-  have h₂: 0 < exp(1)^n := (pow_pos ((1:ℝ).exp_pos)) n,
-  have h₃: 0 ≤ sqrt (2 :ℝ) * sqrt ↑n * ↑n ^ n := by sorry,
-  sorry,
+  have h₁: 0 < ((n : ℝ) + 1)*((n).factorial : ℝ) :=
+  begin
+    norm_cast,
+    apply mul_pos,
+    exact succ_pos n,
+    exact factorial_pos (n),
+  end,
+  have h₂: 0 < exp(1)^n.succ := (pow_pos ((1:ℝ).exp_pos)) n.succ,
+  have h₃: 0 < sqrt (2 :ℝ) * sqrt (↑n + 1) * (↑n + 1) ^ (n + 1) :=
+  begin
+    apply mul_pos,
+    apply mul_pos,
+    simp only [real.sqrt_pos, zero_lt_bit0, zero_lt_one],
+    simp only [real.sqrt_pos, cast_pos],
+    norm_cast,
+    exact succ_pos n,
+    apply pow_pos,
+    norm_cast,
+    exact succ_pos n,
+  end,
+  apply mul_pos,
+  apply mul_pos h₁ h₂,
+  simp only [inv_pos],
+  exact h₃,
 end
 
-lemma an_bounded_by_pos_constant:
-∀ (n : ℕ), exp(3/(4:ℝ) - 1/2*log 2) ≤ an n:=
+lemma an'_bounded_by_pos_constant:
+∀ (n : ℕ), exp(3/(4:ℝ) - 1/2*log 2) ≤ an n.succ:=
 begin
   intro n,
-  rw  ←(le_log_iff_exp_le (an_pos n)),
-  exact bn_bounded_by_constant n,
+  rw  ←(le_log_iff_exp_le (an'_pos n)),
+  exact bn_bounded_by_constant n.succ,
 end
 
-lemma an_antitone: ∀ (a b : ℕ), a ≤ b → an b ≤ an a :=
+lemma an'_antitone: ∀ (a b : ℕ), a ≤ b → an b.succ ≤ an a.succ :=
 begin
   intros a b,
   intro hab,
-  have h := bn_antitone a b hab,
+  have hab' := succ_le_succ hab,
+  have h := bn_antitone a.succ b.succ hab',
   rw bn at h,
   rw bn at h,
-  exact (log_le_log (an_pos b) (an_pos a)).mp h,
+  exact (log_le_log (an'_pos b) (an'_pos a)).mp h,
 end
 
-lemma an_has_lower_bound:(lower_bounds (set.range an)).nonempty :=
+
+lemma an'_has_lower_bound:
+(lower_bounds (set.range (λ (k:ℕ), an k.succ))).nonempty :=
 begin
    use  exp(3/(4:ℝ) - 1/2*log 2),
    intros,
    rw lower_bounds,
    simp only [set.mem_range, forall_exists_index, forall_apply_eq_imp_iff', set.mem_set_of_eq],
-   exact an_bounded_by_pos_constant,
+   exact an'_bounded_by_pos_constant,
+end
+
+lemma an'_has_limit_a :  ∃ (a : ℝ), tendsto
+(λ (n : ℕ),  an n.succ) at_top (𝓝 a) :=
+begin
+  exact monotone_convergence (λ (k:ℕ), an k.succ) an'_antitone an'_has_lower_bound,
 end
 
 lemma an_has_limit_a: ∃ (a : ℝ), tendsto
 (λ (n : ℕ),  an n)
   at_top (𝓝  a) :=
 begin
-  exact monotone_convergence an an_antitone an_has_lower_bound,
+  have ha := an'_has_limit_a,
+  cases ha with x hx,
+  rw ←tendsto_succ an x at hx,
+  use x,
+  exact hx,
 end
 
 lemma an_has_pos_limit_a: ∃ (a : ℝ), 0 < a ∧ tendsto
@@ -544,6 +582,19 @@ begin
   cases h with a ha,
   use a,
   split,
-  sorry,
+  let an' : ℕ → ℝ := λ n, an n.succ,
+  rw tendsto_succ an a at ha,
+  have a_is_glb: is_glb (set.range an') a := is_glb_of_tendsto_at_top an'_antitone ha,
+  have e_lower_bound:   exp(3/(4:ℝ) - 1/2*log 2) ∈ lower_bounds (set.range an') :=
+  begin
+    intros x hx,
+    simp only [set.mem_range] at hx,
+    cases hx with k hk,
+    rw ←hk,
+    exact an'_bounded_by_pos_constant k,
+  end,
+  have e_le: exp(3/(4:ℝ) - 1/2*log 2) ≤ a := (le_is_glb_iff a_is_glb).mpr e_lower_bound,
+  have e_pos: 0 < exp(3/(4:ℝ) - 1/2*log 2) := (3 / 4 - 1 / 2 * log 2).exp_pos,
+  exact gt_of_ge_of_gt e_le e_pos,
   exact ha,
 end
