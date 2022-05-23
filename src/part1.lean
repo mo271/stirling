@@ -11,6 +11,9 @@ import topology.instances.ennreal
 import order.filter
 import order.bounded_order
 import analysis.special_functions.pow
+
+import part0
+
 open_locale filter topological_space classical
 open_locale big_operators -- notation ∑ for finite sums
 
@@ -188,8 +191,8 @@ begin
 end-/
 
 lemma log_sum_plus_minus (x : ℝ) (hx: |x| < 1) : tendsto
-(λ (m : ℕ),  (2:ℝ)*(∑ k in range m,
-(((1/(2*↑k + 1))*(x^(2*↑k + 1)))))) at_top
+(λ (m : ℕ),  (∑ k in range m,
+(((2:ℝ)*(1/(2*↑k + 1))*(x^(2*↑k + 1)))))) at_top
 (𝓝 (log (1+x) -log(1-x)) ):=
 
 begin
@@ -227,10 +230,17 @@ begin
     rw (neg_one_pow_eq_one_iff_even h_min_one_ne_one).mpr hn,
     ring_nf,
   end,
+  
+  have h₄:= has_sum_imp_tendsto h₃,
+  rw tendsto_congr finset_sum_even_odd at h₄,
+  
+  have h_sum_odd : ∀ (m : ℕ), ∑ (n : ℕ) in filter odd (range m),
+   term n = 0 :=
+  begin
+  sorry,
+  end,
 
-  rw has_sum at h₃,
-  rw finset_sum_even_odd at h₃,
-
+  --rw tendsto_at_top_add,
   -- has_sum at h₁ h₂,
   --apply tendsto.add h₁ h₁,
   --apply tendsto.sub  (tendsto (λ (m : ℕ), -(∑ k in range m, ((-x)^(k+1)/(k+1)))) at_top (𝓝 (log (1+x))))
@@ -240,7 +250,7 @@ begin
   --rw tendsto,
   /- --rw ← has_sum,
 
-  --rw has_sum.even_add_odd
+  rw has_sum.even_add_odd
   rw has_sum at h₁,
   rw at_top_finset_
   --rw finset_sum_even_odd
