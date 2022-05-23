@@ -204,11 +204,32 @@ begin
   rw [tactic.ring.add_neg_eq_sub] at h₃,
 
   let term := (λ b : ℕ, ((-1)*(-x)^(b + 1) / ((b : ℝ) + 1)) + (x^(b + 1)/((b:ℝ) + 1))),
+  have h_min_one_ne_one: ((-1:ℝ) ≠ (1:ℝ)), by linarith,
+  
   have h_odd_n: (∀ n : ℕ, (odd n) → (term n) = 0),
   begin
-    intros,
-    sorry,
+    intros n hn,
+    simp only [term],
+
+    rw [neg_pow],
+    have h_even_n_one : even (n+1), by {rw [ add_one, even_succ, ←odd_iff_not_even], apply hn},
+    rw [(neg_one_pow_eq_one_iff_even h_min_one_ne_one).mpr h_even_n_one, one_mul ],
+    ring_nf,
   end,
+
+  have h_even_n: (∀ n : ℕ, (even n) → (term n) = ((2 : ℝ) * x ^ (n+1) / ( (n : ℝ) + 1))),
+  begin
+    intros n hn,
+    simp only [term], 
+    rw [neg_pow],
+    have h_min_one_ne_one: ((-1:ℝ) ≠ (1:ℝ)), by linarith,
+    rw pow_succ (-1:ℝ) n,
+    rw (neg_one_pow_eq_one_iff_even h_min_one_ne_one).mpr hn,
+    ring_nf,
+  end,
+
+  rw has_sum at h₃,
+  rw finset_sum_even_odd at h₃,
 
   -- has_sum at h₁ h₂,
   --apply tendsto.add h₁ h₁,
