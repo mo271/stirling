@@ -17,6 +17,30 @@ open_locale filter
 open_locale big_operators -- notation ∑ for finite sums
 open_locale topological_space
 
+lemma has_sum_consecutive_inverses:
+  has_sum (λ (k: ℕ), 1/(k.succ*(k.succ.succ))) 1 :=
+begin
+  sorry,
+end
+
+lemma split_has_sum_monotone (an : ℕ → ℝ) (a : ℝ) (h: ∀ (n : ℕ),  0 ≤ an n)
+  (hsum: has_sum an a):
+  ∀ (k : ℕ),  ∑ i in range k, an i ≤ a:=
+  begin
+    refine monotone.ge_of_tendsto _ _,
+    rw monotone,
+    intros a b,
+    intro h',
+    have g :=  sum_Ico_eq_sub an h',
+    refine sum_le_sum_of_subset_of_nonneg _ _,
+    exact range_subset.mpr h',
+    intros,
+    exact h i,
+    rw has_sum at hsum,
+    simp only,
+    simp only at hsum,
+    sorry,
+  end
 
 example (a b : ℝ) (ha: 0 < a) (hb: 0 < b) (hab: log a ≤ log b): a ≤ b :=
 begin
