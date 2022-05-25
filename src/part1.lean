@@ -441,8 +441,10 @@ begin
   sorry,
 end
 
+--prev: (1/n.succ + 1)^2/(1 - (1/n.succ + 1)^2)
+--but now should be correct
 lemma bn_diff_le_geo_sum: ∀ (n : ℕ),
-bn n.succ - bn n.succ.succ ≤ (1/n.succ + 1)^2/(1 - (1/n.succ + 1)^2):=
+bn n.succ - bn n.succ.succ ≤ (1/(2*n.succ + 1))^2/(1 - (1/(2*n.succ + 1))^2):=
 begin
   -- bn_diff_has_sum
   -- has_sum_le ,
@@ -454,7 +456,11 @@ lemma bn_sub_bn_succ: ∀ (n : ℕ),
 bn n.succ - bn n.succ.succ ≤ 1/(4*n.succ*(n.succ.succ)) :=
 begin
   intro n,
-  sorry,
+  have h1: (1/(2*n.succ + 1))^2/(1 - (1/(2*n.succ + 1))^2) =  1/(4*n.succ*(n.succ.succ))
+  := by ring,
+  have h2 : 1 / (4 * ↑(n.succ) * ↑(n.succ.succ)) = 1 / (4 * (n.succ) * (n.succ.succ)) := by ring,
+  rw <-h2 at h1,
+  sorry, --no idea why rw <-h1 does not work here,
 end
 
 
