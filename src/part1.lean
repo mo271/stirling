@@ -63,7 +63,7 @@ begin
   },
 end
 
---can one do this with is_compl_even_odd?
+--can one do this with is_compl_even_odd or has_sum.even_add_odd?
 lemma finset_sum_even_odd  {f : ℕ → ℝ} (n : ℕ):
 ∑ k in range n, f k =
 (∑ l in (range n).filter(odd), f l) +
@@ -224,7 +224,7 @@ begin
   have h_odd_n: (∀ n : ℕ, (odd n) → (term x n) = 0),
   begin
     intros n hn,
-    simp only [term],
+    simp only [term], 
 
     rw [neg_pow],
     have h_even_n_one : even (n+1), by {rw [ add_one, even_succ, ←odd_iff_not_even], apply hn},
@@ -235,16 +235,17 @@ begin
   have h_even_n: (∀ n : ℕ, (even n) → (term x n) = ((2 : ℝ) * x ^ (n+1) / ( (n : ℝ) + 1))),
   begin
     intros n hn,
-    simp only [term], 
+    simp only [term],
     rw [neg_pow],
     have h_min_one_ne_one: ((-1:ℝ) ≠ (1:ℝ)), by linarith,
     rw pow_succ (-1:ℝ) n,
     rw (neg_one_pow_eq_one_iff_even h_min_one_ne_one).mpr hn,
     ring_nf,
   end,
-  
 
-  
+  -- have h₄:= has_sum_imp_tendsto h₃,
+  -- rw tendsto_congr finset_sum_even_odd at h₄,
+
   have h_sum_odd : ∀ (m : ℕ), ∑ (n : ℕ) in filter odd (range m),
    term x n = 0 :=
   begin
@@ -330,11 +331,11 @@ begin
       simp only [ne.def, mul_eq_zero, bit0_eq_zero, one_ne_zero,
       cast_eq_zero, false_or],
       exact hn,
-    
-    
-    
-    
-    
+
+
+
+
+
       norm_cast,
       exact succ_ne_zero (2*n),
     end
@@ -415,134 +416,63 @@ lemma power_series_ln (n : ℕ): has_sum
   --rw summable.has_sum_iff,
   --
   --:= has_sum_pow_div_log_of_abs_lt_1 h₂,
-  sorry, sorry,
+  sorry,
+  exact ne_zero_of_lt hn,
  end
 
 noncomputable def bn (n : ℕ) : ℝ := log (an n)
 
-lemma pow_neq_zero_if (n : ℕ) (x : ℝ) : (x ≠ 0 → x^n ≠ 0) :=
-begin
-exact pow_ne_zero n,
-end
-
 lemma zero_lt_sqrt_two_n (n : ℕ) : (n ≠ 0) → 0 < real.sqrt (2 * ↑n)  :=
 begin
-intro hn,
-apply real.sqrt_pos.mpr,
-norm_cast,
-have hn : 0<n, from zero_lt_iff.mpr hn,
-apply mul_pos two_pos ,
-assumption,
-exact nat.nontrivial,
+  intro hn,
+  apply real.sqrt_pos.mpr,
+  norm_cast,
+  have hn : 0<n, from zero_lt_iff.mpr hn,
+  apply mul_pos two_pos ,
+  assumption,
+  exact nat.nontrivial,
 end
 
 lemma n_div_exp1_pow_gt_zero(n : ℕ) :  (↑n / exp 1) ^ n >0 :=
 begin
-cases n,
-rw pow_zero,
-exact one_pos,
-have hsucc : n.succ > 0, from nat.succ_pos n,
-apply gt_iff_lt.mpr,
+  cases n,
+  rw pow_zero,
+  exact one_pos,
+  have hsucc : n.succ > 0, from nat.succ_pos n,
+  apply gt_iff_lt.mpr,
 
-apply pow_pos  _ n.succ,
-apply div_pos_iff.mpr,
-left, split,
-norm_cast, rw ←gt_iff_lt,
-exact hsucc,
-exact (1:ℝ).exp_pos,
+  apply pow_pos  _ n.succ,
+  apply div_pos_iff.mpr,
+  left, split,
+  norm_cast, rw ←gt_iff_lt,
+  exact hsucc,
+  exact (1:ℝ).exp_pos,
 end
 
 lemma bn_formula (n : ℕ):  bn n.succ = (log ↑n.succ.factorial) -
 1/(2:ℝ)*(log (2*↑n.succ)) - ↑n.succ*log (↑n.succ/(exp 1)) :=
 begin
-have h3, from  (lt_iff_le_and_ne.mp (zero_lt_sqrt_two_n n.succ (succ_ne_zero n))),
-have h4, from  (lt_iff_le_and_ne.mp (n_div_exp1_pow_gt_zero n.succ )),
-rw [bn, an, log_div, log_mul, sqrt_eq_rpow, log_rpow, log_pow],
-ring,
-rw zero_lt_mul_left,
-norm_cast,
-exact succ_pos n,
-exact zero_lt_two,
-exact h3.right.symm,
-exact h4.right.symm,
-norm_cast,
-exact n.succ.factorial_ne_zero,
-apply (mul_ne_zero h3.right.symm h4.right.symm),
+  have h3, from  (lt_iff_le_and_ne.mp (zero_lt_sqrt_two_n n.succ (succ_ne_zero n))),
+  have h4, from  (lt_iff_le_and_ne.mp (n_div_exp1_pow_gt_zero n.succ )),
+  rw [bn, an, log_div, log_mul, sqrt_eq_rpow, log_rpow, log_pow],
+  ring,
+  rw zero_lt_mul_left,
+  norm_cast,
+  exact succ_pos n,
+  exact zero_lt_two,
+  exact h3.right.symm,
+  exact h4.right.symm,
+  norm_cast,
+  exact n.succ.factorial_ne_zero,
+  apply (mul_ne_zero h3.right.symm h4.right.symm),
 end
 
 
-lemma bn_strictly_decreasing: ∀ (n : ℕ), bn n.succ > bn n.succ.succ :=
+lemma bn_diff_has_sum: ∀ (n : ℕ),
+has_sum (λ k, (1 : ℝ)/(2*k + 1)*((1/2*n + 1)^2)^k)
+((bn n.succ) - (bn n.succ.succ)) :=
 begin
   sorry,
- /- intros n hn,
-  rw bn_formula n hn, rw bn_formula (n+1) n.succ_ne_zero,
-  apply sub_pos.mp,
-  ring_nf,
-  push_cast,
-  have hreorder :∀ { a b c d e f : ℝ}, a + (b + ( c + ( d + ( e + f))))
-      = (a + d) + (e + b) + (f + c) :=
-      begin
-        intros,
-        ring_nf,
-      end,
-  rw hreorder,
-
-  repeat {rw ←sub_eq_add_neg} ,
-  rw ←mul_sub,
-  have hreorder₂ : ∀{x y z : ℝ }, x*(y+1)-z*y = (x-z)*y+x:=
-    begin
-      intros,
-      ring_nf,
-    end,
-  rw hreorder₂,
-  repeat {rw ←log_div},
-  simp only [factorial_succ],
-  push_cast,
-  rw div_mul_eq_div_mul_one_div _ 2 (n:ℝ),
-  rw mul_comm 2 ((n:ℝ) + 1),
-  rw mul_div_cancel ((n:ℝ) + 1),
-
-  rw mul_comm ((n:ℝ) +1) (n.factorial:ℝ),
-  rw div_mul_eq_div_mul_one_div (n.factorial:ℝ) (n.factorial:ℝ) _,
-  rw div_self,
-  rw one_mul,
-  rw div_div_div_cancel_right,
-  rw ←div_eq_mul_one_div _ (n:ℝ),
-  rw mul_comm _ (n:ℝ),
-  rw ←add_assoc _ _ _,
-  rw add_assoc (log (1 / (↑n + 1))) _ _,
-  rw ←add_mul,
-  rw log_div,
-  rw @log_div ((n:ℝ) +1) (exp 1),
-  simp only [log_one, zero_sub, log_exp],
-  rw add_right_comm,
-  rw add_sub,
-  rw neg_add_self,
-  rw zero_sub,
-  rw add_comm,
-
-  squeeze_simp,
-  sorry,
-  norm_cast,
-  exact succ_ne_zero n,
-  exact (1:ℝ).exp_ne_zero,
-  simp only [ne.def, div_eq_zero_iff, cast_eq_zero],
-  push_neg,
-  split,
-  exact hn,
-  exact (1:ℝ).exp_ne_zero,
-  norm_cast,
-  linarith,
-  norm_cast,
-  simp only [nat.mul_eq_zero, bit0_eq_zero, nat.one_ne_zero, false_or],
-  exact hn,
-  norm_cast,
-  exact factorial_ne_zero n,
-  norm_cast,
-  exact factorial_ne_zero (n + 1),
-  exact real.add_group,
-  exact covariant_swap_add_lt_of_covariant_add_lt ℝ,
-  -/
 end
 
 lemma bn_antitone: ∀ (a b : ℕ), a ≤ b → bn b.succ ≤ bn a.succ :=
@@ -550,15 +480,34 @@ begin
   sorry,
 end
 
-lemma bn_sub_bn_succ: ∀ (n : ℕ), bn n.succ - bn n.succ.succ = 1/(4*n.succ*(n.succ.succ)) :=
+--prev: (1/n.succ + 1)^2/(1 - (1/n.succ + 1)^2)
+--but now should be correct
+lemma bn_diff_le_geo_sum: ∀ (n : ℕ),
+bn n.succ - bn n.succ.succ ≤ (1/(2*n.succ + 1))^2/(1 - (1/(2*n.succ + 1))^2):=
 begin
+  -- bn_diff_has_sum
+  -- has_sum_le ,
+  -- nnreal.has_sum_geometric
   sorry,
 end
+
+lemma bn_sub_bn_succ: ∀ (n : ℕ),
+bn n.succ - bn n.succ.succ ≤ 1/(4*n.succ*(n.succ.succ)) :=
+begin
+  intro n,
+  have h1: (1/(2*n.succ + 1))^2/(1 - (1/(2*n.succ + 1))^2) =  1/(4*n.succ*(n.succ.succ))
+  := by ring,
+  have h2 : 1 / (4 * ↑(n.succ) * ↑(n.succ.succ)) = 1 / (4 * (n.succ) * (n.succ.succ)) := by ring,
+  rw <-h2 at h1,
+  sorry, --no idea why rw <-h1 does not work here,
+end
+
+
 -- in library?
 lemma has_sum_consecutive_inverses:
   has_sum (λ (k: ℕ), 1/(k.succ*(k.succ.succ)))  1 :=
 begin
-  library_search,
+  sorry,
 end
 
 -- some lemma in library that splits off a finite part of an all-positive converging sum?
@@ -578,9 +527,9 @@ begin
   bn 1 - bn n.succ = bn' 0 - bn' n : rfl
    ... = ∑ i in range n, (bn' i - bn' (i + 1)) : by rw ←(sum_range_sub' bn' n)
    ... = ∑ i in range n, (bn i.succ - bn i.succ.succ) : rfl
-   ... = ∑ i in range n, 1/(4*i.succ*(i.succ.succ)) :
+   ... ≤ ∑ i in range n, 1/(4*i.succ*(i.succ.succ)) :
    begin
-     refine sum_congr (rfl) _,
+     refine sum_le_sum _,
      intros k hk,
      exact bn_sub_bn_succ k,
    end
