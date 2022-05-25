@@ -495,11 +495,13 @@ lemma bn_sub_bn_succ: ∀ (n : ℕ),
 bn n.succ - bn n.succ.succ ≤ 1/(4*n.succ*(n.succ.succ)) :=
 begin
   intro n,
-  have h1: (1/(2*n.succ + 1))^2/(1 - (1/(2*n.succ + 1))^2) =  1/(4*n.succ*(n.succ.succ))
-  := by ring,
-  have h2 : 1 / (4 * ↑(n.succ) * ↑(n.succ.succ)) = 1 / (4 * (n.succ) * (n.succ.succ)) := by ring,
-  rw <-h2 at h1,
-  sorry, --no idea why rw <-h1 does not work here,
+  have h1: (1/(2*(n.succ : real) + 1))^2/(1 - (1/(2 * (n.succ : ℝ) + 1))^2) =  1/(4 * (n.succ : ℝ)*(n.succ.succ : ℝ))
+  := by sorry,
+
+  rw ← h1,
+          --the type casting seemed to be different...
+  sorry, 
+
 end
 
 
