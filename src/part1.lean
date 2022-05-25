@@ -190,11 +190,19 @@ begin
   sorry,
 end-/
 
+noncomputable def term (x : ℝ)(n : ℕ) : ℝ :=
+   ((-1)*((-x)^(n + 1) / ((n : ℝ) + 1)) + (x^(n + 1)/((n:ℝ) + 1)))
+
+lemma term_def : ∀ (x: ℝ) , term x =(λ n,  ((-1)*((-x)^(n + 1) / ((n : ℝ) + 1)) + (x^(n + 1)/((n:ℝ) + 1)))) :=
+begin
+  intros,
+  refl,
+end
+
 lemma log_sum_plus_minus (x : ℝ) (hx: |x| < 1) : tendsto
 (λ (m : ℕ),  (∑ k in range m,
 (((2:ℝ)*(1/(2*↑k + 1))*(x^(2*↑k + 1)))))) at_top
 (𝓝 (log (1+x) -log(1-x)) ):=
-
 begin
   have min_one_not_zero : (-1 : ℝ) ≠ ( 0 : ℝ), by
       simp only [ne.def, neg_eq_zero, one_ne_zero, not_false_iff],
@@ -202,14 +210,18 @@ begin
   have h₂', from has_sum_pow_div_log_of_abs_lt_1 (eq.trans_lt (abs_neg x) hx),
   have h₂, from (has_sum_mul_left_iff min_one_not_zero).mp h₂',
   rw [neg_one_mul, neg_neg, sub_neg_eq_add 1 x] at h₂,
-  --rw ←neg_eq_neg_one_mul at h₂, somehow doesn't work..
+  
   have h₃, from has_sum.add h₂ h₁,
   rw [tactic.ring.add_neg_eq_sub] at h₃,
+  rw [←term_def x ] at h₃,
+  have h₄:= has_sum.tendsto_sum_nat h₃,
+  simp only at h₄,
+  rw tendsto_congr finset_sum_even_odd at h₄,
 
-  let term := (λ b : ℕ, ((-1)*(-x)^(b + 1) / ((b : ℝ) + 1)) + (x^(b + 1)/((b:ℝ) + 1))),
+  
   have h_min_one_ne_one: ((-1:ℝ) ≠ (1:ℝ)), by linarith,
   
-  have h_odd_n: (∀ n : ℕ, (odd n) → (term n) = 0),
+  have h_odd_n: (∀ n : ℕ, (odd n) → (term x n) = 0),
   begin
     intros n hn,
     simp only [term],
@@ -220,7 +232,7 @@ begin
     ring_nf,
   end,
 
-  have h_even_n: (∀ n : ℕ, (even n) → (term n) = ((2 : ℝ) * x ^ (n+1) / ( (n : ℝ) + 1))),
+  have h_even_n: (∀ n : ℕ, (even n) → (term x n) = ((2 : ℝ) * x ^ (n+1) / ( (n : ℝ) + 1))),
   begin
     intros n hn,
     simp only [term], 
@@ -231,32 +243,57 @@ begin
     ring_nf,
   end,
   
-  have h₄:= has_sum_imp_tendsto h₃,
-  rw tendsto_congr finset_sum_even_odd at h₄,
+
   
   have h_sum_odd : ∀ (m : ℕ), ∑ (n : ℕ) in filter odd (range m),
-   term n = 0 :=
+   term x n = 0 :=
   begin
-  sorry,
+  intro m, 
+  apply sum_eq_zero,
+  intros n hn,
+  apply h_odd_n,
+  rw [mem_filter] at hn,
+  exact hn.2,
   end,
 
-  --rw tendsto_at_top_add,
-  -- has_sum at h₁ h₂,
-  --apply tendsto.add h₁ h₁,
-  --apply tendsto.sub  (tendsto (λ (m : ℕ), -(∑ k in range m, ((-x)^(k+1)/(k+1)))) at_top (𝓝 (log (1+x))))
-  --    (tendsto (λ (m : ℕ), -(∑ k in range m, ((-x)^(k+1)/(k+1)))) at_top (𝓝 (log (1-x)))),
+  have h_sum_even  : ∀ (m : ℕ) , ∑ (n : ℕ) in filter even (range m), term x n 
+    = ∑ (n : ℕ) in filter even (range m), ((2 : ℝ) * x ^ (n+1) / ( (n : ℝ) + 1)) := 
+  begin 
+  intro m, 
+  apply sum_congr,
+    refl,
+  intros n hn,
+  apply h_even_n,
+  rw [mem_filter] at hn,
+  exact hn.2,
+  end,
+  
+  have h_sum, from 
+  (λ l : ℕ, (congr (congr_arg has_add.add (h_sum_odd l)) (h_sum_even l))), 
 
-  --apply tendsto,
-  --rw tendsto,
-  /- --rw ← has_sum,
+  rw tendsto_congr h_sum at h₄,
+  simp only [zero_add] at h₄,
 
-  rw has_sum.even_add_odd
-  rw has_sum at h₁,
-  rw at_top_finset_
-  --rw finset_sum_even_odd
-  rw tendsto.sub_sub,
-  rw tendsto.tendsto_add_at_top_iff_nat,-/
-  sorry,
+  have h₅ := tendsto_even_of_tendsto h₄,
+  simp only at h₅,
+
+  have h_final : ∀ (m : ℕ), ∑ (n : ℕ) in filter even (range (2 * m)), 2 * x ^ (n + 1) / ((n : ℝ) + 1)
+    = (∑ (n : ℕ) in range m, (2 * (1 / (2 * ↑n + 1)) * x ^ (2 * ↑n + 1))):=
+  begin
+    intro m,
+    rw finset_reindex_even,
+    apply sum_congr,
+    refl,
+    intros,
+    push_cast,
+    generalize : x^(2 * x_1 + 1) = z,
+    ring_nf,
+    field_simp,
+    refl,
+  end,
+
+  rw tendsto_congr h_final at h₅,
+  exact h₅,
 end
 
 
@@ -530,6 +567,7 @@ lemma partial_sum_consecutive_reciprocals:
  ∀ n, ∑ i in range n, (1:ℝ)/(i.succ*(i.succ.succ)) ≤ 1 :=
  begin
    sorry,
+
  end
 
 lemma bn_bounded_aux: ∀ (n : ℕ), bn 1 - bn n.succ ≤ 1/4 :=

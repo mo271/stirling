@@ -22,8 +22,21 @@ open finset
 open nat
 open filter
 
+lemma tendsto_even_of_tendsto {f:ℕ → ℝ} {y : ℝ}: (tendsto f at_top (𝓝 y))→ tendsto (λ k, f(2*k)) at_top (𝓝 y) :=
+begin
+  intro h,
+  repeat {rw tendsto_at_top' at *},
+  intros V hV,
+  have h' := h V hV,
+  cases h' with a ha,
+  existsi a,
+  intros b hb,
+  have hb':= ha (2*b) _,
+  assumption,
+  linarith,
+end
 
-
+--Already in mathlib
 lemma has_sum_imp_tendsto {f : ℕ → ℝ} {a : ℝ}:  has_sum f a 
  → tendsto (λ (m : ℕ), (∑ k in range m, f(k))) at_top (𝓝 a):=
  begin
