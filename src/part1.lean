@@ -205,8 +205,7 @@ lemma log_sum_plus_minus (x : ℝ) (hx: |x| < 1) : has_sum (λ k:ℕ,
 begin
   have min_one_not_zero : (-1 : ℝ) ≠ ( 0 : ℝ), by linarith,
   have h_min_one_ne_one:  (-1 : ℝ) ≠ ( 1 : ℝ), by linarith,
-  
-  
+
   have h₁, from has_sum_pow_div_log_of_abs_lt_1 hx,
   have h₂', from has_sum_pow_div_log_of_abs_lt_1 (eq.trans_lt (abs_neg x) hx),
   have h₂, from (has_sum_mul_left_iff min_one_not_zero).mp h₂',
@@ -214,10 +213,10 @@ begin
   have h₃, from has_sum.add h₂ h₁,
   rw [tactic.ring.add_neg_eq_sub] at h₃,
   rw [←term_def x ] at h₃,
-  
+
   let g := (λ (n : ℕ),  (2 * n)),
 
-  rw ← function.injective.has_sum_iff (nat.mul_right_injective two_pos) _ at h₃,
+  rw ←function.injective.has_sum_iff (nat.mul_right_injective two_pos) _ at h₃,
 
   suffices h_term_eq_goal : (term x ∘ g) = (λ k : ℕ, 2*(1 / (2 * (k : ℝ) + 1)) * x^(2 * k  + 1)), 
   begin
@@ -240,105 +239,6 @@ begin
   simp only [term],
   rw [even.neg_pow (even_succ.mpr hm), succ_eq_add_one],
   ring_nf,
-end
-
---This is now outdated
-lemma log_sum_plus_minus' (x : ℝ) (hx: |x| < 1) : tendsto
-(λ (m : ℕ),  (∑ k in range m,
-(((2:ℝ)*(1/(2*↑k + 1))*(x^(2*↑k + 1)))))) at_top
-(𝓝 (log (1+x) -log(1-x)) ):=
-begin
-  have min_one_not_zero : (-1 : ℝ) ≠ ( 0 : ℝ), by
-      simp only [ne.def, neg_eq_zero, one_ne_zero, not_false_iff],
-  have h₁, from has_sum_pow_div_log_of_abs_lt_1 hx,
-  have h₂', from has_sum_pow_div_log_of_abs_lt_1 (eq.trans_lt (abs_neg x) hx),
-  have h₂, from (has_sum_mul_left_iff min_one_not_zero).mp h₂',
-  rw [neg_one_mul, neg_neg, sub_neg_eq_add 1 x] at h₂,
-  
-  have h₃, from has_sum.add h₂ h₁,
-  rw [tactic.ring.add_neg_eq_sub] at h₃,
-  rw [←term_def x ] at h₃,
-  have h₄:= has_sum.tendsto_sum_nat h₃,
-  simp only at h₄,
-  rw tendsto_congr finset_sum_even_odd at h₄,
-
-  
-  have h_min_one_ne_one: ((-1:ℝ) ≠ (1:ℝ)), by linarith,
-  
-  have h_odd_n: (∀ n : ℕ, (odd n) → (term x n) = 0),
-  begin
-    intros n hn,
-    simp only [term], 
-
-    rw [neg_pow],
-    have h_even_n_one : even (n+1), by {rw [ add_one, even_succ, ←odd_iff_not_even], apply hn},
-    rw [(neg_one_pow_eq_one_iff_even h_min_one_ne_one).mpr h_even_n_one, one_mul ],
-    ring_nf,
-  end,
-
-  have h_even_n: (∀ n : ℕ, (even n) → (term x n) = ((2 : ℝ) * x ^ (n+1) / ( (n : ℝ) + 1))),
-  begin
-    intros n hn,
-    simp only [term],
-    rw [neg_pow],
-    have h_min_one_ne_one: ((-1:ℝ) ≠ (1:ℝ)), by linarith,
-    rw pow_succ (-1:ℝ) n,
-    rw (neg_one_pow_eq_one_iff_even h_min_one_ne_one).mpr hn,
-    ring_nf,
-  end,
-
-  -- have h₄:= has_sum_imp_tendsto h₃,
-  -- rw tendsto_congr finset_sum_even_odd at h₄,
-
-  have h_sum_odd : ∀ (m : ℕ), ∑ (n : ℕ) in filter odd (range m),
-   term x n = 0 :=
-  begin
-  intro m, 
-  apply sum_eq_zero,
-  intros n hn,
-  apply h_odd_n,
-  rw [mem_filter] at hn,
-  exact hn.2,
-  end,
-
-  have h_sum_even  : ∀ (m : ℕ) , ∑ (n : ℕ) in filter even (range m), term x n 
-    = ∑ (n : ℕ) in filter even (range m), ((2 : ℝ) * x ^ (n+1) / ( (n : ℝ) + 1)) := 
-  begin 
-  intro m, 
-  apply sum_congr,
-    refl,
-  intros n hn,
-  apply h_even_n,
-  rw [mem_filter] at hn,
-  exact hn.2,
-  end,
-  
-  have h_sum, from 
-  (λ l : ℕ, (congr (congr_arg has_add.add (h_sum_odd l)) (h_sum_even l))), 
-
-  rw tendsto_congr h_sum at h₄,
-  simp only [zero_add] at h₄,
-
-  have h₅ := tendsto_even_of_tendsto h₄,
-  simp only at h₅,
-
-  have h_final : ∀ (m : ℕ), ∑ (n : ℕ) in filter even (range (2 * m)), 2 * x ^ (n + 1) / ((n : ℝ) + 1)
-    = (∑ (n : ℕ) in range m, (2 * (1 / (2 * ↑n + 1)) * x ^ (2 * ↑n + 1))):=
-  begin
-    intro m,
-    rw finset_reindex_even,
-    apply sum_congr,
-    refl,
-    intros,
-    push_cast,
-    generalize : x^(2 * x_1 + 1) = z,
-    ring_nf,
-    field_simp,
-    refl,
-  end,
-
-  rw tendsto_congr h_final at h₅,
-  exact h₅,
 end
 
 
@@ -402,15 +302,14 @@ begin
   rw (div_eq_one_iff_eq h₁).mpr h₂,
 end
 
-lemma power_series_ln (n : ℕ): has_sum
+lemma power_series_ln (n : ℕ) (hn: 0 < n): has_sum
 (λ (k : ℕ),
-(2:ℝ) * (((1/(2*↑k + 1))*((1/(2*((↑n + 1))^(2*↑k + 1)))))))
+(2:ℝ) * (1/(2*(k : ℝ) + 1))*((1/(2*(n:ℝ) + 1))^(2*k + 1)))
 (log (↑n.succ / ↑n)) :=
  begin
-  have hn : 0 < n:= by sorry,
-  rw aux_log,
+  
   have h₀: 0 <  (2 * n +1) := by exact succ_pos',
-  have h₁: |(1:ℝ) / (2 * ↑n + 1)| < 1 :=
+  have h₁: |1 / (2 * (n : ℝ) + 1)| < 1 :=
   begin
     norm_cast,
     rw abs_of_pos,
@@ -425,43 +324,48 @@ lemma power_series_ln (n : ℕ): has_sum
     norm_cast,
     exact h₀,
   end,
-  let f_left : ℕ → ℝ := λ k, (1 / (2 * n + 1)) ^ (k + 1) / (k + 1),
-  have h_left : has_sum f_left (-log (1 - 1 / (2 * ↑n + 1)))
-  := has_sum_pow_div_log_of_abs_lt_1 h₁,
-  let f_right : ℕ → ℝ := λ k, ((-1) / (2 * n + 1)) ^ (k + 1) / (k + 1),
-  have h₂: | ((-1:ℝ) / (2 * ↑n + 1))| < 1 :=
-  begin
-    rw abs_div,
-    rw abs_neg,
-    rw abs_div at h₁,
-    exact h₁,
-  end,
-  have h_right: has_sum f_right (-log (1 - (-1) / (2 * ↑n + 1)))
-  := has_sum_pow_div_log_of_abs_lt_1 h₂,
-  let f : ℕ → ℝ := λ k, (f_left k) + (f_right k),
-  have h: has_sum f
-  ((-log (1 - 1 / (2 * ↑n + 1))) + (-log (1 - (-1) / (2 * ↑n + 1)))) :=
-  has_sum.add h_left h_right,
-  have h_sum : summable f :=
-  begin
-    use ((-log (1 - 1 / (2 * ↑n + 1))) + (-log (1 - (-1) / (2 * ↑n + 1)))),
-    exact h,
-  end,
-  have h_even: has_sum (λ k, f (2*k)) 0 := by sorry,
-  have h_even_sum: summable (λ k, f (2*k)) := by sorry,
-  have h_odd_sum: summable (λ k, f (2*k + 1)) := by sorry,
-  have g := tsum_even_add_odd h_even_sum h_odd_sum,
-  have h' := has_sum.tsum_eq h,
-  rw ←g at h',
-  have h_even' := has_sum.tsum_eq h_even,
-  simp only at h_even',
-  rw h_even' at h',
-  simp only [zero_add] at h',
-  --rw summable.has_sum_iff,
-  --
-  --:= has_sum_pow_div_log_of_abs_lt_1 h₂,
-  sorry,
-  exact ne_zero_of_lt hn,
+  rw aux_log,
+  exact log_sum_plus_minus (1/(2*(n : ℝ)+1)) h₁,
+
+  exact ne_of_gt hn,
+
+  -- let f_left : ℕ → ℝ := λ k, (1 / (2 * n + 1)) ^ (k + 1) / (k + 1),
+  -- have h_left : has_sum f_left (-log (1 - 1 / (2 * ↑n + 1)))
+  -- := has_sum_pow_div_log_of_abs_lt_1 h₁,
+  -- let f_right : ℕ → ℝ := λ k, ((-1) / (2 * n + 1)) ^ (k + 1) / (k + 1),
+  -- have h₂: | ((-1:ℝ) / (2 * ↑n + 1))| < 1 :=
+  -- begin
+  --   rw abs_div,
+  --   rw abs_neg,
+  --   rw abs_div at h₁,
+  --   exact h₁,
+  -- end,
+  -- have h_right: has_sum f_right (-log (1 - (-1) / (2 * ↑n + 1)))
+  -- := has_sum_pow_div_log_of_abs_lt_1 h₂,
+  -- let f : ℕ → ℝ := λ k, (f_left k) + (f_right k),
+  -- have h: has_sum f
+  -- ((-log (1 - 1 / (2 * ↑n + 1))) + (-log (1 - (-1) / (2 * ↑n + 1)))) :=
+  -- has_sum.add h_left h_right,
+  -- have h_sum : summable f :=
+  -- begin
+  --   use ((-log (1 - 1 / (2 * ↑n + 1))) + (-log (1 - (-1) / (2 * ↑n + 1)))),
+  --   exact h,
+  -- end,
+  -- have h_even: has_sum (λ k, f (2*k)) 0 := by sorry,
+  -- have h_even_sum: summable (λ k, f (2*k)) := by sorry,
+  -- have h_odd_sum: summable (λ k, f (2*k + 1)) := by sorry,
+  -- have g := tsum_even_add_odd h_even_sum h_odd_sum,
+  -- have h' := has_sum.tsum_eq h,
+  -- rw ←g at h',
+  -- have h_even' := has_sum.tsum_eq h_even,
+  -- simp only at h_even',
+  -- rw h_even' at h',
+  -- simp only [zero_add] at h',
+  -- --rw summable.has_sum_iff,
+  -- --
+  -- --:= has_sum_pow_div_log_of_abs_lt_1 h₂,
+  -- sorry,
+  -- exact ne_zero_of_lt hn,
  end
 
 noncomputable def bn (n : ℕ) : ℝ := log (an n)
