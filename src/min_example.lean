@@ -23,31 +23,17 @@ open_locale big_operators -- notation ∑ for finite sums
 
 open_locale classical real topological_space nnreal ennreal filter big_operators
 
-lemma sub_seq_tendsto {an : ℕ → ℝ} {A : ℝ}
- (h: tendsto an at_top (𝓝 A)):
- tendsto (λ (n : ℕ), an (2*n)) at_top (𝓝 A) :=
-h.comp (tendsto_id.const_mul_at_top' two_pos)
-
-lemma sub_seq_tendsto' {an : ℕ → ℝ} {A : ℝ}
- (h: tendsto an at_top (𝓝 A)):
- tendsto (λ (n : ℕ), an (n.succ)) at_top (𝓝 A) :=
- begin
-   refine h.comp _,
-   exact tendsto_add_at_top_nat 1,
- end
-
-
-
-lemma split_zero (m:ℕ): ∀ (n:ℕ), ∑ (i : ℕ) in range (n.succ),
-1 / (2 * (i:ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ i =
- (∑ (i : ℕ) in range n,
-1 / (2 * (i.succ:ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ i.succ) + 1 :=
+example (b: ℕ) (z:ℝ) (hy_pos: z > 0):
+ z / (z * ((2 * ↑b + 1) * z ^ (2 * b))) = 1 / ((2 * ↑b + 1) * z ^ (2 * b)) :=
 begin
-  intro n,
-  rw sum_range_succ' (λ k:ℕ, 1 / (2 * (k:ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ k)
-  n,
-  simp only [one_div, cast_succ, inv_pow₀, cast_zero, mul_zero, zero_add, pow_zero,
-  inv_one, mul_one, add_left_inj],
+  rw div_mul_right,
+  exact ne_of_gt hy_pos,
+  sorry,
+end
+
+example (a b c: ℝ) (ha: a ≠ 0) (hb: 0 ≠ b) (hab: 0 ≠ b*a): a/(a*b) = (1/b):=
+begin
+  rw div_mul_right,
 end
 
 
