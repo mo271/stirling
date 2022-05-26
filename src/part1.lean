@@ -388,7 +388,7 @@ intro m,
 have hx : ∀ (n : ℕ),  (bn n.succ) - (bn n.succ.succ) = ((n.succ : ℝ)+1/(2 : ℝ))* log(((n.succ.succ ): ℝ)/(n.succ:ℝ) ) - 1,
 begin
   sorry{
-  intro n, 
+  intro n,
 
   have h_reorder : ∀{a b c d e f :ℝ}, a-1/(2 : ℝ)*b-c -(d-1/(2:ℝ)*e-f) = (a-d)-1/(2:ℝ)*(b-e)-(c-f),
   by {intros, ring_nf},
@@ -406,7 +406,7 @@ begin
 end,
 
 have h_sum , from power_series_ln m.succ (succ_pos m),
-have h_nonzero : (m.succ : ℝ)+1/(2 : ℝ)≠ 0, 
+have h_nonzero : (m.succ : ℝ)+1/(2 : ℝ)≠ 0,
 by {rw cast_succ, field_simp, norm_cast, linarith},
 
 rw has_sum_mul_left_iff h_nonzero at h_sum,
@@ -587,35 +587,54 @@ lemma bn_sub_bn_succ: ∀ (n : ℕ),
 bn n.succ - bn n.succ.succ ≤ 1/(4*n.succ*(n.succ.succ)) :=
 begin
   intro n,
-  have h1: (1/(2*(n.succ : real) + 1))^2/(1 - (1/(2 * (n.succ : ℝ) + 1))^2) =  1/(4 * (n.succ : ℝ)*(n.succ.succ : ℝ))
-  := by 
-
-  rw ← h1,
-          --the type casting seemed to be different...
-  sorry,
-
+  refine le_trans (bn_diff_le_geo_sum n) _,
+  have h₁: 0 < 4 * (n.succ : ℝ) * ↑(n.succ.succ) :=
+  begin
+    norm_cast,
+    simp only [canonically_ordered_comm_semiring.mul_pos,
+    succ_pos', and_self],
+  end,
+  have h₂: 0 < 1 - (1 / (2 * (n.succ : ℝ) + 1)) ^ 2 :=
+  begin
+    refine sub_pos.mpr _,
+    refine (sq_lt_one_iff _).mpr _,
+    rw one_div,
+    refine inv_nonneg.mpr _,
+    norm_cast,
+    exact zero_le (2 * succ n + 1),
+    refine (div_lt_one _).mpr _,
+    all_goals {norm_cast},
+    linarith,
+    refine lt_add_of_pos_left 1 _,
+    refine (1:ℕ).succ_mul_pos _,
+    exact succ_pos n,
+  end,
+  refine (le_div_iff' h₁).mpr _,
+  rw mul_div (4 * (n.succ:ℝ) * ↑(n.succ.succ))
+    ((1 / (2 * ↑(n.succ) + 1)) ^ 2) (1 - (1 / (2 * (n.succ:ℝ) + 1)) ^ 2),
+  refine (div_le_one h₂).mpr _,
+  norm_num,
+  rw mul_div,
+  have h₃: 0 < (2 * ((n : ℝ) + 1) + 1) ^ 2 :=
+  begin
+    rw sq,
+    norm_cast,
+    simp only [canonically_ordered_comm_semiring.mul_pos,
+    succ_pos', and_self],
+  end,
+  refine (div_le_iff' h₃).mpr _,
+  rw mul_sub,
+  norm_num,
+  refine le_sub.mp _,
+  rw mul_one_div,
+  refine (div_le_iff' h₃).mpr _,
+  refine (le_mul_iff_one_le_right h₃).mpr _,
+  refine le_sub_iff_add_le.mpr _,
+  norm_cast,
+  rw sq,
+  linarith,
 end
 
-<<<<<<< HEAD
-
--- in library?
-lemma has_sum_consecutive_inverses:
-  has_sum (λ (k: ℕ), 1/((k+1 : ℝ) *(k+2 : ℝ)))  1 :=
-begin
-  squeeze_simp,
-end
-
--- some lemma in library that splits off a finite part of an all-positive converging sum?
-
-lemma partial_sum_consecutive_reciprocals:
- ∀ n, ∑ i in range n, (1:ℝ)/(i.succ*(i.succ.succ)) ≤ 1 :=
- begin
-   sorry,
-
- end
-
-=======
->>>>>>> ab8bd4aa780068cae28bc176fe02018405a289e8
 lemma bn_bounded_aux: ∀ (n : ℕ), bn 1 - bn n.succ ≤ 1/4 :=
 begin
   let bn': (ℕ → ℝ) :=  λ (k : ℕ), bn k.succ,
