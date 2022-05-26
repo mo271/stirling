@@ -24,54 +24,6 @@ open finset
 open filter
 open nat
 
-example (a b : (ℕ →  ℝ)) (A B : ℝ)
-(hA: tendsto (λ (k : ℕ), a k) at_top (𝓝 (A)))
-(hB: tendsto (λ (k : ℕ), b k) at_top (𝓝 (B))) :
-tendsto (λ (k : ℕ), a k * (b k)) at_top (𝓝 (A * B)) :=
-begin
- exact tendsto.mul hA hB,
-end
-
-example: tendsto (λ (x : ℕ), ((x : ℝ))⁻¹) at_top (𝓝 0)
-:=tendsto_inverse_at_top_nhds_0_nat
-
-
-
-example: tendsto (λ (x : ℕ), ((2 : ℝ))) at_top (𝓝 2):=
- tendsto_const_nhds
-
-example (a : ℕ → ℝ) (A : ℝ)
-(h: tendsto (λ (k : ℕ), a (k + 1)) at_top (𝓝 (A))):
-tendsto (λ (k : ℕ), a (k)) at_top (𝓝 (A)) :=
-begin
-  exact (tendsto_add_at_top_iff_nat 1).mp h,
-end
-
-
-
-lemma tendsto_inv' (a : ℕ → ℝ) (A : ℝ) (hA: 0≠A)
- (h: tendsto (λ (k : ℕ), a k) at_top (𝓝 (A))) :
-  (tendsto (λ (k : ℕ), (a k)⁻¹) at_top (𝓝 (A⁻¹))) :=
-begin
-  exact tendsto.inv₀ h (ne.symm hA),
-end
-
-lemma const_tendsto (a : ℕ → ℝ) (A : ℝ):
- tendsto (λ (k : ℕ), (0 : ℝ)) at_top (𝓝 (0)) :=
-begin
-  simp only [tendsto_const_nhds],
-end
-
-
-example (x y :ℝ) (hx: x≠0) (hy: y≠0):
- x*y ≠ 0 := mul_ne_zero hx hy
-
-
-example (x y : ℝ) (hx: 0 ≤ x) (hy: 0 ≤ y) (hxy: x^2 = y^2):
-x = y:=
-begin
-  exact (sq_eq_sq hx hy).mp hxy,
-end
 
 -- part 2b of https://proofwiki.org/wiki/Stirling%27s_Formula
 
@@ -253,8 +205,6 @@ tendsto  (λ (n: ℕ), (an n)^4) at_top (𝓝 (a^4)) :=
 begin
  exact tendsto.pow ha 4,
 end
-
-
 
 lemma an_aux2 (a: ℝ) (hane: a≠0) (ha: tendsto
 (λ (n : ℕ),  an n) at_top (𝓝  a)):

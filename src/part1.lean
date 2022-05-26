@@ -380,14 +380,6 @@ begin
   },
 end
 
-lemma summable_succ {a : ℕ → ℝ} (h: summable a):
-summable (λ (n : ℕ), a n.succ) :=
--- proof by Eric Rodriguez
--- https://leanprover.zulipchat.com/#narrow/stream/217875-Is-there-code-for-X.3F/topic/.E2.9C.94.20simple.28.3F.29.20summable.20lemma
-begin
-  simp_rw [succ_eq_add_one, summable_nat_add_iff],
-  assumption,
-end
 
 lemma bn_diff_has_sum: ∀ (n : ℕ),
 has_sum (λ (k : ℕ), (1 : ℝ)/(2*k.succ + 1)*((1/(2*n.succ + 1))^2)^(k.succ))
@@ -445,14 +437,23 @@ begin
   intros k hk,
   exact h_inner k,
 end,
-have h_sum := has_sum.tendsto_sum_nat h_sum₁,
+have h_sum₂ := has_sum.tendsto_sum_nat h_sum₁,
+have h_sum : tendsto
+  (λ (n : ℕ), ∑ (i : ℕ) in range n.succ,
+  (λ (b : ℕ), 1 / (2 * (b : ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ b) i)
+  at_top
+  (𝓝 ((↑(m.succ) + 1 / 2) * log (↑(m.succ.succ) / ↑(m.succ)))):= succ_tendsto h_sum₂,
 simp only [] at h_sum,
-have split_zero: ∀ (n:ℕ), ∑ (i : ℕ) in range n,
+have split_zero: ∀ (n:ℕ), ∑ (i : ℕ) in range n.succ,
 1 / (2 * (i:ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ i =
  (∑ (i : ℕ) in range n,
 1 / (2 * (i.succ:ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ i.succ) + 1 :=
 begin
-  sorry,
+  intro n,
+  rw sum_range_succ' (λ k:ℕ, 1 / (2 * (k:ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ k)
+  n,
+  simp only [one_div, cast_succ, inv_pow₀, cast_zero, mul_zero, zero_add, pow_zero,
+  inv_one, mul_one, add_left_inj],
 end,
 replace h_sum := tendsto.congr split_zero h_sum,
 replace h_sum := tendsto.add_const (-1) h_sum,
@@ -461,7 +462,6 @@ rw tactic.ring.add_neg_eq_sub _ (1 : ℝ) at h_sum,
 rw ←hx at h_sum,
 refine (summable.has_sum_iff_tendsto_nat _).mpr h_sum,
 exact summable_succ (has_sum.summable h_sum₁),
--- summable from one of the has_sums above
 end
 
 lemma bn_antitone: ∀ (a b : ℕ), a ≤ b → bn b.succ ≤ bn a.succ :=
