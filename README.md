@@ -13,7 +13,7 @@ noncomputable def an (n : ℕ) : ℝ  :=
 
 and prove
 
-```
+```lean
 lemma an_has_limit_sqrt_pi: tendsto
 (λ (n : ℕ),  an n) at_top (𝓝 (sqrt π)) :=
 ```
