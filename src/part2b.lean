@@ -12,7 +12,7 @@ import analysis.special_functions.pow
 import analysis.special_functions.integrals
 import data.real.pi.wallis
 
-import part2
+import part2a
 
 open_locale filter topological_space classical
 open_locale big_operators -- notation ∑ for finite sums
