@@ -232,7 +232,6 @@ begin
   rw odd.neg_pow (⟨n, rfl⟩ :odd (2 * n + 1)) x,
   rw [neg_one_mul, neg_div, neg_neg, cast_mul, cast_two],
   ring_nf,
-  -----------------------
 
   intros m hm,
   simp only [range_two_mul, set.mem_set_of_eq] at hm,
@@ -245,6 +244,7 @@ end
 lemma aux_log (n : ℕ) (hn: n ≠ 0):
 log (n.succ/n) = log (1 + 1 / (2*n + 1)) - log (1 - 1/(2*n +1)):=
 begin
+  sorry {
   have h₁: (2:ℝ)*n + 1 ≠ 0 :=
   begin
     norm_cast,
@@ -275,11 +275,6 @@ begin
       simp only [ne.def, mul_eq_zero, bit0_eq_zero, one_ne_zero,
       cast_eq_zero, false_or],
       exact hn,
-
-
-
-
-
       norm_cast,
       exact succ_ne_zero (2*n),
     end
@@ -300,6 +295,7 @@ begin
   rw (div_eq_one_iff_eq h₁).mpr h₂,
   rw sub_div _ (1 : ℝ),
   rw (div_eq_one_iff_eq h₁).mpr h₂,
+  },
 end
 
 lemma power_series_ln (n : ℕ) (hn: 0 < n): has_sum
@@ -411,86 +407,33 @@ by {rw cast_succ, field_simp, norm_cast, linarith},
 
 rw has_sum_mul_left_iff h_nonzero at h_sum,
 
-have : ∀ (b : ℕ), (((m.succ) : ℝ) + 1 / 2) * (2 * (1 / (2 * (b:ℝ) + 1)) *
-   (1 / (2 * ((m.succ) : ℝ) + 1)) ^ (2 * b + 1))
-     = (1 / (2 * (b : ℝ) + 1)) * (1 / (2 * ((m.succ) : ℝ) + 1)) ^ (2 * b),
+have h_inner: ∀ (b : ℕ),(((m.succ : ℝ) + 1 / 2) * (2 * (1 / (2 * ↑b + 1)) *
+    (1 / (2 * ↑(m.succ) + 1)) ^ (2 * b + 1)))
+     = (1 : ℝ)/(2*(b : ℝ) + 1)*((1/(2*m.succ + 1))^2)^(b) :=
 begin
   intro b,
   generalize : (m.succ : ℝ) = x,
   rw mul_left_comm,
   sorry,
 end,
-
-sorry,
- /- intros n hn,
-  rw bn_formula n hn, rw bn_formula (n+1) n.succ_ne_zero,
-  apply sub_pos.mp,
-  ring_nf,
-  push_cast,
-  have hreorder :∀ { a b c d e f : ℝ}, a + (b + ( c + ( d + ( e + f))))
-      = (a + d) + (e + b) + (f + c) :=
-      begin
-        intros,
-        ring_nf,
-      end,
-  rw hreorder,
-
-  repeat {rw ←sub_eq_add_neg} ,
-  rw ←mul_sub,
-  have hreorder₂ : ∀{x y z : ℝ }, x*(y+1)-z*y = (x-z)*y+x:=
-    begin
-      intros,
-      ring_nf,
-    end,
-  rw hreorder₂,
-  repeat {rw ←log_div},
-  simp only [factorial_succ],
-  push_cast,
-  rw div_mul_eq_div_mul_one_div _ 2 (n:ℝ),
-  rw mul_comm 2 ((n:ℝ) + 1),
-  rw mul_div_cancel ((n:ℝ) + 1),
-
-  rw mul_comm ((n:ℝ) +1) (n.factorial:ℝ),
-  rw div_mul_eq_div_mul_one_div (n.factorial:ℝ) (n.factorial:ℝ) _,
-  rw div_self,
-  rw one_mul,
-  rw div_div_div_cancel_right,
-  rw ←div_eq_mul_one_div _ (n:ℝ),
-  rw mul_comm _ (n:ℝ),
-  rw ←add_assoc _ _ _,
-  rw add_assoc (log (1 / (↑n + 1))) _ _,
-  rw ←add_mul,
-  rw log_div,
-  rw @log_div ((n:ℝ) +1) (exp 1),
-  simp only [log_one, zero_sub, log_exp],
-  rw add_right_comm,
-  rw add_sub,
-  rw neg_add_self,
-  rw zero_sub,
-  rw add_comm,
-
-  squeeze_simp,
-  sorry,
-  norm_cast,
-  exact succ_ne_zero n,
-  exact (1:ℝ).exp_ne_zero,
-  simp only [ne.def, div_eq_zero_iff, cast_eq_zero],
-  push_neg,
+have h_sum': has_sum (λ (b : ℕ),
+((1 : ℝ)/(2*(b : ℝ) + 1)*((1/(2*m.succ + 1))^2)^(b)))
+(((m.succ : ℝ) + 1 / 2) * log (↑(m.succ.succ) / ↑(m.succ))) :=
+begin
+  refine has_sum.has_sum_of_sum_eq _ h_sum,
+  intros,
+  use u,
+  intros,
+  use v',
   split,
-  exact hn,
-  exact (1:ℝ).exp_ne_zero,
-  norm_cast,
-  linarith,
-  norm_cast,
-  simp only [nat.mul_eq_zero, bit0_eq_zero, nat.one_ne_zero, false_or],
-  exact hn,
-  norm_cast,
-  exact factorial_ne_zero n,
-  norm_cast,
-  exact factorial_ne_zero (n + 1),
-  exact real.add_group,
-  exact covariant_swap_add_lt_of_covariant_add_lt ℝ,
-  -/
+  exact ᾰ,
+  refine sum_congr rfl _,
+  intros k hk,
+  exact h_inner k,
+end,
+rw has_sum at h_sum',
+sorry,
+
 
 end
 

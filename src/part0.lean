@@ -37,7 +37,7 @@ begin
 end
 
 --Already in mathlib
-lemma has_sum_imp_tendsto {f : ℕ → ℝ} {a : ℝ}:  has_sum f a 
+lemma has_sum_imp_tendsto {f : ℕ → ℝ} {a : ℝ}:  has_sum f a
  → tendsto (λ (m : ℕ), (∑ k in range m, f(k))) at_top (𝓝 a):=
  begin
   intro h,
@@ -54,7 +54,7 @@ lemma has_sum_imp_tendsto {f : ℕ → ℝ} {a : ℝ}:  has_sum f a
   cases hg with hg1 hg',
 
   rw forall_congr (λ s ,@filter.mem_principal (finset ℕ) (g s) (set.Ici s )) at hg1,
-  
+
 
   let f_to_U :=   {A : finset ℕ | ∑ (b : ℕ) in A, f b ∈ V},
   let f_range_to_U := {a : ℕ | range a ∈ f_to_U},
@@ -66,13 +66,13 @@ lemma has_sum_imp_tendsto {f : ℕ → ℝ} {a : ℝ}:  has_sum f a
   let U_set := h_Ufin.to_finset,
   let U_union := insert 0 (U_set.bUnion id),
   let M := (U_union.sup id).succ,
-  have all_U_in_range_M : ∀ (I : U), (I : finset ℕ) ⊆ (range M) := 
-  begin 
+  have all_U_in_range_M : ∀ (I : U), (I : finset ℕ) ⊆ (range M) :=
+  begin
     intro I,
     have : (I : finset ℕ) ∈ U_set, by simp only [set.finite.mem_to_finset, subtype.coe_prop],
-    have : (I : finset ℕ) ⊆ U_set.bUnion id, by 
-      exact subset_bUnion_of_mem id this, 
-    have  h_I_subs_U_union: (I : finset ℕ) ⊆ U_union, by 
+    have : (I : finset ℕ) ⊆ U_set.bUnion id, by
+      exact subset_bUnion_of_mem id this,
+    have  h_I_subs_U_union: (I : finset ℕ) ⊆ U_union, by
       exact finset.subset.trans this (subset_insert 0 (U_set.bUnion id)),
     have : (U_union) ⊆ range M, by exact subset_range_sup_succ (U_union),
     exact subset.trans h_I_subs_U_union this,
@@ -87,25 +87,25 @@ lemma has_sum_imp_tendsto {f : ℕ → ℝ} {a : ℝ}:  has_sum f a
   existsi g',
   split,
   intro x,
-  have hxM : (x : ℕ) = M, by 
+  have hxM : (x : ℕ) = M, by
   { have := subtype.mem x, simp only [U'] at this,
     simpa only [insert_emptyc_eq] using this},
 
-  rewrite [mem_principal], 
+  rewrite [mem_principal],
   simp only [g'],
   rw ←set.Ici_def,
   apply set.subset_union_of_subset_left,
   rw set.subset_compl_iff_disjoint,
   have : has_inter (set ℕ), by exact set.has_inter,
-  rw set.eq_empty_iff_forall_not_mem, 
+  rw set.eq_empty_iff_forall_not_mem,
   simp only [set.mem_inter_eq, set.mem_set_of_eq, mem_coe, mem_range, not_and, not_lt, imp_self, forall_const],
   simp only [U'],
   simp only [set.Inter_coe_set, set.mem_insert_iff, set.mem_empty_eq, or_false, subtype.coe_mk, set.Inter_Inter_eq_left],
   rw set.subset_def at hg3,
-  
 
-  have h₁:{x : ℕ | (range x).sum f ∈ V} ⊆ f_range_to_U, 
-  begin 
+
+  have h₁:{x : ℕ | (range x).sum f ∈ V} ⊆ f_range_to_U,
+  begin
     rw set.subset_def,
     intro n,
     intro hn,
@@ -125,15 +125,15 @@ lemma has_sum_imp_tendsto {f : ℕ → ℝ} {a : ℝ}:  has_sum f a
     rw set.mem_Inter at hgx,
     have : (∀ I: U, range n ∈ g I) :=
     begin
-      intro I, 
+      intro I,
       have hg1_I, by exact hg1 I,
       have , from all_U_in_range_M I,
       have I_subset_range_n, from this.trans (range_subset.mpr hn),
       simp only at hg1_I,
-      have : (range n) ∈ set.Ici (I : finset ℕ), by 
+      have : (range n) ∈ set.Ici (I : finset ℕ), by
         {rw [set.mem_Ici, le_eq_subset], assumption},
-      exact set.mem_of_mem_of_subset this hg1_I, 
-    end, 
+      exact set.mem_of_mem_of_subset this hg1_I,
+    end,
     have h_range_n := hgx this,
     simp only [set.mem_set_of_eq] at h_range_n,
     assumption,
@@ -143,7 +143,7 @@ lemma has_sum_imp_tendsto {f : ℕ → ℝ} {a : ℝ}:  has_sum f a
   begin
     simp only [f_range_to_U, set.mem_set_of_eq],
   end,
-  
+
   apply set.eq_of_subset_of_subset,
     apply set.subset_union_of_subset_right,
     exact h₁,
@@ -151,3 +151,48 @@ lemma has_sum_imp_tendsto {f : ℕ → ℝ} {a : ℝ}:  has_sum f a
     exact h₂,
   exact h₃,
   end
+
+
+
+
+lemma inverse_triangle_sum':
+  ∀ (n : ℕ),
+  ∑ k in range n, ((1 : ℝ) / (k.succ * (k.succ.succ))) =
+  ((n : ℝ) / n.succ) :=
+begin
+  refine sum_range_induction _ _ _ _,
+  simp only [cast_zero, zero_div],
+  push_cast,
+  intro n,
+  have h₀: ((n:ℝ) + 1) ≠ 0 :=
+  begin
+    norm_cast,
+    rw ←succ_eq_add_one,
+    exact succ_ne_zero n,
+  end,
+  have h₁: ((n:ℝ) + 1 + 1) ≠ 0 :=
+  begin
+    norm_cast,
+    repeat {rw ←succ_eq_add_one},
+    exact succ_ne_zero n.succ,
+  end,
+  have h₂: (((n:ℝ) + 1)*((n:ℝ) + 1 + 1)) ≠ 0 :=
+  begin
+    exact mul_ne_zero h₀ h₁,
+  end,
+  field_simp,
+  ring,
+end
+
+
+lemma partial_sum_consecutive_reciprocals:
+ ∀ n, ∑ i in range n, (1:ℝ)/(i.succ*(i.succ.succ)) ≤ 1 :=
+ begin
+   intro n,
+   rw inverse_triangle_sum' n,
+   refine (div_le_one _).mpr _,
+   norm_cast,
+   exact succ_pos n,
+   norm_cast,
+   exact le_succ n,
+ end
