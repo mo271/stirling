@@ -18,9 +18,11 @@ open_locale big_operators -- notation ∑ for finite sums
 open_locale topological_space
 
 
-example (n: ℕ) (h: 0<n): 0 < 2*n
+example (b x: ℕ):
+2 * (1 / (2 * ↑b + 1)) * ((x + 1 / 2) * (1 / (2 * x + 1)) ^ (2 * b + 1)) =
+  1 / (2 * ↑b + 1) * (1 / (2 * x + 1)) ^ (2 * b)
 :=
 begin
- exact 1.succ_mul_pos h,
+ 
 end
 

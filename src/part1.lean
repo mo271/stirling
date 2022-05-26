@@ -384,8 +384,8 @@ has_sum (λ (k : ℕ), (1 : ℝ)/(2*k.succ + 1)*((1/(2*n.succ + 1))^2)^(k.succ))
 ((bn n.succ) - (bn n.succ.succ)) :=
 begin
 intro m,
-
-have hx : ∀ (n : ℕ),  (bn n.succ) - (bn n.succ.succ) = ((n.succ : ℝ)+1/(2 : ℝ))* log(((n.succ.succ ): ℝ)/(n.succ:ℝ) ) - 1,
+have hx : ∀ (n : ℕ),  (bn n.succ) - (bn n.succ.succ) =
+  ((n.succ : ℝ)+1/(2 : ℝ))* log(((n.succ.succ ): ℝ)/(n.succ:ℝ) ) - 1,
 begin
   sorry{
   intro n,
@@ -411,7 +411,8 @@ by {rw cast_succ, field_simp, norm_cast, linarith},
 
 rw has_sum_mul_left_iff h_nonzero at h_sum,
 
-have : ∀ (b : ℕ), (((m.succ) : ℝ) + 1 / 2) * (2 * (1 / (2 * (b:ℝ) + 1)) * (1 / (2 * ((m.succ) : ℝ) + 1)) ^ (2 * b + 1))
+have : ∀ (b : ℕ), (((m.succ) : ℝ) + 1 / 2) * (2 * (1 / (2 * (b:ℝ) + 1)) *
+   (1 / (2 * ((m.succ) : ℝ) + 1)) ^ (2 * b + 1))
      = (1 / (2 * (b : ℝ) + 1)) * (1 / (2 * ((m.succ) : ℝ) + 1)) ^ (2 * b),
 begin
   intro b,
@@ -768,8 +769,7 @@ lemma an'_antitone: ∀ (a b : ℕ), a ≤ b → an b.succ ≤ an a.succ :=
 begin
   intros a b,
   intro hab,
-  have hab' := succ_le_succ hab,
-  have h := bn_antitone a.succ b.succ hab',
+  have h := bn_antitone a b hab,
   rw bn at h,
   rw bn at h,
   exact (log_le_log (an'_pos b) (an'_pos a)).mp h,
