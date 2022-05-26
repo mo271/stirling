@@ -218,10 +218,10 @@ begin
 
   rw ←function.injective.has_sum_iff (nat.mul_right_injective two_pos) _ at h₃,
 
-  suffices h_term_eq_goal : (term x ∘ g) = (λ k : ℕ, 2*(1 / (2 * (k : ℝ) + 1)) * x^(2 * k  + 1)), 
+  suffices h_term_eq_goal : (term x ∘ g) = (λ k : ℕ, 2*(1 / (2 * (k : ℝ) + 1)) * x^(2 * k  + 1)),
   begin
     rw h_term_eq_goal at h₃,
-    exact h₃, 
+    exact h₃,
   end,
 
   apply funext,
@@ -307,7 +307,7 @@ lemma power_series_ln (n : ℕ) (hn: 0 < n): has_sum
 (2:ℝ) * (1/(2*(k : ℝ) + 1))*((1/(2*(n:ℝ) + 1))^(2*k + 1)))
 (log (↑n.succ / ↑n)) :=
  begin
-  
+
   have h₀: 0 <  (2 * n +1) := by exact succ_pos',
   have h₁: |1 / (2 * (n : ℝ) + 1)| < 1 :=
   begin
@@ -380,7 +380,7 @@ end
 
 
 lemma bn_diff_has_sum: ∀ (n : ℕ),
-has_sum (λ k, (1 : ℝ)/(2*k + 1)*((1/2*n + 1)^2)^k)
+has_sum (λ (k : ℕ), (1 : ℝ)/(2*k.succ + 1)*((1/(2*n.succ + 1))^2)^(k.succ))
 ((bn n.succ) - (bn n.succ.succ)) :=
 begin
 intro m,
@@ -498,15 +498,77 @@ begin
   sorry,
 end
 
---prev: (1/n.succ + 1)^2/(1 - (1/n.succ + 1)^2)
---but now should be correct
 lemma bn_diff_le_geo_sum: ∀ (n : ℕ),
-bn n.succ - bn n.succ.succ ≤ (1/(2*n.succ + 1))^2/(1 - (1/(2*n.succ + 1))^2):=
+bn n.succ - bn n.succ.succ ≤
+(1/(2*n.succ + 1))^2/(1 - (1/(2*n.succ + 1))^2) :=
 begin
-  -- bn_diff_has_sum
-  -- has_sum_le ,
-  -- nnreal.has_sum_geometric
-  sorry,
+  intro n,
+  have h := bn_diff_has_sum n,
+  have g : has_sum
+  (λ (k : ℕ), ((1 / (2 * (n.succ : ℝ) + 1)) ^ 2) ^ k.succ)
+  ((1/(2*n.succ + 1))^2/(1 - (1/(2*n.succ + 1))^2)) :=
+  begin
+    have h_pow_succ := λ (k:ℕ),
+    symm (pow_succ ((1 / (2 * ((n:ℝ) + 1) + 1)) ^ 2)  k),
+    have h_nonneg: 0 ≤ ((1 / (2 * (n.succ:ℝ) + 1)) ^ 2) :=
+    begin
+      simp only [cast_succ, one_div, inv_pow₀, inv_nonneg],
+      norm_cast,
+      simp only [zero_le'],
+    end,
+    have hlt:  ((1 / (2 * (n.succ:ℝ) + 1)) ^ 2) < 1 :=
+    begin
+      simp only [cast_succ, one_div, inv_pow₀],
+      refine inv_lt_one _,
+      norm_cast,
+      simp only [nat.one_lt_pow_iff, ne.def, zero_eq_bit0,
+        nat.one_ne_zero, not_false_iff, lt_add_iff_pos_left, canonically_ordered_comm_semiring.mul_pos,
+        succ_pos', and_self],
+    end,
+    have h_geom := has_sum_geometric_of_lt_1 h_nonneg hlt,
+    have h_geom' :=
+    has_sum.mul_left ((1 / (2 * (n.succ:ℝ) + 1)) ^ 2) h_geom,
+    norm_num at h_geom',
+    norm_num at h_pow_succ,
+    have h_geom'' :
+    has_sum (λ (b : ℕ), (1 / ((2 * ((n:ℝ) + 1) + 1) ^ 2) ^ b.succ))
+    (1 / (2 * ((n:ℝ) + 1) + 1) ^ 2 * (1 - 1 / (2 * (↑n + 1) + 1) ^ 2)⁻¹) :=
+    begin
+      refine has_sum.has_sum_of_sum_eq _ h_geom',
+      intros,
+      use u,
+      intros,
+      use v',
+      split,
+      exact ᾰ,
+      refine sum_congr rfl _,
+      intros k hk,
+      exact h_pow_succ k,
+    end,
+    norm_num,
+    exact h_geom'',
+  end,
+  have hab: ∀ (k:ℕ),
+  (1 / (2 * (k.succ : ℝ) + 1)) * ((1 / (2 * (n.succ : ℝ) + 1)) ^ 2) ^ k.succ
+  ≤  ((1 / (2*(n.succ : ℝ) + 1)) ^ 2) ^ k.succ:=
+  begin
+    intro k,
+    have h_zero_le: 0 ≤ ((1 / (2 * (n.succ : ℝ) + 1)) ^ 2) ^ k.succ :=
+    begin
+      simp only [cast_succ, one_div, inv_pow₀, inv_nonneg],
+      norm_cast,
+      simp only [zero_le'],
+    end,
+    have h_left: 1 / (2 * (k.succ:ℝ) + 1) ≤ 1 :=
+    begin
+      simp only [cast_succ, one_div],
+      refine inv_le_one _,
+      norm_cast,
+      simp only [le_add_iff_nonneg_left, zero_le'],
+    end,
+    exact mul_le_of_le_one_left h_zero_le h_left,
+  end,
+  exact has_sum_le hab h g,
 end
 
 lemma bn_sub_bn_succ: ∀ (n : ℕ),
@@ -518,7 +580,7 @@ begin
 
   rw ← h1,
           --the type casting seemed to be different...
-  sorry, 
+  sorry,
 
 end
 
