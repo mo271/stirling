@@ -18,11 +18,16 @@ open_locale big_operators -- notation ∑ for finite sums
 open_locale topological_space
 
 
-example (n k :ℕ ):
-1 / (2 * (k.succ:ℝ) + 1) ≤ 1 :=
+example (n:ℕ): (n : ℝ) ≤ (n.succ : ℝ) :=
 begin
-  simp only [cast_succ, one_div],
-  refine inv_le_one _,
+  library_search,
+end
+
+example (n:ℕ): ((n : ℝ)/(n.succ : ℝ)) ≤ 1 :=
+begin
+  refine (div_le_one _).mpr _,
   norm_cast,
-  simp only [le_add_iff_nonneg_left, zero_le'],
+  exact succ_pos n,
+  norm_cast,
+  exact le_succ n,
 end

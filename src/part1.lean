@@ -514,23 +514,6 @@ begin
 
 end
 
-
--- in library?
-lemma has_sum_consecutive_inverses:
-  has_sum (λ (k: ℕ), 1/(k.succ*(k.succ.succ)))  1 :=
-begin
-  sorry,
-end
-
--- some lemma in library that splits off a finite part of an all-positive converging sum?
-
-lemma partial_sum_consecutive_reciprocals:
- ∀ n, ∑ i in range n, (1:ℝ)/(i.succ*(i.succ.succ)) ≤ 1 :=
- begin
-   sorry,
-
- end
-
 lemma bn_bounded_aux: ∀ (n : ℕ), bn 1 - bn n.succ ≤ 1/4 :=
 begin
   let bn': (ℕ → ℝ) :=  λ (k : ℕ), bn k.succ,
