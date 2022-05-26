@@ -495,7 +495,19 @@ end
 
 lemma bn_antitone: ∀ (a b : ℕ), a ≤ b → bn b.succ ≤ bn a.succ :=
 begin
-  sorry,
+  apply antitone_nat_of_succ_le,
+  intro n,
+  refine sub_nonneg.mp _,
+  rw ←succ_eq_add_one,
+  refine has_sum.nonneg _ (bn_diff_has_sum n),
+  norm_num,
+  simp only [one_div],
+  intro b,
+  refine mul_nonneg _ _,
+  all_goals {refine inv_nonneg.mpr _},
+  all_goals {norm_cast},
+  exact zero_le (2 * (b + 1) + 1),
+  exact zero_le (((2 * (n + 1) + 1) ^ 2) ^ succ b),
 end
 
 lemma bn_diff_le_geo_sum: ∀ (n : ℕ),
@@ -584,6 +596,7 @@ begin
 
 end
 
+<<<<<<< HEAD
 
 -- in library?
 lemma has_sum_consecutive_inverses:
@@ -601,6 +614,8 @@ lemma partial_sum_consecutive_reciprocals:
 
  end
 
+=======
+>>>>>>> ab8bd4aa780068cae28bc176fe02018405a289e8
 lemma bn_bounded_aux: ∀ (n : ℕ), bn 1 - bn n.succ ≤ 1/4 :=
 begin
   let bn': (ℕ → ℝ) :=  λ (k : ℕ), bn k.succ,
