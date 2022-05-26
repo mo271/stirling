@@ -2,7 +2,7 @@
 
 We provide a proof of Stirling's formula in the following form:
 
-$$n! = \sqrt{2\pi n}\left(\frac{n}{e}\right)^n.$$
+$$n! \tilde \sqrt{2\pi n}\left(\frac{n}{e}\right)^n.$$
 
 More concretely, we define
 ```lean
