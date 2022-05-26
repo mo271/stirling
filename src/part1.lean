@@ -329,43 +329,6 @@ lemma power_series_ln (n : ℕ) (hn: 0 < n): has_sum
 
   exact ne_of_gt hn,
 
-  -- let f_left : ℕ → ℝ := λ k, (1 / (2 * n + 1)) ^ (k + 1) / (k + 1),
-  -- have h_left : has_sum f_left (-log (1 - 1 / (2 * ↑n + 1)))
-  -- := has_sum_pow_div_log_of_abs_lt_1 h₁,
-  -- let f_right : ℕ → ℝ := λ k, ((-1) / (2 * n + 1)) ^ (k + 1) / (k + 1),
-  -- have h₂: | ((-1:ℝ) / (2 * ↑n + 1))| < 1 :=
-  -- begin
-  --   rw abs_div,
-  --   rw abs_neg,
-  --   rw abs_div at h₁,
-  --   exact h₁,
-  -- end,
-  -- have h_right: has_sum f_right (-log (1 - (-1) / (2 * ↑n + 1)))
-  -- := has_sum_pow_div_log_of_abs_lt_1 h₂,
-  -- let f : ℕ → ℝ := λ k, (f_left k) + (f_right k),
-  -- have h: has_sum f
-  -- ((-log (1 - 1 / (2 * ↑n + 1))) + (-log (1 - (-1) / (2 * ↑n + 1)))) :=
-  -- has_sum.add h_left h_right,
-  -- have h_sum : summable f :=
-  -- begin
-  --   use ((-log (1 - 1 / (2 * ↑n + 1))) + (-log (1 - (-1) / (2 * ↑n + 1)))),
-  --   exact h,
-  -- end,
-  -- have h_even: has_sum (λ k, f (2*k)) 0 := by sorry,
-  -- have h_even_sum: summable (λ k, f (2*k)) := by sorry,
-  -- have h_odd_sum: summable (λ k, f (2*k + 1)) := by sorry,
-  -- have g := tsum_even_add_odd h_even_sum h_odd_sum,
-  -- have h' := has_sum.tsum_eq h,
-  -- rw ←g at h',
-  -- have h_even' := has_sum.tsum_eq h_even,
-  -- simp only at h_even',
-  -- rw h_even' at h',
-  -- simp only [zero_add] at h',
-  -- --rw summable.has_sum_iff,
-  -- --
-  -- --:= has_sum_pow_div_log_of_abs_lt_1 h₂,
-  -- sorry,
-  -- exact ne_zero_of_lt hn,
  end
 
 noncomputable def bn (n : ℕ) : ℝ := log (an n)
@@ -420,7 +383,114 @@ lemma bn_diff_has_sum: ∀ (n : ℕ),
 has_sum (λ k, (1 : ℝ)/(2*k + 1)*((1/2*n + 1)^2)^k)
 ((bn n.succ) - (bn n.succ.succ)) :=
 begin
+intro m,
+
+have hx : ∀ (n : ℕ),  (bn n.succ) - (bn n.succ.succ) = ((n.succ : ℝ)+1/(2 : ℝ))* log(((n.succ.succ ): ℝ)/(n.succ:ℝ) ) - 1,
+begin
+  sorry{
+  intro n, 
+
+  have h_reorder : ∀{a b c d e f :ℝ}, a-1/(2 : ℝ)*b-c -(d-1/(2:ℝ)*e-f) = (a-d)-1/(2:ℝ)*(b-e)-(c-f),
+  by {intros, ring_nf},
+
+  rw [bn_formula, bn_formula, h_reorder ],
+  repeat {rw [log_div, factorial_succ]},
+  push_cast,
+  repeat {rw log_mul},
+  ring_nf,
+  rw log_exp,
+  all_goals {norm_cast},
+  any_goals {field_simp},
+  any_goals {exact factorial_ne_zero n},
+  any_goals {exact exp_ne_zero 1},},
+end,
+
+have h_sum , from power_series_ln m.succ (succ_pos m),
+have h_nonzero : (m.succ : ℝ)+1/(2 : ℝ)≠ 0, 
+by {rw cast_succ, field_simp, norm_cast, linarith},
+
+rw has_sum_mul_left_iff h_nonzero at h_sum,
+
+have : ∀ (b : ℕ), (((m.succ) : ℝ) + 1 / 2) * (2 * (1 / (2 * (b:ℝ) + 1)) * (1 / (2 * ((m.succ) : ℝ) + 1)) ^ (2 * b + 1))
+     = (1 / (2 * (b : ℝ) + 1)) * (1 / (2 * ((m.succ) : ℝ) + 1)) ^ (2 * b),
+begin
+  intro b,
+  generalize : (m.succ : ℝ) = x,
+  rw mul_left_comm,
   sorry,
+end,
+
+sorry,
+ /- intros n hn,
+  rw bn_formula n hn, rw bn_formula (n+1) n.succ_ne_zero,
+  apply sub_pos.mp,
+  ring_nf,
+  push_cast,
+  have hreorder :∀ { a b c d e f : ℝ}, a + (b + ( c + ( d + ( e + f))))
+      = (a + d) + (e + b) + (f + c) :=
+      begin
+        intros,
+        ring_nf,
+      end,
+  rw hreorder,
+
+  repeat {rw ←sub_eq_add_neg} ,
+  rw ←mul_sub,
+  have hreorder₂ : ∀{x y z : ℝ }, x*(y+1)-z*y = (x-z)*y+x:=
+    begin
+      intros,
+      ring_nf,
+    end,
+  rw hreorder₂,
+  repeat {rw ←log_div},
+  simp only [factorial_succ],
+  push_cast,
+  rw div_mul_eq_div_mul_one_div _ 2 (n:ℝ),
+  rw mul_comm 2 ((n:ℝ) + 1),
+  rw mul_div_cancel ((n:ℝ) + 1),
+
+  rw mul_comm ((n:ℝ) +1) (n.factorial:ℝ),
+  rw div_mul_eq_div_mul_one_div (n.factorial:ℝ) (n.factorial:ℝ) _,
+  rw div_self,
+  rw one_mul,
+  rw div_div_div_cancel_right,
+  rw ←div_eq_mul_one_div _ (n:ℝ),
+  rw mul_comm _ (n:ℝ),
+  rw ←add_assoc _ _ _,
+  rw add_assoc (log (1 / (↑n + 1))) _ _,
+  rw ←add_mul,
+  rw log_div,
+  rw @log_div ((n:ℝ) +1) (exp 1),
+  simp only [log_one, zero_sub, log_exp],
+  rw add_right_comm,
+  rw add_sub,
+  rw neg_add_self,
+  rw zero_sub,
+  rw add_comm,
+
+  squeeze_simp,
+  sorry,
+  norm_cast,
+  exact succ_ne_zero n,
+  exact (1:ℝ).exp_ne_zero,
+  simp only [ne.def, div_eq_zero_iff, cast_eq_zero],
+  push_neg,
+  split,
+  exact hn,
+  exact (1:ℝ).exp_ne_zero,
+  norm_cast,
+  linarith,
+  norm_cast,
+  simp only [nat.mul_eq_zero, bit0_eq_zero, nat.one_ne_zero, false_or],
+  exact hn,
+  norm_cast,
+  exact factorial_ne_zero n,
+  norm_cast,
+  exact factorial_ne_zero (n + 1),
+  exact real.add_group,
+  exact covariant_swap_add_lt_of_covariant_add_lt ℝ,
+  -/
+
 end
 
 lemma bn_antitone: ∀ (a b : ℕ), a ≤ b → bn b.succ ≤ bn a.succ :=
@@ -444,7 +514,7 @@ bn n.succ - bn n.succ.succ ≤ 1/(4*n.succ*(n.succ.succ)) :=
 begin
   intro n,
   have h1: (1/(2*(n.succ : real) + 1))^2/(1 - (1/(2 * (n.succ : ℝ) + 1))^2) =  1/(4 * (n.succ : ℝ)*(n.succ.succ : ℝ))
-  := by sorry,
+  := by 
 
   rw ← h1,
           --the type casting seemed to be different...
@@ -455,9 +525,9 @@ end
 
 -- in library?
 lemma has_sum_consecutive_inverses:
-  has_sum (λ (k: ℕ), 1/(k.succ*(k.succ.succ)))  1 :=
+  has_sum (λ (k: ℕ), 1/((k+1 : ℝ) *(k+2 : ℝ)))  1 :=
 begin
-  sorry,
+  squeeze_simp,
 end
 
 -- some lemma in library that splits off a finite part of an all-positive converging sum?
