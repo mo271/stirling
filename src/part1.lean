@@ -380,6 +380,11 @@ begin
   },
 end
 
+lemma summable_succ {a : ℕ → ℝ} (h: summable a):
+summable (λ (n : ℕ), a n.succ) :=
+begin
+  sorry,
+end
 
 lemma bn_diff_has_sum: ∀ (n : ℕ),
 has_sum (λ (k : ℕ), (1 : ℝ)/(2*k.succ + 1)*((1/(2*n.succ + 1))^2)^(k.succ))
@@ -422,7 +427,7 @@ begin
   rw mul_left_comm,
   sorry,
 end,
-have h_sum: has_sum (λ (b : ℕ),
+have h_sum₁: has_sum (λ (b : ℕ),
 ((1 : ℝ)/(2*(b : ℝ) + 1)*((1/(2*m.succ + 1))^2)^(b)))
 (((m.succ : ℝ) + 1 / 2) * log (↑(m.succ.succ) / ↑(m.succ))) :=
 begin
@@ -437,7 +442,7 @@ begin
   intros k hk,
   exact h_inner k,
 end,
-replace h_sum := has_sum.tendsto_sum_nat h_sum,
+have h_sum := has_sum.tendsto_sum_nat h_sum₁,
 simp only [] at h_sum,
 have split_zero: ∀ (n:ℕ), ∑ (i : ℕ) in range n,
 1 / (2 * (i:ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ i =
@@ -452,7 +457,7 @@ simp only [add_neg_cancel_right] at h_sum,
 rw tactic.ring.add_neg_eq_sub _ (1 : ℝ) at h_sum,
 rw ←hx at h_sum,
 refine (summable.has_sum_iff_tendsto_nat _).mpr h_sum,
-sorry,
+exact summable_succ (has_sum.summable h_sum₁),
 -- summable from one of the has_sums above
 end
 
