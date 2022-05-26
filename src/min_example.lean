@@ -18,9 +18,16 @@ open_locale big_operators -- notation ∑ for finite sums
 open_locale topological_space
 
 
-example (n:ℕ): (n : ℝ) ≤ (n.succ : ℝ) :=
+example (n b:ℕ ):
+0 ≤ 1 / (2 * ((b:ℝ) + 1) + 1) * (1 / ((2 * ((n:ℝ) + 1) + 1) ^ 2) ^ b.succ)
+:=
 begin
-  library_search,
+  simp only [one_div],
+  refine mul_nonneg _ _,
+  all_goals {refine inv_nonneg.mpr _},
+  all_goals {norm_cast},
+  exact zero_le (2 * (b + 1) + 1),
+  exact zero_le (((2 * (n + 1) + 1) ^ 2) ^ succ b),
 end
 
 example (n:ℕ): ((n : ℝ)/(n.succ : ℝ)) ≤ 1 :=
