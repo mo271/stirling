@@ -28,6 +28,7 @@ open nat
 -- part 1 of https://proofwiki.org/wiki/Stirling%27s_Formula
 -- first section of part 1
 
+--uses an,
 lemma tendsto_succ (an : ℕ → ℝ) (a:ℝ): tendsto an at_top (𝓝 a) ↔
 tendsto (λ n : ℕ, (an n.succ)) at_top (𝓝 a) :=
 begin
@@ -64,119 +65,6 @@ begin
   },
 end
 
---can one do this with is_compl_even_odd or has_sum.even_add_odd?
-lemma finset_sum_even_odd  {f : ℕ → ℝ} (n : ℕ):
-∑ k in range n, f k =
-(∑ l in (range n).filter(odd), f l) +
-(∑ m in (range n).filter(even), f m) :=
-begin
-  have h_union: ∀ ( n : ℕ), range n  =
-  (range n).filter(odd) ∪ (range n).filter(even) :=
-  begin
-    intro n,
-    induction n with d hd,
-    simp only [range_zero, filter_true_of_mem, not_mem_empty, forall_false_left, forall_const, empty_union],
-    repeat {rw [range_succ]},
-    repeat {rw [filter_insert]},
-
-    by_cases h: even d,
-      rw [if_pos h, if_neg (even_iff_not_odd.mp h)],
-      rw union_insert,
-      exact congr_arg (insert d) hd,
-    rw [if_neg h, if_pos (odd_iff_not_even.mpr h)],
-    rw insert_union,
-    exact congr_arg (insert d) hd,
-  end,
-  nth_rewrite 0 h_union,
-  have h_disjoint: ∀ (n : ℕ), disjoint  ((range n).filter(odd))
-     ((range n).filter(even)) :=
-  begin
-    intro n,
-    induction n with d hd,
-    simp only [range_zero, filter_true_of_mem, not_mem_empty, forall_false_left, forall_const, disjoint_empty_right],
-    repeat {rw range_succ},
-    repeat {rw filter_insert},
-    by_cases h: even d,
-      rw [if_pos h, if_neg (even_iff_not_odd.mp h)],
-      rw disjoint_insert_right,
-      split,
-        rw [mem_filter, not_and],
-        intro h₂,
-        exact absurd h₂ not_mem_range_self,
-      assumption,
-    rw [if_neg h, if_pos (odd_iff_not_even.mpr h)],
-      rw disjoint_insert_left,
-      split,
-        rw [mem_filter, not_and],
-        tauto,
-      assumption,
-  end,
-  rw sum_union (h_disjoint n),
-end
-
-
-lemma finset_reindex_odd {f : ℕ → ℝ} (n : ℕ):
-∑ l in (range (2*n)).filter(odd), f l = ∑ l in (range n), f (2*l + 1) :=
-begin
-  induction n with d hd,
-  simp only [mul_zero, range_zero, filter_true_of_mem, not_mem_empty, forall_false_left, forall_const, sum_empty],
-  rw [mul_succ, add_succ, add_succ, add_zero],
-  repeat {rw range_succ},
-  repeat {rewrite [finset.sum_insert]},
-  repeat {rewrite [finset.filter_insert]},
-  have h₁ : ¬ odd ( 2* d), by
-    simp only [odd_iff_not_even, even.mul_right, even_two, not_true, not_false_iff],
-  have h₂: odd (2 * d).succ, by
-    {simp only [odd_iff_not_even, h₁, even_succ],
-    rw ←odd_iff_not_even,
-    assumption},
-
-  rw [if_neg h₁, if_pos h₂],
-
-  repeat {rw finset.sum_insert},
-  simp only [add_right_inj],
-  exact hd,
-  rw [mem_filter],
-  suffices :(2 * d).succ ∉ range (2 * d),
-  begin
-  apply not_and.mpr,
-  exact not.elim this,
-    end,
-
-  rw mem_range,
-  exact not_succ_lt_self,
-
-  rw mem_range,
-  exact irrefl d,
-end
-
-
-
-lemma finset_reindex_even {f : ℕ → ℝ} (n : ℕ):
-∑ l in (range (2*n)).filter(even), f l = ∑ l in (range n), f (2*l) :=
-begin
-  induction n with d hd,
-  simp only [mul_zero, range_zero, filter_true_of_mem, not_mem_empty, forall_false_left, forall_const, sum_empty],
-  rw [mul_succ, add_succ, add_succ, add_zero],
-  repeat {rw range_succ},
-  repeat {rewrite [finset.sum_insert]},
-  repeat {rewrite [finset.filter_insert]},
-  have h₁ : even ( 2 * d), by exact even_two_mul d,
-  have h₂ : ¬(even ((2 * d).succ)), by  {simp only [even_succ, h₁], tautology},
-
-  rw [if_neg h₂, if_pos h₁],
-  rw finset.sum_insert,
-  simp only [add_right_inj],
-  exact hd,
-
-  rw [mem_filter],
-  suffices : (2 * d) ∉ range (2 * d), by tauto,
-  rw mem_range,
-  exact irrefl (2*d),
-
-  rw mem_range,
-  exact irrefl d,
-end
 
 noncomputable def an (n : ℕ) : ℝ  := (n.factorial :ℝ )
 / ((real.sqrt(2*(n))*((n/(exp 1)))^n))
@@ -190,7 +78,7 @@ begin
   refl,
 end
 
-
+--uses term,
 lemma log_sum_plus_minus (x : ℝ) (hx: |x| < 1) : has_sum (λ k:ℕ,
 (2:ℝ)*(1/(2*↑k + 1))*(x^(2* k + 1))) (log (1 + x) - log(1 - x)):=
 begin
@@ -231,7 +119,7 @@ begin
   ring_nf,
 end
 
-
+--uses nothing?
 lemma aux_log (n : ℕ) (hn: n ≠ 0):
 log (n.succ/n) = log (1 + 1 / (2*n + 1)) - log (1 - 1/(2*n +1)):=
 begin
@@ -287,6 +175,7 @@ begin
   rw (div_eq_one_iff_eq h₁).mpr h₂,
 end
 
+--uses aux_log, log_sum_plus_minus
 lemma power_series_ln (n : ℕ) (hn: 0 < n): has_sum
 (λ (k : ℕ),
 (2:ℝ) * (1/(2*(k : ℝ) + 1))*((1/(2*(n:ℝ) + 1))^(2*k + 1)))
@@ -316,6 +205,7 @@ lemma power_series_ln (n : ℕ) (hn: 0 < n): has_sum
 
 noncomputable def bn (n : ℕ) : ℝ := log (an n)
 
+--uses nothing
 lemma zero_lt_sqrt_two_n (n : ℕ) : (n ≠ 0) → 0 < real.sqrt (2 * ↑n)  :=
 begin
   intro hn,
@@ -327,6 +217,7 @@ begin
   exact nat.nontrivial,
 end
 
+--uses nothing
 lemma n_div_exp1_pow_gt_zero(n : ℕ) :  (↑n / exp 1) ^ n >0 :=
 begin
   cases n,
@@ -343,6 +234,7 @@ begin
   exact (1:ℝ).exp_pos,
 end
 
+--uses bn, n_div_exp1_pow_gt_zero, zero_lt_zwrt_two_n
 lemma bn_formula (n : ℕ):  bn n.succ = (log ↑n.succ.factorial) -
 1/(2:ℝ)*(log (2*↑n.succ)) - ↑n.succ*log (↑n.succ/(exp 1)) :=
 begin

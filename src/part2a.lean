@@ -29,6 +29,7 @@ open nat
 noncomputable def wallis_inside_prod (n : ℕ) : ℝ :=
 (((2:ℝ) * n) / (2*n - 1)) * ((2 *n)/(2 * n + 1))
 
+--uses wallis_inside_prod
 lemma aux1 (k : ℕ): ∏ i in range k, (wallis_inside_prod (1 + i)) =
     ∏ i in Ico 1 k.succ,
     wallis_inside_prod i :=
@@ -37,6 +38,7 @@ begin
   rw prod_Ico_add wallis_inside_prod 0 k 1,
 end
 
+--uses wallis_inside_prod, aux1, 
 lemma equality1: tendsto (λ (k : ℕ), ∏ i in Ico 1 k.succ,
    wallis_inside_prod i)
     at_top (𝓝 (π/2)) :=
@@ -78,7 +80,7 @@ begin
   exact tendsto_prod_pi_div_two,
 end
 
-
+--uses nothing?
 lemma aux2 (r : ℝ) (d : ℕ):
 1 / ↑(2 * d.succ + 1) * (
   r
@@ -126,6 +128,7 @@ begin
   ring,
 end
 
+--uses wallis_insise_prod, aux2
 lemma equation3 (n : ℕ):  ∏ k in Ico 1 n.succ,
     wallis_inside_prod k =
     (1:ℝ)/(2 * n + 1) * ∏ k in Ico 1 n.succ,
@@ -148,6 +151,7 @@ begin
   apply zero_lt_succ,
 end
 
+--uses nothing?
 lemma equation4 (k : ℕ) (hk: k ≠ 0):
 ((2 : ℝ) * k)^2/(2 * k - 1)^2 =
 ((2 : ℝ) * k)^2/(2 * k - 1)^2 * ((2*k)^2/(2*k)^2) :=
@@ -168,6 +172,7 @@ begin
   simp only [mul_one],
 end
 
+--uses equation 4
 lemma equation4' (n : ℕ):
 1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
 ((2 : ℝ) * k)^2/(2 * k - 1)^2 =
@@ -183,6 +188,7 @@ begin
   exact one_le_iff_ne_zero.mp hd_left,
 end
 
+--uses nothing?
 lemma equation5 (k : ℕ):
 ((2 : ℝ) * k)^2/(2 * k - 1)^2 * ((2*k)^2/(2*k)^2) =
 ((2 : ℝ)^4 * k^4)/(((2*k - 1)*(2*k))^2) :=
@@ -201,6 +207,7 @@ begin
  rw ←mul_inv₀,
 end
 
+--uses equation5,
 lemma equation5' (n : ℕ):
 1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
 ((2 : ℝ) * k)^2/(2 * k - 1)^2 * ((2*k)^2/(2*k)^2) =
@@ -213,6 +220,7 @@ begin
   rw ←equation5,
 end
 
+--uses nothing?
 lemma equation6 (n : ℕ):
 1/((2 : ℝ) * n + 1) *
 ∏  (k : ℕ) in Ico 1 n.succ,
@@ -302,6 +310,7 @@ end
 noncomputable def wn (n : ℕ) : ℝ  :=
 ((2:ℝ)^(4*n)*(n.factorial)^4)/((((2*n).factorial)^2)*(2*↑n + 1))
 
+--uses wn, wallis_inside_prod, equality1, equation3, equation4', equation5', equation6
 lemma wallis_consequence: tendsto (λ (n : ℕ),
 wn n) at_top (𝓝 (π/2)) :=
 begin

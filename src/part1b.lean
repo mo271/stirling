@@ -28,11 +28,11 @@ open nat
 -- part 1 of https://proofwiki.org/wiki/Stirling%27s_Formula
 -- second section of part 1
 
-lemma bn_diff_has_sum: ∀ (n : ℕ),
+-- uses bn, bn_formula, 
+lemma bn_diff_has_sum  (n : ℕ) :
 has_sum (λ (k : ℕ), (1 : ℝ)/(2*k.succ + 1)*((1/(2*n.succ + 1))^2)^(k.succ))
 ((bn n.succ) - (bn n.succ.succ)) :=
 begin
-  intro m,
   have hx : ∀ (n : ℕ),  (bn n.succ) - (bn n.succ.succ) =
     ((n.succ : ℝ)+1/(2 : ℝ))* log(((n.succ.succ ): ℝ)/(n.succ:ℝ) ) - 1,
   begin
@@ -53,19 +53,19 @@ begin
     any_goals {exact exp_ne_zero 1},
   end,
 
-  have h_sum₀ , from power_series_ln m.succ (succ_pos m),
-  have h_nonzero : (m.succ : ℝ)+1/(2 : ℝ)≠ 0,
+  have h_sum₀ , from power_series_ln n.succ (succ_pos n),
+  have h_nonzero : (n.succ : ℝ)+1/(2 : ℝ)≠ 0,
   by {rw cast_succ, field_simp, norm_cast, linarith},
 
   rw has_sum_mul_left_iff h_nonzero at h_sum₀,
 
-  have h_inner: ∀ (b : ℕ),(((m.succ : ℝ) + 1 / 2) * (2 * (1 / (2 * ↑b + 1)) *
-      (1 / (2 * ↑(m.succ) + 1)) ^ (2 * b + 1)))
-      = (1 : ℝ)/(2*(b : ℝ) + 1)*((1/(2*m.succ + 1))^2)^(b) :=
+  have h_inner: ∀ (b : ℕ),(((n.succ : ℝ) + 1 / 2) * (2 * (1 / (2 * ↑b + 1)) *
+      (1 / (2 * ↑(n.succ) + 1)) ^ (2 * b + 1)))
+      = (1 : ℝ)/(2*(b : ℝ) + 1)*((1/(2*n.succ + 1))^2)^(b) :=
   begin
     intro b,
-    have  hm : ((m.succ : ℝ) > 0), by {norm_cast, exact succ_pos m},
-    generalize hy : (m.succ : ℝ) = y ,
+    have  hn : ((n.succ : ℝ) > 0), by {norm_cast, exact succ_pos n},
+    generalize hy : (n.succ : ℝ) = y ,
     field_simp,
     rw mul_comm,
     rw pow_add _ _ 1,
@@ -80,8 +80,8 @@ begin
     exact ne_of_gt hy_pos,
   end,
   have h_sum₁: has_sum (λ (b : ℕ),
-  ((1 : ℝ)/(2*(b : ℝ) + 1)*((1/(2*m.succ + 1))^2)^(b)))
-  (((m.succ : ℝ) + 1 / 2) * log (↑(m.succ.succ) / ↑(m.succ))) :=
+  ((1 : ℝ)/(2*(b : ℝ) + 1)*((1/(2* n.succ + 1))^2)^(b)))
+  (((n.succ : ℝ) + 1 / 2) * log (↑(n.succ.succ) / ↑(n.succ))) :=
   begin
     refine has_sum.has_sum_of_sum_eq _ h_sum₀,
     intros,
@@ -101,14 +101,14 @@ begin
     at_top
     (𝓝 ((↑(m.succ) + 1 / 2) * log (↑(m.succ.succ) / ↑(m.succ)))):= succ_tendsto h_sum₂,
   simp only [] at h_sum,
-  have split_zero: ∀ (n:ℕ), ∑ (i : ℕ) in range n.succ,
-  1 / (2 * (i:ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ i =
-  (∑ (i : ℕ) in range n,
-  1 / (2 * (i.succ:ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ i.succ) + 1 :=
+  have split_zero: ∀ (m:ℕ), ∑ (i : ℕ) in range m.succ,
+  1 / (2 * (i:ℝ) + 1) * ((1 / (2 * ↑(n.succ) + 1)) ^ 2) ^ i =
+  (∑ (i : ℕ) in range m,
+  1 / (2 * (i.succ:ℝ) + 1) * ((1 / (2 * ↑(n.succ) + 1)) ^ 2) ^ i.succ) + 1 :=
   begin
-    intro n,
-    rw sum_range_succ' (λ k:ℕ, 1 / (2 * (k:ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ k)
-    n,
+    intro m,
+    rw sum_range_succ' (λ k:ℕ, 1 / (2 * (k:ℝ) + 1) * ((1 / (2 * ↑(n.succ) + 1)) ^ 2) ^ k)
+    m,
     simp only [one_div, cast_succ, inv_pow₀, cast_zero, mul_zero, zero_add, pow_zero,
     inv_one, mul_one, add_left_inj],
   end,
@@ -121,6 +121,7 @@ begin
   exact summable_succ (has_sum.summable h_sum₁),
 end
 
+--uses bn, bn_diff_has_sum
 lemma bn_antitone: ∀ (a b : ℕ), a ≤ b → bn b.succ ≤ bn a.succ :=
 begin
   apply antitone_nat_of_succ_le,
@@ -138,6 +139,7 @@ begin
   exact zero_le (((2 * (n + 1) + 1) ^ 2) ^ succ b),
 end
 
+--uses bn, bn_diff_has_sum, 
 lemma bn_diff_le_geo_sum: ∀ (n : ℕ),
 bn n.succ - bn n.succ.succ ≤
 (1/(2*n.succ + 1))^2/(1 - (1/(2*n.succ + 1))^2) :=
@@ -211,6 +213,7 @@ begin
   exact has_sum_le hab h g,
 end
 
+--uses bn, sq, succ_pos', bn_diff_le_geo_sum
 lemma bn_sub_bn_succ: ∀ (n : ℕ),
 bn n.succ - bn n.succ.succ ≤ 1/(4*n.succ*(n.succ.succ)) :=
 begin
@@ -263,6 +266,7 @@ begin
   linarith,
 end
 
+--uses bn, bn_sub_bn_succ, partial_sum_consecutive_reciprocals
 lemma bn_bounded_aux: ∀ (n : ℕ), bn 1 - bn n.succ ≤ 1/4 :=
 begin
   let bn': (ℕ → ℝ) :=  λ (k : ℕ), bn k.succ,
@@ -304,6 +308,7 @@ begin
    ... = 1/4 : by rw mul_one,
 end
 
+--uses bn_bounded_aux, bn, bn_formula
 lemma bn_bounded_by_constant: ∀  (n : ℕ), bn n.succ ≥ 3/(4:ℝ) - 1/2*log 2 :=
 begin
   intro n,
@@ -318,6 +323,7 @@ begin
    ... =  3/(4:ℝ) - 1/2*log 2: by ring,
 end
 
+--uses bn, bn_bounded_by_constant
 lemma bn_has_lower_bound:(lower_bounds (set.range (λ (k:ℕ), bn k.succ))).nonempty :=
 begin
    use  3/(4:ℝ) - 1/2*log 2 ,
@@ -327,6 +333,7 @@ begin
    exact bn_bounded_by_constant,
 end
 
+--not in lib?
 lemma monotone_convergence (bn : ℕ → ℝ) (h_sd: ∀ (a b : ℕ), a ≤ b → bn b ≤ bn a)
 (h_bounded: (lower_bounds (set.range bn)).nonempty): ∃ (b : ℝ), tendsto bn at_top (𝓝  b)  :=
 begin
@@ -342,6 +349,7 @@ begin
  exact h,
 end
 
+--uses bn, bn_antitone, bn_has_lower_bound
 lemma bn_has_limit_b: ∃ (b : ℝ),
 tendsto (λ (n : ℕ),  bn n.succ)  at_top (𝓝  b) :=
 begin
@@ -351,6 +359,7 @@ end
 /-an_pos can not be proven if we allow n = 0
 corrected version below, but dependent lemmas need to be adjusted-/
 
+--uses an, 
 lemma  an'_pos: ∀ (n : ℕ), 0 < an n.succ :=
 begin
   intro n,
@@ -384,6 +393,7 @@ begin
   exact h₃,
 end
 
+--uses an, bn_bounded_by_constant
 lemma an'_bounded_by_pos_constant:
 ∀ (n : ℕ), exp(3/(4:ℝ) - 1/2*log 2) ≤ an n.succ:=
 begin
@@ -392,6 +402,7 @@ begin
   exact bn_bounded_by_constant n,
 end
 
+--uses an, bn, bn_antitone, an'
 lemma an'_antitone: ∀ (a b : ℕ), a ≤ b → an b.succ ≤ an a.succ :=
 begin
   intros a b,
@@ -402,7 +413,7 @@ begin
   exact (log_le_log (an'_pos b) (an'_pos a)).mp h,
 end
 
-
+--uses an, an'_bounded_by_pos_constant
 lemma an'_has_lower_bound:
 (lower_bounds (set.range (λ (k:ℕ), an k.succ))).nonempty :=
 begin
@@ -413,12 +424,14 @@ begin
    exact an'_bounded_by_pos_constant,
 end
 
+--uses an'_antitone, an'_has_lower_bound,
 lemma an'_has_limit_a :  ∃ (a : ℝ), tendsto
 (λ (n : ℕ),  an n.succ) at_top (𝓝 a) :=
 begin
   exact monotone_convergence (λ (k:ℕ), an k.succ) an'_antitone an'_has_lower_bound,
 end
 
+--uses an'_has_limit_a
 lemma an_has_limit_a: ∃ (a : ℝ), tendsto
 (λ (n : ℕ),  an n)
   at_top (𝓝  a) :=
@@ -430,6 +443,7 @@ begin
   exact hx,
 end
 
+--uses an_has_limit_a, an'_antitone, an, an'_bounded_by_pos_constant
 lemma an_has_pos_limit_a: ∃ (a : ℝ), 0 < a ∧ tendsto
 (λ (n : ℕ),  an n)
   at_top (𝓝  a) :=

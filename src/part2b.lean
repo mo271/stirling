@@ -27,7 +27,7 @@ open nat
 
 -- part 2b of https://proofwiki.org/wiki/Stirling%27s_Formula
 
-
+--uses an
 lemma sub_seq_tendsto {an : ℕ → ℝ} {A : ℝ}
  (h: tendsto an at_top (𝓝 A)):
  tendsto (λ (n : ℕ), an (2*n)) at_top (𝓝 A) :=
@@ -38,6 +38,7 @@ noncomputable def cn (n : ℕ) : ℝ  :=
  ((real.sqrt(2*n)*((n/(exp 1))^n))^4) * 2^(4*n) /
  (((real.sqrt(4*n)*(((2*n)/(exp 1)))^(2*n)))^2 * (2*n + 1))
 
+--uses cn, 
 lemma rest_cancel (n : ℕ):
  (n : ℝ) / (2*n + 1) = cn n :=
  begin
@@ -154,6 +155,7 @@ lemma rest_cancel (n : ℕ):
    linarith,
  end
 
+--uses : cn, rest_cancel ,
 lemma rest_has_limit_one_half: tendsto
 (λ (n:ℕ), cn n) at_top (𝓝 (1/2)) :=
 begin
@@ -199,6 +201,7 @@ begin
  exact g,
 end
 
+--uses an,
 lemma an_aux1 (a: ℝ) (ha: tendsto
 (λ (n : ℕ),  an n) at_top (𝓝  a)):
 tendsto  (λ (n: ℕ), (an n)^4) at_top (𝓝 (a^4)) :=
@@ -206,6 +209,7 @@ begin
  exact tendsto.pow ha 4,
 end
 
+--uses an
 lemma an_aux2 (a: ℝ) (hane: a≠0) (ha: tendsto
 (λ (n : ℕ),  an n) at_top (𝓝  a)):
 tendsto (λ (n : ℕ),  (an n)⁻¹) at_top (𝓝  ((a)⁻¹)) :=
@@ -213,6 +217,7 @@ begin
   exact tendsto.inv₀ ha hane,
 end
 
+--uses : an_aux2, an
 lemma an_aux3 (a: ℝ) (hane: a≠0) (ha: tendsto
 (λ (n : ℕ),  an n) at_top (𝓝  a)):
 tendsto  (λ (n: ℕ), (1/(an n))^(2)) at_top (𝓝 ((1/a)^(2))) :=
@@ -228,6 +233,7 @@ begin
  apply tendsto.pow h_congr 2,
 end
 
+--uses an_aux3, an, sub_seq_tendsto
 lemma an_aux4 (a: ℝ) (hane: a≠0) (ha: tendsto
 (λ (n : ℕ),  an n) at_top (𝓝  a)):
 tendsto  (λ (n: ℕ), (1/(an (2*n)))^(2)) at_top (𝓝 ((1/a)^(2))):=
@@ -236,6 +242,7 @@ begin
   exact sub_seq_tendsto h,
 end
 
+--uses: an, cn, wn -- that's it??
 -- added the assumption hn. Without that the statement is false (I think).
 -- With the new assumption, the lemma below does not work anymore...
 lemma expand_in_limit (n : ℕ) (hn: n ≠ 0):
@@ -351,13 +358,15 @@ begin
   ring,
 end
 
-lemma expand_in_limit' (n : ℕ):
+--usues: wn, expand_in_limit
+lemma expand_in_limit' (n : ℕ): 
  (an n.succ)^4 * (1/(an (2 * n.succ)))^(2) * cn n.succ = wn n.succ:=
  begin
    have hn: n.succ ≠ 0 := succ_ne_zero n,
    exact expand_in_limit n.succ hn,
  end
 
+--uses: rest_has_limit_one_half, expand_in_limit', wn, an_aux1, an_aux4
 lemma second_wallis_limit (a: ℝ) (hane: a≠0) (ha: tendsto
 an at_top (𝓝  a)):
 tendsto wn at_top (𝓝 (a^2/2)):=
@@ -389,6 +398,7 @@ begin
   exact h,
 end
 
+--uses : second_wallis_limit, wallis_consequence, an
 lemma pi_and_a (a: ℝ) (hane: a ≠ 0) (ha: tendsto
 (λ (n : ℕ),  an n) at_top (𝓝  a)):
 π/2 = a^2/2 :=
@@ -398,7 +408,9 @@ begin
   exact tendsto_nhds_unique g h,
 end
 
-lemma an_has_limit_sqrt_pi: tendsto
+
+--uses : an_has_pos_limit_a,  pi_and_a, an
+lemma an_has_limit_sqrt_pi: tendsto 
 (λ (n : ℕ),  an n) at_top (𝓝 (sqrt π)) :=
 begin
   have ha:= an_has_pos_limit_a,
