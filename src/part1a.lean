@@ -28,6 +28,7 @@ open nat
 -- part 1 of https://proofwiki.org/wiki/Stirling%27s_Formula
 -- first section of part 1
 
+
 --uses an,
 lemma tendsto_succ (an : ℕ → ℝ) (a:ℝ): tendsto an at_top (𝓝 a) ↔
 tendsto (λ n : ℕ, (an n.succ)) at_top (𝓝 a) :=

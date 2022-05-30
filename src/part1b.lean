@@ -29,9 +29,9 @@ open nat
 -- second section of part 1
 
 -- uses bn, bn_formula, 
-lemma bn_diff_has_sum  (n : ℕ) :
-has_sum (λ (k : ℕ), (1 : ℝ)/(2*k.succ + 1)*((1/(2*n.succ + 1))^2)^(k.succ))
-((bn n.succ) - (bn n.succ.succ)) :=
+lemma bn_diff_has_sum  (m : ℕ) :
+has_sum (λ (k : ℕ), (1 : ℝ)/(2*k.succ + 1)*((1/(2*m.succ + 1))^2)^(k.succ))
+((bn m.succ) - (bn m.succ.succ)) :=
 begin
   have hx : ∀ (n : ℕ),  (bn n.succ) - (bn n.succ.succ) =
     ((n.succ : ℝ)+1/(2 : ℝ))* log(((n.succ.succ ): ℝ)/(n.succ:ℝ) ) - 1,
@@ -53,19 +53,19 @@ begin
     any_goals {exact exp_ne_zero 1},
   end,
 
-  have h_sum₀ , from power_series_ln n.succ (succ_pos n),
-  have h_nonzero : (n.succ : ℝ)+1/(2 : ℝ)≠ 0,
+  have h_sum₀ , from power_series_ln m.succ (succ_pos m),
+  have h_nonzero : (m.succ : ℝ)+1/(2 : ℝ)≠ 0,
   by {rw cast_succ, field_simp, norm_cast, linarith},
 
   rw has_sum_mul_left_iff h_nonzero at h_sum₀,
 
-  have h_inner: ∀ (b : ℕ),(((n.succ : ℝ) + 1 / 2) * (2 * (1 / (2 * ↑b + 1)) *
-      (1 / (2 * ↑(n.succ) + 1)) ^ (2 * b + 1)))
-      = (1 : ℝ)/(2*(b : ℝ) + 1)*((1/(2*n.succ + 1))^2)^(b) :=
+  have h_inner: ∀ (b : ℕ),(((m.succ : ℝ) + 1 / 2) * (2 * (1 / (2 * ↑b + 1)) *
+      (1 / (2 * ↑(m.succ) + 1)) ^ (2 * b + 1)))
+      = (1 : ℝ)/(2*(b : ℝ) + 1)*((1/(2*m.succ + 1))^2)^(b) :=
   begin
     intro b,
-    have  hn : ((n.succ : ℝ) > 0), by {norm_cast, exact succ_pos n},
-    generalize hy : (n.succ : ℝ) = y ,
+    have  hn : ((m.succ : ℝ) > 0), by {norm_cast, exact succ_pos m},
+    generalize hy : (m.succ : ℝ) = y ,
     field_simp,
     rw mul_comm,
     rw pow_add _ _ 1,
@@ -80,8 +80,8 @@ begin
     exact ne_of_gt hy_pos,
   end,
   have h_sum₁: has_sum (λ (b : ℕ),
-  ((1 : ℝ)/(2*(b : ℝ) + 1)*((1/(2* n.succ + 1))^2)^(b)))
-  (((n.succ : ℝ) + 1 / 2) * log (↑(n.succ.succ) / ↑(n.succ))) :=
+  ((1 : ℝ)/(2*(b : ℝ) + 1)*((1/(2* m.succ + 1))^2)^(b)))
+  (((m.succ : ℝ) + 1 / 2) * log (↑(m.succ.succ) / ↑(m.succ))) :=
   begin
     refine has_sum.has_sum_of_sum_eq _ h_sum₀,
     intros,
@@ -101,14 +101,14 @@ begin
     at_top
     (𝓝 ((↑(m.succ) + 1 / 2) * log (↑(m.succ.succ) / ↑(m.succ)))):= succ_tendsto h_sum₂,
   simp only [] at h_sum,
-  have split_zero: ∀ (m:ℕ), ∑ (i : ℕ) in range m.succ,
-  1 / (2 * (i:ℝ) + 1) * ((1 / (2 * ↑(n.succ) + 1)) ^ 2) ^ i =
-  (∑ (i : ℕ) in range m,
-  1 / (2 * (i.succ:ℝ) + 1) * ((1 / (2 * ↑(n.succ) + 1)) ^ 2) ^ i.succ) + 1 :=
+  have split_zero: ∀ (n:ℕ), ∑ (i : ℕ) in range n.succ,
+  1 / (2 * (i:ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ i =
+  (∑ (i : ℕ) in range n,
+  1 / (2 * (i.succ:ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ i.succ) + 1 :=
   begin
-    intro m,
-    rw sum_range_succ' (λ k:ℕ, 1 / (2 * (k:ℝ) + 1) * ((1 / (2 * ↑(n.succ) + 1)) ^ 2) ^ k)
-    m,
+    intro n,
+    rw sum_range_succ' (λ k:ℕ, 1 / (2 * (k:ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ k)
+    n,
     simp only [one_div, cast_succ, inv_pow₀, cast_zero, mul_zero, zero_add, pow_zero,
     inv_one, mul_one, add_left_inj],
   end,
