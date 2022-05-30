@@ -73,11 +73,9 @@ noncomputable def an (n : ℕ) : ℝ  := (n.factorial :ℝ )
 noncomputable def term (x : ℝ)(n : ℕ) : ℝ :=
    ((-1)*((-x)^(n + 1) / ((n : ℝ) + 1)) + (x^(n + 1)/((n:ℝ) + 1)))
 
-lemma term_def : ∀ (x: ℝ) , term x =(λ n,  ((-1)*((-x)^(n + 1) / ((n : ℝ) + 1)) + (x^(n + 1)/((n:ℝ) + 1)))) :=
-begin
-  intros,
-  refl,
-end
+lemma term_def  (x: ℝ) : term x =(λ n,  ((-1)*((-x)^(n + 1) / ((n : ℝ) + 1)) + (x^(n + 1)/((n:ℝ) + 1)))) :=
+by refl
+
 
 --uses term,
 lemma log_sum_plus_minus (x : ℝ) (hx: |x| < 1) : has_sum (λ k:ℕ,
@@ -88,14 +86,12 @@ begin
 
   have h₁, from has_sum_pow_div_log_of_abs_lt_1 hx,
   have h₂', from has_sum_pow_div_log_of_abs_lt_1 (eq.trans_lt (abs_neg x) hx),
-  have h₂, from (has_sum_mul_left_iff min_one_not_zero).mp h₂',
+  replace h₂ :=  (has_sum_mul_left_iff min_one_not_zero).mp h₂',
   rw [neg_one_mul, neg_neg, sub_neg_eq_add 1 x] at h₂,
   have h₃, from has_sum.add h₂ h₁,
-  rw [tactic.ring.add_neg_eq_sub] at h₃,
-  rw [←term_def x ] at h₃,
+  rw [tactic.ring.add_neg_eq_sub, ←term_def x ] at h₃,
 
   let g := (λ (n : ℕ),  (2 * n)),
-
   rw ←function.injective.has_sum_iff (nat.mul_right_injective two_pos) _ at h₃,
 
   suffices h_term_eq_goal : (term x ∘ g) = (λ k : ℕ, 2*(1 / (2 * (k : ℝ) + 1)) * x^(2 * k  + 1)),
