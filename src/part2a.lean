@@ -90,42 +90,16 @@ lemma aux2 (r : ℝ) (d : ℕ):
    ) * (↑(2 * d.succ) / (↑(2 * d.succ) - 1)
    * (↑(2 * d.succ) / ↑(2 * d.succ + 1)))
  :=
-begin
-  rw ←mul_assoc _ r _,
-  rw mul_comm _ r,
-  rw mul_comm _ r,
-  rw mul_assoc r _ _,
-  rw mul_assoc r _ _,
-  rw congr_arg (has_mul.mul r) _,
-  repeat {rw succ_eq_add_one},
-  repeat {rw mul_add},
-  simp only [mul_one, cast_add, cast_mul, cast_bit0,
-  cast_one, one_div, cast_pow],
-  repeat {rw pow_two},
-  repeat {rw ←(add_sub _ _ _)},
-  have two_sub_one: (2:ℝ ) - 1 = 1 := by ring,
-  rw two_sub_one,
-  norm_cast,
-  repeat {rw div_eq_inv_mul},
-  rw mul_comm (↑(2 * d + 1))⁻¹,
-  rw mul_comm _ ↑((2 * d + 2) * (2 * d + 2)),
-  rw mul_comm (↑(2 * d + 2 + 1))⁻¹ _,
-  rw cast_mul,
-  rw mul_comm (↑(2 * d + 1))⁻¹ ↑(2 * d + 2),
-  rw mul_comm (↑(2 * d + 2 + 1))⁻¹ _,
-  repeat {rw mul_assoc},
-  rw congr_arg (has_mul.mul _) _,
-  rw mul_comm (↑(2 * d + 1))⁻¹ _,
-  repeat {rw mul_assoc},
-  rw congr_arg (has_mul.mul _) _,
-  rw mul_comm _ (↑(2 * d + 2 + 1))⁻¹,
-  repeat {rw mul_assoc},
-  rw congr_arg (has_mul.mul _) _,
-  simp only [cast_mul, cast_add, cast_bit0, cast_one],
-  repeat {rw ←div_eq_inv_mul},
+begin 
+  by_cases h : r = 0,
+  repeat {rw h},
+  simp only [zero_mul, mul_zero],
+
+  have: 2 * ((d : ℝ) + 1) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},  
+  have: 2 * (d : ℝ) + 1       ≠ 0, by {norm_cast, exact succ_ne_zero _},
+  have: 2 * ((d : ℝ) + 1) - 1 ≠ 0, by {ring_nf, norm_cast, exact succ_ne_zero _},
+  field_simp,
   ring_nf,
-  simp only [inv_pow₀, inv_inj],
-  ring,
 end
 
 --uses wallis_insise_prod, aux2
