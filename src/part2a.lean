@@ -231,80 +231,34 @@ begin
   simp only [cast_zero, mul_zero, zero_add, Ico_self,
    prod_empty, mul_one, pow_zero, factorial_zero, cast_one,
     one_pow],
-  rw succ_eq_add_one,
+  replace hd := congr_arg (has_mul.mul (2*(d:ℝ)+1)) hd,
+
+  have : 2* (d : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2*d)},
+  rw [←mul_assoc, mul_one_div_cancel this, one_mul] at hd,
   rw prod_Ico_succ_top,
-  rw ←succ_eq_add_one,
-  rw ←mul_assoc,
-  {let hd' := (congr_arg (has_mul.mul (2 * (d:ℝ) + 1)) hd),
-   rw ←mul_assoc at hd',
-   have hnezero: (2 * (d:ℝ) + 1) ≠ 0 :=
-   begin
-     norm_cast,
-     apply succ_ne_zero,
-   end,
-   rw (mul_one_div_cancel hnezero) at hd',
-   rw one_mul at hd',
-   rw hd',
-   simp only [cast_succ, one_div, factorial_succ, cast_mul],
-   have hsucc: 2*d.succ = (2*d).succ.succ :=
-   begin
-     repeat {rw succ_eq_add_one},
-     ring,
-   end,
-   rw hsucc,
-   repeat {rw factorial_succ},
-   norm_cast,
-   generalize : ((d.factorial)) = x,
-   have h0: 0 ≠ ((2*d).factorial) :=  ne_of_lt (factorial_pos (2*d)),
-   have h1: (2 * ((d:ℝ) + 1) + 1) * (↑((2*d).factorial)^ 2 * (2 * ↑d + 1)) *
-      ((2 * (↑d + 1) - 1) * (2 * (↑d + 1))) ^ 2 ≠ 0 :=
-   begin
+  rw hd,
+  rw [mul_succ 2],
+  repeat {rw factorial_succ},
+  have :  (((2 * d + 1 + 1) * ((2 * d + 1) * (2 * d).factorial)):ℝ) ≠ 0,
+    begin
     norm_cast,
-    simp only [cast_mul, cast_add, cast_bit0, cast_one, mul_eq_zero,
-     pow_eq_zero_iff, succ_pos', cast_eq_zero, bit0_eq_zero, one_ne_zero,
-     false_or],
-     push_neg,
-     split,
-     split,
-     norm_cast,
-     exact succ_ne_zero (2 * (d + 1)),
-     norm_cast,
-     split,
-     exact h0.symm,
-     exact succ_ne_zero (2 * d),
-     split,
-     rw mul_add,
-     norm_cast,
-     simp only [mul_one, cast_add, cast_mul, cast_bit0, cast_one],
-     rw ←add_sub,
-     have two_sub_one_eq_one: (2 : ℝ) - 1 = 1 := by linarith,
-     rw two_sub_one_eq_one,
-     norm_cast,
-     exact succ_ne_zero (2*d),
-     norm_cast,
-     exact succ_ne_zero d,
-   end,
-   have h2: ((2 * (d:ℝ) + 1 + 1) * ((2 * ↑d + 1) * ((2*d).factorial))) ^ 2 *
-    (2 * (↑d + 1) + 1) ≠ 0 :=
-   begin
-     norm_cast,
-     simp only [nat.mul_eq_zero, pow_eq_zero_iff, succ_pos', succ_ne_zero,
-     false_or, or_false],
-     exact h0.symm,
-   end,
-   rw succ_eq_add_one,
-   field_simp,
-   ring_nf,
-   repeat {rw pow_mul},
-   have h3: (2:ℝ)^4 = 16 := by linarith,
-   have h4: (16 : ℝ)^(d + 1) = 16*16^d :=
-   begin
-     rw pow_succ,
-   end,
-   rw [h3, h4],
-   linarith,
-   },
-  exact le_add_self,
+    exact mul_ne_zero (succ_ne_zero (2*d+1)) 
+      ( mul_ne_zero (succ_ne_zero (2*d)) (factorial_ne_zero (2*d))),
+    end,
+
+  have : (2 *(d.succ : ℝ) + 1)       ≠ 0, by {norm_cast, exact succ_ne_zero (2*d.succ)}, 
+  have : (2 * ((d:ℝ) + 1) + 1)       ≠ 0, by {norm_cast, exact succ_ne_zero (2*(d+1))},
+  have : (((2 * d).factorial):ℝ) ^ 2 ≠ 0, by {norm_cast, exact pow_ne_zero 2 (factorial_ne_zero (2*d))},
+  have : (2 * ((d:ℝ) + 1) - 1)       ≠ 0, by {ring_nf, norm_cast, exact succ_ne_zero (2*d)},
+  have : (2 * ((d:ℝ) + 1))           ≠ 0, by {norm_cast, exact (mul_ne_zero two_ne_zero (succ_ne_zero d))},
+  field_simp,
+  rw [mul_succ 4 d, pow_add _ (4*d) 4],
+  generalize  g₀ : d.factorial = x,
+  generalize  g₁ : (2*d).factorial = y,
+  generalize  g₂ : 2^d = z,
+  ring_nf,
+  
+  exact succ_le_succ (zero_le d),
 end
 
 noncomputable def wn (n : ℕ) : ℝ  :=
