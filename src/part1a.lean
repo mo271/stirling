@@ -141,41 +141,24 @@ lemma power_series_ln (n : ℕ) (hn: 0 < n): has_sum
 (2:ℝ) * (1/(2*(k : ℝ) + 1))*((1/(2*(n:ℝ) + 1))^(2*k + 1)))
 (log (↑n.succ / ↑n)) :=
  begin
-  have h₀: 0 <  (2 * n +1) := by exact succ_pos',
+  have h₀: 0 <  (((2 * n +1):ℕ) : ℝ), from (cast_pos.mpr (2*n).succ_pos),
   have h₁: |1 / (2 * (n : ℝ) + 1)| < 1 :=
   begin
     norm_cast,
-    rw abs_of_pos,
-    rw div_lt_one,
-    norm_cast,
-    rw add_comm,
-    apply lt_add_of_zero_lt_left,
-    simp only [canonically_ordered_comm_semiring.mul_pos, succ_pos', true_and, hn],
-    norm_cast,
-    exact h₀,
-    simp only [cast_add, cast_mul, cast_bit0, cast_one, one_div, inv_pos],
-    norm_cast,
-    exact h₀,
+    rw [abs_of_pos, div_lt_one]; norm_cast,
+    any_goals {linarith},
+    exact div_pos one_pos h₀,
   end,
-  rw aux_log,
-  exact log_sum_plus_minus (1/(2*(n : ℝ)+1)) h₁,
-
-  exact ne_of_gt hn,
+  rw aux_log n (ne_of_gt hn),
+    exact log_sum_plus_minus (1/(2*(n : ℝ)+1)) h₁,
  end
 
 noncomputable def bn (n : ℕ) : ℝ := log (an n)
 
 --uses nothing
-lemma zero_lt_sqrt_two_n (n : ℕ) : (n ≠ 0) → 0 < real.sqrt (2 * ↑n)  :=
-begin
-  intro hn,
-  apply real.sqrt_pos.mpr,
-  norm_cast,
-  have hn : 0<n, from zero_lt_iff.mpr hn,
-  apply mul_pos two_pos ,
-  assumption,
-  exact nat.nontrivial,
-end
+lemma zero_lt_sqrt_two_n (n : ℕ) (hn : n ≠ 0) : 0 < real.sqrt (2 * ↑n) := 
+   real.sqrt_pos.mpr (mul_pos two_pos (cast_pos.mpr (zero_lt_iff.mpr hn)))
+
 
 --uses nothing
 lemma n_div_exp1_pow_gt_zero(n : ℕ) :  (↑n / exp 1) ^ n >0 :=
@@ -183,15 +166,10 @@ begin
   cases n,
   rw pow_zero,
   exact one_pos,
-  have hsucc : n.succ > 0, from nat.succ_pos n,
-  apply gt_iff_lt.mpr,
 
-  apply pow_pos  _ n.succ,
-  apply div_pos_iff.mpr,
-  left, split,
-  norm_cast, rw ←gt_iff_lt,
-  exact hsucc,
-  exact (1:ℝ).exp_pos,
+  apply gt_iff_lt.mpr,
+  apply pow_pos  _ (n.succ),
+  exact div_pos (cast_pos.mpr n.succ_pos )  (exp_pos 1),
 end
 
 --uses bn, n_div_exp1_pow_gt_zero, zero_lt_zwrt_two_n
