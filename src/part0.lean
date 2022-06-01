@@ -64,13 +64,3 @@ lemma partial_sum_consecutive_reciprocals:
    norm_cast,
    exact le_succ n,
  end
-
-
-lemma summable_succ {a : ℕ → ℝ} (h: summable a):
-summable (λ (n : ℕ), a n.succ) :=
--- proof by Eric Rodriguez
--- https://leanprover.zulipchat.com/#narrow/stream/217875-Is-there-code-for-X.3F/topic/.E2.9C.94.20simple.28.3F.29.20summable.20lemma
-begin
-  simp_rw [succ_eq_add_one, summable_nat_add_iff],
-  assumption,
-end

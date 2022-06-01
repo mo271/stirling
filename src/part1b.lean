@@ -118,7 +118,7 @@ begin
   rw tactic.ring.add_neg_eq_sub _ (1 : ℝ) at h_sum,
   rw ←hx at h_sum,
   refine (summable.has_sum_iff_tendsto_nat _).mpr h_sum,
-  exact summable_succ (has_sum.summable h_sum₁),
+  exact (summable_nat_add_iff 1).mpr (has_sum.summable h_sum₁),
 end
 
 --uses bn, bn_diff_has_sum

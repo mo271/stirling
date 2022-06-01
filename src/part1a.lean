@@ -29,8 +29,7 @@ open nat
 -- first section of part 1
 
 
---uses an,
-lemma tendsto_succ (an : ℕ → ℝ) (a:ℝ): tendsto an at_top (𝓝 a) ↔
+lemma tendsto_succ (an : ℕ → ℝ) (a : ℝ): tendsto an at_top (𝓝 a) ↔
 tendsto (λ n : ℕ, (an n.succ)) at_top (𝓝 a) :=
 begin
   split,
@@ -122,7 +121,7 @@ log (n.succ/n) = log (1 + 1 / (2*n + 1)) - log (1 - 1/(2*n +1)):=
 begin
   have : (n:ℝ)       ≠ 0, from cast_ne_zero.mpr hn,
   have : (2:ℝ)*n + 1 ≠ 0, by { norm_cast, exact succ_ne_zero (2*n)},
-  
+
   rw ←log_div _ _,
 
   suffices h : (n.succ:ℝ)/(n:ℝ) = (1 + 1 / (2*n + 1))/(1 - 1/(2*n +1)),
@@ -156,7 +155,7 @@ lemma power_series_ln (n : ℕ) (hn: 0 < n): has_sum
 noncomputable def bn (n : ℕ) : ℝ := log (an n)
 
 --uses nothing
-lemma zero_lt_sqrt_two_n (n : ℕ) (hn : n ≠ 0) : 0 < real.sqrt (2 * ↑n) := 
+lemma zero_lt_sqrt_two_n (n : ℕ) (hn : n ≠ 0) : 0 < real.sqrt (2 * ↑n) :=
    real.sqrt_pos.mpr (mul_pos two_pos (cast_pos.mpr (zero_lt_iff.mpr hn)))
 
 
