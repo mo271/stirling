@@ -29,13 +29,13 @@ open nat
 -- first section of part 1
 
 
-lemma tendsto_succ (an : ℕ → ℝ) (a : ℝ): tendsto an at_top (𝓝 a) ↔
+lemma tendsto_succ (an : ℕ → ℝ) (a : ℝ) : tendsto an at_top (𝓝 a) ↔
 tendsto (λ n : ℕ, (an n.succ)) at_top (𝓝 a) :=
 begin
   split,
   {
     intro h,
-    -- rw tendsto at h,
+    -- rw tendsto at h, -- this is not needed
     rw tendsto_at_top' at h,
     rw tendsto_at_top',
     intros,
@@ -48,7 +48,7 @@ begin
     exact gm b.succ hbsucc,
   },
   { intro h,
-    -- rw tendsto at h,
+    -- rw tendsto at h, -- this is not needed
     rw tendsto_at_top' at h,
     rw tendsto_at_top',
     intros,
@@ -66,48 +66,40 @@ begin
 end
 
 
-noncomputable def an (n : ℕ) : ℝ  := (n.factorial :ℝ )
-/ ((real.sqrt(2*(n))*((n/(exp 1)))^n))
+noncomputable def an (n : ℕ) : ℝ  := (n.factorial : ℝ) / ((real.sqrt(2*(n))*((n/(exp 1)))^n))
 
-noncomputable def term (x : ℝ)(n : ℕ) : ℝ :=
-   ((-1)*((-x)^(n + 1) / ((n : ℝ) + 1)) + (x^(n + 1)/((n:ℝ) + 1)))
+noncomputable def term (x : ℝ) (n : ℕ) : ℝ :=
+  ((-1)*((-x)^(n + 1) / ((n : ℝ) + 1)) + (x^(n + 1)/((n:ℝ) + 1)))
 
-lemma term_def  (x: ℝ) : term x =(λ n,  ((-1)*((-x)^(n + 1) / ((n : ℝ) + 1)) + (x^(n + 1)/((n:ℝ) + 1)))) :=
-by refl
-
+lemma term_def  (x : ℝ) : term x = (λ n, ((-1) * ((-x) ^ (n + 1) / ((n : ℝ) + 1)) + 
+  (x ^ (n + 1) / ((n : ℝ) + 1)))) := by refl
 
 --uses term,
-lemma log_sum_plus_minus (x : ℝ) (hx: |x| < 1) : has_sum (λ k:ℕ,
-(2:ℝ)*(1/(2*↑k + 1))*(x^(2* k + 1))) (log (1 + x) - log(1 - x)):=
+lemma log_sum_plus_minus (x : ℝ) (hx: |x| < 1) : 
+  has_sum (λ k : ℕ, (2 : ℝ) * (1 / (2 * ↑k + 1)) * (x ^ (2 * k + 1))) (log (1 + x) - log(1 - x)) :=
 begin
   have min_one_not_zero : (-1 : ℝ) ≠ ( 0 : ℝ), by linarith,
-  have h_min_one_ne_one:  (-1 : ℝ) ≠ ( 1 : ℝ), by linarith,
-
+  have h_min_one_ne_one : (-1 : ℝ) ≠ ( 1 : ℝ), by linarith,
   have h₁, from has_sum_pow_div_log_of_abs_lt_1 hx,
-  have h₂', from has_sum_pow_div_log_of_abs_lt_1 (eq.trans_lt (abs_neg x) hx),
+  have h₂', from has_sum_pow_div_log_of_abs_lt_1 (eq.trans_lt (abs_neg x) hx), /-maybe rename-/
   replace h₂ :=  (has_sum_mul_left_iff min_one_not_zero).mp h₂',
   rw [neg_one_mul, neg_neg, sub_neg_eq_add 1 x] at h₂,
   have h₃, from has_sum.add h₂ h₁,
   rw [tactic.ring.add_neg_eq_sub, ←term_def x ] at h₃,
-
-  let g := (λ (n : ℕ),  (2 * n)),
-  rw ←function.injective.has_sum_iff (nat.mul_right_injective two_pos) _ at h₃,
-
+  let g := (λ (n : ℕ), (2 * n)),
+  rw ← function.injective.has_sum_iff (nat.mul_right_injective two_pos) _ at h₃,
   suffices h_term_eq_goal : (term x ∘ g) = (λ k : ℕ, 2*(1 / (2 * (k : ℝ) + 1)) * x^(2 * k  + 1)),
   begin
     rw h_term_eq_goal at h₃,
     exact h₃,
   end,
-
   apply funext,
   intro n,
-
   rw [function.comp_app],
   simp only [g, term],
-  rw odd.neg_pow (⟨n, rfl⟩ :odd (2 * n + 1)) x,
+  rw odd.neg_pow (⟨n, rfl⟩ : odd (2 * n + 1)) x,
   rw [neg_one_mul, neg_div, neg_neg, cast_mul, cast_two],
   ring_nf,
-
   intros m hm,
   simp only [range_two_mul, set.mem_set_of_eq] at hm,
   simp only [term],
@@ -116,32 +108,28 @@ begin
 end
 
 --uses nothing?
-lemma aux_log (n : ℕ) (hn: n ≠ 0):
-log (n.succ/n) = log (1 + 1 / (2*n + 1)) - log (1 - 1/(2*n +1)):=
+lemma aux_log (n : ℕ) (hn : n ≠ 0) :
+  log (n.succ / n) = log (1 + 1 / (2 * n + 1)) - log (1 - 1 / (2 * n + 1)) :=
 begin
-  have : (n:ℝ)       ≠ 0, from cast_ne_zero.mpr hn,
-  have : (2:ℝ)*n + 1 ≠ 0, by { norm_cast, exact succ_ne_zero (2*n)},
-
-  rw ←log_div _ _,
-
-  suffices h : (n.succ:ℝ)/(n:ℝ) = (1 + 1 / (2*n + 1))/(1 - 1/(2*n +1)),
+  have : (n : ℝ) ≠ 0, from cast_ne_zero.mpr hn,
+  have : (2 : ℝ) * n + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2 * n)},
+  rw ← log_div _ _,
+  suffices h : (n.succ : ℝ) / (n : ℝ) = (1 + 1 / (2 * n + 1)) / (1 - 1 / (2 * n + 1)),
     from congr_arg log h,
-
-  rw ←one_add,
+  rw ← one_add,
   all_goals {field_simp},
   ring_nf,
   norm_cast,
-  exact succ_ne_zero (2*n+1),
+  exact succ_ne_zero (2 * n + 1),
 end
 
 --uses aux_log, log_sum_plus_minus
-lemma power_series_ln (n : ℕ) (hn: 0 < n): has_sum
-(λ (k : ℕ),
-(2:ℝ) * (1/(2*(k : ℝ) + 1))*((1/(2*(n:ℝ) + 1))^(2*k + 1)))
-(log (↑n.succ / ↑n)) :=
+lemma power_series_ln (n : ℕ) (hn: 0 < n) : has_sum (λ (k : ℕ),
+  (2 : ℝ) * (1 / (2 * (k : ℝ) + 1)) * ((1 / (2 * (n : ℝ) + 1)) ^ (2 * k + 1))) 
+  (log (↑n.succ / ↑n)) :=
  begin
-  have h₀: 0 <  (((2 * n +1):ℕ) : ℝ), from (cast_pos.mpr (2*n).succ_pos),
-  have h₁: |1 / (2 * (n : ℝ) + 1)| < 1 :=
+  have h₀ : 0 < (((2 * n + 1) : ℕ) : ℝ), from (cast_pos.mpr (2 * n).succ_pos),
+  have h₁ : |1 / (2 * (n : ℝ) + 1)| < 1 :=
   begin
     norm_cast,
     rw [abs_of_pos, div_lt_one]; norm_cast,
@@ -149,7 +137,7 @@ lemma power_series_ln (n : ℕ) (hn: 0 < n): has_sum
     exact div_pos one_pos h₀,
   end,
   rw aux_log n (ne_of_gt hn),
-    exact log_sum_plus_minus (1/(2*(n : ℝ)+1)) h₁,
+    exact log_sum_plus_minus (1 / (2 * (n : ℝ) + 1)) h₁,
  end
 
 noncomputable def bn (n : ℕ) : ℝ := log (an n)
@@ -158,25 +146,23 @@ noncomputable def bn (n : ℕ) : ℝ := log (an n)
 lemma zero_lt_sqrt_two_n (n : ℕ) (hn : n ≠ 0) : 0 < real.sqrt (2 * ↑n) :=
    real.sqrt_pos.mpr (mul_pos two_pos (cast_pos.mpr (zero_lt_iff.mpr hn)))
 
-
 --uses nothing
-lemma n_div_exp1_pow_gt_zero(n : ℕ) :  (↑n / exp 1) ^ n >0 :=
+lemma n_div_exp1_pow_gt_zero (n : ℕ) : (↑n / exp 1) ^ n > 0 :=
 begin
   cases n,
   rw pow_zero,
   exact one_pos,
-
   apply gt_iff_lt.mpr,
   apply pow_pos  _ (n.succ),
-  exact div_pos (cast_pos.mpr n.succ_pos )  (exp_pos 1),
+  exact div_pos (cast_pos.mpr n.succ_pos ) (exp_pos 1),
 end
 
 --uses bn, n_div_exp1_pow_gt_zero, zero_lt_zwrt_two_n
-lemma bn_formula (n : ℕ):  bn n.succ = (log ↑n.succ.factorial) -
-1/(2:ℝ)*(log (2*↑n.succ)) - ↑n.succ*log (↑n.succ/(exp 1)) :=
+lemma bn_formula (n : ℕ): bn n.succ = (log ↑n.succ.factorial) -
+  1 / (2 : ℝ) * (log (2 * ↑n.succ)) - ↑n.succ * log (↑n.succ / (exp 1)) :=
 begin
-  have h3, from  (lt_iff_le_and_ne.mp (zero_lt_sqrt_two_n n.succ (succ_ne_zero n))),
-  have h4, from  (lt_iff_le_and_ne.mp (n_div_exp1_pow_gt_zero n.succ )),
+  have h3, from (lt_iff_le_and_ne.mp (zero_lt_sqrt_two_n n.succ (succ_ne_zero n))),
+  have h4, from (lt_iff_le_and_ne.mp (n_div_exp1_pow_gt_zero n.succ)),
   rw [bn, an, log_div, log_mul, sqrt_eq_rpow, log_rpow, log_pow],
   ring,
   rw zero_lt_mul_left,

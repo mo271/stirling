@@ -23,7 +23,7 @@ open nat
 open filter
 
 
-lemma inverse_triangle_sum':
+lemma inverse_triangle_sum' :
   ∀ (n : ℕ),
   ∑ k in range n, ((1 : ℝ) / (k.succ * (k.succ.succ))) =
   ((n : ℝ) / n.succ) :=
@@ -32,19 +32,19 @@ begin
   simp only [cast_zero, zero_div],
   push_cast,
   intro n,
-  have h₀: ((n:ℝ) + 1) ≠ 0 :=
+  have h₀ : ((n : ℝ) + 1) ≠ 0 :=
   begin
     norm_cast,
     rw ←succ_eq_add_one,
     exact succ_ne_zero n,
   end,
-  have h₁: ((n:ℝ) + 1 + 1) ≠ 0 :=
+  have h₁ : ((n : ℝ) + 1 + 1) ≠ 0 :=
   begin
     norm_cast,
     repeat {rw ←succ_eq_add_one},
     exact succ_ne_zero n.succ,
   end,
-  have h₂: (((n:ℝ) + 1)*((n:ℝ) + 1 + 1)) ≠ 0 :=
+  have h₂ : (((n : ℝ) + 1) * ((n : ℝ) + 1 + 1)) ≠ 0 :=
   begin
     exact mul_ne_zero h₀ h₁,
   end,
@@ -52,9 +52,8 @@ begin
   ring,
 end
 
-
 lemma partial_sum_consecutive_reciprocals:
- ∀ n, ∑ i in range n, (1:ℝ)/(i.succ*(i.succ.succ)) ≤ 1 :=
+ ∀ n, ∑ i in range n, (1 : ℝ) / (i.succ * (i.succ.succ)) ≤ 1 :=
  begin
    intro n,
    rw inverse_triangle_sum' n,
