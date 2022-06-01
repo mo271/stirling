@@ -74,11 +74,3 @@ begin
   simp_rw [succ_eq_add_one, summable_nat_add_iff],
   assumption,
 end
-
-lemma succ_tendsto {an : ℕ → ℝ} {A : ℝ}
- (h: tendsto an at_top (𝓝 A)):
- tendsto (λ (n : ℕ), an (n.succ)) at_top (𝓝 A) :=
- begin
-   refine h.comp _,
-   exact tendsto_add_at_top_nat 1,
- end

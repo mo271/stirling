@@ -28,7 +28,7 @@ open nat
 -- part 1 of https://proofwiki.org/wiki/Stirling%27s_Formula
 -- second section of part 1
 
--- uses bn, bn_formula, 
+-- uses bn, bn_formula,
 lemma bn_diff_has_sum  (m : ℕ) :
 has_sum (λ (k : ℕ), (1 : ℝ)/(2*k.succ + 1)*((1/(2*m.succ + 1))^2)^(k.succ))
 ((bn m.succ) - (bn m.succ.succ)) :=
@@ -99,7 +99,7 @@ begin
     (λ (n : ℕ), ∑ (i : ℕ) in range n.succ,
     (λ (b : ℕ), 1 / (2 * (b : ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ b) i)
     at_top
-    (𝓝 ((↑(m.succ) + 1 / 2) * log (↑(m.succ.succ) / ↑(m.succ)))):= succ_tendsto h_sum₂,
+    (𝓝 ((↑(m.succ) + 1 / 2) * log (↑(m.succ.succ) / ↑(m.succ)))):= h_sum₂.comp (tendsto_add_at_top_nat 1),
   simp only [] at h_sum,
   have split_zero: ∀ (n:ℕ), ∑ (i : ℕ) in range n.succ,
   1 / (2 * (i:ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ i =
@@ -139,7 +139,7 @@ begin
   exact zero_le (((2 * (n + 1) + 1) ^ 2) ^ succ b),
 end
 
---uses bn, bn_diff_has_sum, 
+--uses bn, bn_diff_has_sum,
 lemma bn_diff_le_geo_sum: ∀ (n : ℕ),
 bn n.succ - bn n.succ.succ ≤
 (1/(2*n.succ + 1))^2/(1 - (1/(2*n.succ + 1))^2) :=
@@ -359,7 +359,7 @@ end
 /-an_pos can not be proven if we allow n = 0
 corrected version below, but dependent lemmas need to be adjusted-/
 
---uses an, 
+--uses an,
 lemma  an'_pos: ∀ (n : ℕ), 0 < an n.succ :=
 begin
   intro n,
