@@ -58,9 +58,6 @@ lemma partial_sum_consecutive_reciprocals:
  begin
    intro n,
    rw inverse_triangle_sum' n,
-   refine (div_le_one _).mpr _,
-   norm_cast,
-   exact succ_pos n,
-   norm_cast,
-   exact le_succ n,
+   refine (div_le_one _).mpr (cast_le.mpr n.le_succ),
+   exact (cast_lt.mpr n.succ_pos),
  end
