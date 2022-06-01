@@ -52,7 +52,7 @@ begin
   ring,
 end
 
-
+--TODO: use /archive/100-theorems-list/42_inverse_triangle_sum.lean and delete lemma above.
 lemma partial_sum_consecutive_reciprocals:
  ∀ n, ∑ i in range n, (1:ℝ)/(i.succ*(i.succ.succ)) ≤ 1 :=
  begin
