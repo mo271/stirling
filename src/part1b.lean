@@ -190,16 +190,16 @@ begin
     intro k,
     have h_zero_le : 0 ≤ ((1 / (2 * (n.succ : ℝ) + 1)) ^ 2) ^ k.succ :=
     begin
-      simp only [cast_succ, one_div, inv_pow₀, inv_nonneg],
+      simp [cast_succ, one_div, inv_pow₀, inv_nonneg],
       norm_cast,
-      simp only [zero_le'],
+      exact zero_le',
     end,
     have h_left : 1 / (2 * (k.succ:ℝ) + 1) ≤ 1 :=
     begin
       simp only [cast_succ, one_div],
       refine inv_le_one _,
       norm_cast,
-      simp only [le_add_iff_nonneg_left, zero_le'],
+      exact (le_add_iff_nonneg_left 1).mpr zero_le',
     end,
     exact mul_le_of_le_one_left h_zero_le h_left,
   end,
@@ -222,16 +222,16 @@ begin
   begin
     refine sub_pos.mpr _,
     refine (sq_lt_one_iff _).mpr _,
-    rw one_div,
+    { rw one_div,
     refine inv_nonneg.mpr _,
     norm_cast,
-    exact zero_le (2 * succ n + 1),
-    refine (div_lt_one _).mpr _,
+    exact zero_le (2 * succ n + 1)},
+    { refine (div_lt_one _).mpr _,
     all_goals {norm_cast},
     linarith,
     refine lt_add_of_pos_left 1 _,
     refine (1 : ℕ).succ_mul_pos _,
-    exact succ_pos n,
+    exact succ_pos n},
   end,
   refine (le_div_iff' h₁).mpr _,
   rw mul_div (4 * (n.succ : ℝ) * ↑(n.succ.succ))
@@ -266,8 +266,8 @@ begin
   intro n,
   calc
   bn 1 - bn n.succ = bn' 0 - bn' n : rfl
-   ... = ∑ i in range n, (bn' i - bn' (i + 1)) : by rw ← (sum_range_sub' bn' n)
-   ... = ∑ i in range n, (bn i.succ - bn i.succ.succ) : rfl
+   ... = ∑ i in range n, (bn' i - bn' (i + 1))          : by rw ← (sum_range_sub' bn' n)
+   ... = ∑ i in range n, (bn i.succ - bn i.succ.succ)   : rfl
    ... ≤ ∑ i in range n, 1 / (4 * i.succ * i.succ.succ) :
    begin
      refine sum_le_sum _,
@@ -289,10 +289,7 @@ begin
     intros k hk,
     exact hi k,
    end
-   ... = 1 / 4 * ∑ i in range n, 1 / (i.succ * i.succ.succ) :
-   begin
-     rw mul_sum,
-   end
+   ... = 1 / 4 * ∑ i in range n, 1 / (i.succ * i.succ.succ) : by rw mul_sum
    ... ≤ 1 / 4 * 1 :
    begin
      refine (mul_le_mul_left _).mpr _,
@@ -332,14 +329,9 @@ end
 lemma monotone_convergence (bn : ℕ → ℝ) (h_sd: ∀ (a b : ℕ), a ≤ b → bn b ≤ bn a)
   (h_bounded : (lower_bounds (set.range bn)).nonempty) : ∃ (b : ℝ), tendsto bn at_top (𝓝 b) :=
 begin
- let x := (Inf (set.range bn)),
- have h : is_glb (set.range bn) x,
-   by refine real.is_glb_Inf (set.range bn) (set.range_nonempty bn) h_bounded,
- use x,
- refine tendsto_at_top_is_glb _ _,
- rw antitone,
- exact h_sd,
- exact h,
+ use Inf (set.range bn),
+ refine tendsto_at_top_is_glb h_sd (real.is_glb_Inf (set.range bn)
+   (set.range_nonempty bn) h_bounded),
 end
 
 --uses bn, bn_antitone, bn_has_lower_bound
@@ -360,27 +352,22 @@ begin
   have h₁ : 0 < ((n : ℝ) + 1) * (n.factorial : ℝ) :=
   begin
     norm_cast,
-    apply mul_pos,
-    exact succ_pos n,
-    exact factorial_pos n,
+    exact mul_pos n.succ_pos n.factorial_pos,
   end,
   have h₂ : 0 < exp 1 ^ n.succ := (pow_pos ((1 : ℝ).exp_pos)) n.succ,
   have h₃ : 0 < sqrt (2 : ℝ) * sqrt (↑n + 1) * (↑n + 1) ^ (n + 1) :=
   begin
     apply mul_pos,
-    apply mul_pos,
+    { apply mul_pos,
     simp only [real.sqrt_pos, zero_lt_bit0, zero_lt_one],
     simp only [real.sqrt_pos, cast_pos],
     norm_cast,
-    exact succ_pos n,
+    exact succ_pos n},
     apply pow_pos,
     norm_cast,
     exact succ_pos n,
   end,
-  apply mul_pos,
-  apply mul_pos h₁ h₂,
-  simp only [inv_pos],
-  exact h₃,
+  exact mul_pos (mul_pos h₁ h₂) (inv_pos.mpr h₃),
 end
 
 --uses an, bn_bounded_by_constant
@@ -441,7 +428,7 @@ begin
   have e_lower_bound : exp (3 / (4 : ℝ) - 1 / 2 * log 2) ∈ lower_bounds (set.range an') :=
   begin
     intros x hx,
-    simp only [set.mem_range] at hx,
+    rw [set.mem_range] at hx,
     cases hx with k hk,
     rw ←hk,
     exact an'_bounded_by_pos_constant k,
