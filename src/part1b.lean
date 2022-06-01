@@ -356,9 +356,6 @@ begin
   exact monotone_convergence (λ (k:ℕ), bn k.succ) bn_antitone bn_has_lower_bound,
 end
 
-/-an_pos can not be proven if we allow n = 0
-corrected version below, but dependent lemmas need to be adjusted-/
-
 --uses an,
 lemma  an'_pos: ∀ (n : ℕ), 0 < an n.succ :=
 begin

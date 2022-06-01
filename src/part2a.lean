@@ -38,7 +38,7 @@ begin
   rw prod_Ico_add wallis_inside_prod 0 k 1,
 end
 
---uses wallis_inside_prod, aux1, 
+--uses wallis_inside_prod, aux1,
 lemma equality1: tendsto (λ (k : ℕ), ∏ i in Ico 1 k.succ,
    wallis_inside_prod i)
     at_top (𝓝 (π/2)) :=
@@ -90,12 +90,12 @@ lemma aux2 (r : ℝ) (d : ℕ):
    ) * (↑(2 * d.succ) / (↑(2 * d.succ) - 1)
    * (↑(2 * d.succ) / ↑(2 * d.succ + 1)))
  :=
-begin 
+begin
   by_cases h : r = 0,
   repeat {rw h},
   simp only [zero_mul, mul_zero],
 
-  have: 2 * ((d : ℝ) + 1) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},  
+  have: 2 * ((d : ℝ) + 1) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},
   have: 2 * (d : ℝ) + 1       ≠ 0, by {norm_cast, exact succ_ne_zero _},
   have: 2 * ((d : ℝ) + 1) - 1 ≠ 0, by {ring_nf, norm_cast, exact succ_ne_zero _},
   field_simp,
@@ -157,7 +157,7 @@ begin
   refl,
   intros d hd,
   rw ←equation4,
-  simp at hd,
+  simp only [mem_Ico] at hd,
   cases hd,
   exact one_le_iff_ne_zero.mp hd_left,
 end
@@ -216,11 +216,11 @@ begin
   have :  (((2 * d + 1 + 1) * ((2 * d + 1) * (2 * d).factorial)):ℝ) ≠ 0,
     begin
     norm_cast,
-    exact mul_ne_zero (succ_ne_zero (2*d+1)) 
+    exact mul_ne_zero (succ_ne_zero (2*d+1))
       ( mul_ne_zero (succ_ne_zero (2*d)) (factorial_ne_zero (2*d))),
     end,
 
-  have : (2 *(d.succ : ℝ) + 1)       ≠ 0, by {norm_cast, exact succ_ne_zero (2*d.succ)}, 
+  have : (2 *(d.succ : ℝ) + 1)       ≠ 0, by {norm_cast, exact succ_ne_zero (2*d.succ)},
   have : (2 * ((d:ℝ) + 1) + 1)       ≠ 0, by {norm_cast, exact succ_ne_zero (2*(d+1))},
   have : (((2 * d).factorial):ℝ) ^ 2 ≠ 0, by {norm_cast, exact pow_ne_zero 2 (factorial_ne_zero (2*d))},
   have : (2 * ((d:ℝ) + 1) - 1)       ≠ 0, by {ring_nf, norm_cast, exact succ_ne_zero (2*d)},
@@ -231,7 +231,7 @@ begin
   generalize  g₁ : (2*d).factorial = y,
   generalize  g₂ : 2^d = z,
   ring_nf,
-  
+
   exact succ_le_succ (zero_le d),
 end
 
