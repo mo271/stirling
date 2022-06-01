@@ -37,7 +37,7 @@ begin
     ((n.succ : ℝ) + 1 / (2 : ℝ)) * log(((n.succ.succ) : ℝ) / (n.succ : ℝ)) - 1,
   begin
     intro n,
-    have h_reorder : ∀ {a b c d e f : ℝ}, 
+    have h_reorder : ∀ {a b c d e f : ℝ},
     a - 1 / (2 : ℝ) * b - c -(d - 1 / (2 : ℝ) * e - f) = (a - d) - 1 / (2 : ℝ) * (b - e) - (c - f),
     by {intros, ring_nf},
     rw [bn_formula, bn_formula, h_reorder],
@@ -95,9 +95,8 @@ begin
     (λ (n : ℕ), ∑ (i : ℕ) in range n.succ,
     (λ (b : ℕ), 1 / (2 * (b : ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ b) i)
     at_top
-    (𝓝 ((↑(m.succ) + 1 / 2) * log (↑(m.succ.succ) / ↑(m.succ)))) := 
+    (𝓝 ((↑(m.succ) + 1 / 2) * log (↑(m.succ.succ) / ↑(m.succ)))) :=
     h_sum₂.comp (tendsto_add_at_top_nat 1),
-  simp only [] at h_sum,
   have split_zero: ∀ (n : ℕ), ∑ (i : ℕ) in range n.succ,
   1 / (2 * (i : ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ i =
   (∑ (i : ℕ) in range n,
@@ -142,16 +141,16 @@ begin
   intro n,
   have h := bn_diff_has_sum n,
   have g : has_sum
-  (λ (k : ℕ), ((1 / (2 * (n.succ : ℝ) + 1)) ^ 2) ^ k.succ) 
+  (λ (k : ℕ), ((1 / (2 * (n.succ : ℝ) + 1)) ^ 2) ^ k.succ)
   ((1 / (2 * n.succ + 1)) ^ 2 / (1 - (1 / (2 * n.succ + 1)) ^ 2)) :=
   begin
     have h_pow_succ := λ (k : ℕ),
     symm (pow_succ ((1 / (2 * ((n : ℝ) + 1) + 1)) ^ 2)  k),
     have h_nonneg: 0 ≤ ((1 / (2 * (n.succ:ℝ) + 1)) ^ 2) :=
     begin
-      simp only [cast_succ, one_div, inv_pow₀, inv_nonneg],
+      rw [cast_succ, one_div, inv_pow₀, inv_nonneg],
       norm_cast,
-      simp only [zero_le'],
+      exact zero_le',
     end,
     have hlt : ((1 / (2 * (n.succ : ℝ) + 1)) ^ 2) < 1 :=
     begin
@@ -184,7 +183,7 @@ begin
     norm_num,
     exact h_geom'',
   end,
-  have hab : 
+  have hab :
     ∀ (k : ℕ), (1 / (2 * (k.succ : ℝ) + 1)) * ((1 / (2 * (n.succ : ℝ) + 1)) ^ 2) ^ k.succ ≤
     ((1 / (2 * (n.succ : ℝ) + 1)) ^ 2) ^ k.succ :=
   begin
@@ -309,9 +308,9 @@ begin
   intro n,
   calc
   bn n.succ ≥ bn 1 - 1 / 4 : sub_le.mp (bn_bounded_aux n)
-   ... = (log ((1 : ℕ).factorial) - 1 / 2 * log (2 * (1 : ℕ)) - (1 : ℕ) * 
+   ... = (log ((1 : ℕ).factorial) - 1 / 2 * log (2 * (1 : ℕ)) - (1 : ℕ) *
           log ((1 : ℕ) / (exp 1))) - 1 / 4 : by rw bn_formula 0
-   ... = 0 - 1 / 2 * log 2 - log (1 / (exp 1)) - 1 / 4 : 
+   ... = 0 - 1 / 2 * log 2 - log (1 / (exp 1)) - 1 / 4 :
       by simp only [factorial_one, cast_one, log_one, one_div, mul_one, log_inv, log_exp, mul_neg]
    ... = -1 / 2 * log 2 - log (1 / (exp 1)) - 1 / 4 : by ring
    ... = -1 / 2 * log 2 + 1 - 1 / 4  : by simp only [one_div, log_inv, log_exp, sub_neg_eq_add]
