@@ -28,41 +28,28 @@ open nat
 -- part 1 of https://proofwiki.org/wiki/Stirling%27s_Formula
 -- first section of part 1
 
+lemma test (b:ℕ) (hb:  b≥ 1): 0≠ b := (one_le_iff_ne_zero.mp hb).symm
 
 lemma tendsto_succ (an : ℕ → ℝ) (a : ℝ): tendsto an at_top (𝓝 a) ↔
 tendsto (λ n : ℕ, (an n.succ)) at_top (𝓝 a) :=
 begin
-  split,
-  {
-    intro h,
-    -- rw tendsto at h,
-    rw tendsto_at_top' at h,
-    rw tendsto_at_top',
-    intros,
-    have g := h s H,
-    cases g with m gm,
-    use m,
-    intro b,
-    intro hb,
-    have hbsucc: b.succ >= m := le_succ_of_le hb,
-    exact gm b.succ hbsucc,
-  },
-  { intro h,
-    -- rw tendsto at h,
-    rw tendsto_at_top' at h,
-    rw tendsto_at_top',
-    intros,
-    have g := h s H,
-    cases g with m gm,
-    use m.succ,
-    intro b,
-    intro hb,
-    cases b,
-    exfalso,
-    exact not_succ_le_zero m hb,
-    have hbm: b >= m := succ_le_succ_iff.mp hb,
-    exact gm b hbm,
-  },
+  have  : (λ n : ℕ, (an n.succ))  = an ∘ succ, by refl,
+  rw this,
+  nth_rewrite_rhs 0 ←tendsto_map'_iff, 
+  have h : map succ at_top = at_top := 
+  begin
+    rw map_at_top_eq_of_gc pred 1,
+        exact @succ_le_succ, 
+      intros a b hb,
+      cases (exists_eq_succ_of_ne_zero (one_le_iff_ne_zero.mp hb)) with d hd,
+      rw [hd, pred_succ],
+      exact succ_le_succ_iff,
+    intros b hb,
+    cases (exists_eq_succ_of_ne_zero (one_le_iff_ne_zero.mp hb)) with d hd,
+    rw hd,
+    rw pred_succ,
+  end,
+  rw h,
 end
 
 
@@ -84,8 +71,8 @@ begin
   have h_min_one_ne_one:  (-1 : ℝ) ≠ ( 1 : ℝ), by linarith,
 
   have h₁, from has_sum_pow_div_log_of_abs_lt_1 hx,
-  have h₂', from has_sum_pow_div_log_of_abs_lt_1 (eq.trans_lt (abs_neg x) hx),
-  replace h₂ :=  (has_sum_mul_left_iff min_one_not_zero).mp h₂',
+  have h₂, from has_sum_pow_div_log_of_abs_lt_1 (eq.trans_lt (abs_neg x) hx),
+  replace h₂ :=  (has_sum_mul_left_iff min_one_not_zero).mp h₂,
   rw [neg_one_mul, neg_neg, sub_neg_eq_add 1 x] at h₂,
   have h₃, from has_sum.add h₂ h₁,
   rw [tactic.ring.add_neg_eq_sub, ←term_def x ] at h₃,
@@ -94,14 +81,10 @@ begin
   rw ←function.injective.has_sum_iff (nat.mul_right_injective two_pos) _ at h₃,
 
   suffices h_term_eq_goal : (term x ∘ g) = (λ k : ℕ, 2*(1 / (2 * (k : ℝ) + 1)) * x^(2 * k  + 1)),
-  begin
-    rw h_term_eq_goal at h₃,
-    exact h₃,
-  end,
+    by {rw h_term_eq_goal at h₃, exact h₃},
 
   apply funext,
   intro n,
-
   rw [function.comp_app],
   simp only [g, term],
   rw odd.neg_pow (⟨n, rfl⟩ :odd (2 * n + 1)) x,
@@ -111,8 +94,7 @@ begin
   intros m hm,
   simp only [range_two_mul, set.mem_set_of_eq] at hm,
   simp only [term],
-  rw [even.neg_pow (even_succ.mpr hm), succ_eq_add_one],
-  ring_nf,
+  rw [even.neg_pow (even_succ.mpr hm), succ_eq_add_one, neg_one_mul, neg_add_self],
 end
 
 --uses nothing?
