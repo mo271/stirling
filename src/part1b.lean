@@ -44,40 +44,33 @@ begin
     repeat {rw [log_div, factorial_succ]},
     push_cast,
     repeat {rw log_mul},
-    ring_nf,
+    --ring_nf,
     rw log_exp,
+    ring_nf,
     all_goals {norm_cast},
-    any_goals {field_simp},
+    all_goals {try {refine mul_ne_zero _ _}, try {exact succ_ne_zero _}},
     any_goals {exact factorial_ne_zero n},
     any_goals {exact exp_ne_zero 1},
   end,
   have h_sum₀, from power_series_ln m.succ (succ_pos m),
   have h_nonzero : (m.succ : ℝ) + 1 / (2 : ℝ) ≠ 0,
-  by {rw cast_succ, field_simp, norm_cast, linarith},
+  by {rw cast_succ, field_simp, norm_cast, linarith}, --there has to be a better way...
   rw has_sum_mul_left_iff h_nonzero at h_sum₀,
-  have h_inner: ∀ (b : ℕ) , (((m.succ : ℝ) + 1 / 2) * (2 * (1 / (2 * ↑b + 1)) *
-      (1 / (2 * ↑(m.succ) + 1)) ^ (2 * b + 1)))
+  have h_inner: ∀ (b : ℕ) , (((m.succ : ℝ) + 1 / 2) * (2 * (1 / (2 * (b : ℝ) + 1)) *
+      (1 / (2 * (m.succ : ℝ) + 1)) ^ (2 * b + 1)))
       = (1 : ℝ) / (2 * (b : ℝ) + 1) * ((1 / (2 * m.succ + 1)) ^ 2) ^ b :=
   begin
     intro b,
-    have hn : ((m.succ : ℝ) > 0), by {norm_cast, exact succ_pos m},
-    generalize hy : (m.succ : ℝ) = y,
+    rw [←pow_mul, pow_add],
+    have : 2 * (b : ℝ) + 1     ≠ 0, by {norm_cast, exact succ_ne_zero (2*b)},
+    have : 2 * (m.succ :ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2*m.succ)},
     field_simp,
-    rw mul_comm,
-    rw pow_add _ _ 1,
-    have hy_pos : 2 * y + 1 > 0,
-      by {linarith},
-    generalize hz : 2 * y + 1 = z,
-    rw hz at hy_pos,
-    rw [← pow_mul, pow_one],
-    rw ← mul_assoc,
-    rw mul_comm _ z,
-    rw div_mul_right,
-    exact ne_of_gt hy_pos,
+    rw mul_comm _ (2 : ℝ),
+    exact mul_rotate' _ _ _,
   end,
   have h_sum₁ : has_sum (λ (b : ℕ),
     ((1 : ℝ) / (2 * (b : ℝ) + 1) * ((1 / (2 * m.succ + 1)) ^ 2) ^ b))
-    (((m.succ : ℝ) + 1 / 2) * log (↑(m.succ.succ) / ↑(m.succ))) :=
+    (((m.succ : ℝ) + 1 / 2) * log ((m.succ.succ : ℝ) / (m.succ : ℝ))) :=
   begin
     refine has_sum.has_sum_of_sum_eq _ h_sum₀,
     intros,
@@ -93,17 +86,17 @@ begin
   have h_sum₂ := has_sum.tendsto_sum_nat h_sum₁,
   have h_sum : tendsto
     (λ (n : ℕ), ∑ (i : ℕ) in range n.succ,
-    (λ (b : ℕ), 1 / (2 * (b : ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ b) i)
+    (λ (b : ℕ), 1 / (2 * (b : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ b) i)
     at_top
-    (𝓝 ((↑(m.succ) + 1 / 2) * log (↑(m.succ.succ) / ↑(m.succ)))) :=
+    (𝓝 (((m.succ : ℝ) + 1 / 2) * log ((m.succ.succ : ℝ) / (m.succ : ℝ)))) :=
     h_sum₂.comp (tendsto_add_at_top_nat 1),
   have split_zero: ∀ (n : ℕ), ∑ (i : ℕ) in range n.succ,
-  1 / (2 * (i : ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ i =
+  1 / (2 * (i : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ i =
   (∑ (i : ℕ) in range n,
-  1 / (2 * (i.succ:ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ i.succ) + 1 :=
+  1 / (2 * (i.succ:ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ i.succ) + 1 :=
   begin
     intro n,
-    rw sum_range_succ' (λ (k : ℕ), 1 / (2 * (k:ℝ) + 1) * ((1 / (2 * ↑(m.succ) + 1)) ^ 2) ^ k) n,
+    rw sum_range_succ' (λ (k : ℕ), 1 / (2 * (k:ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k) n,
     simp only [one_div, cast_succ, inv_pow₀, cast_zero, mul_zero, zero_add, pow_zero,
     inv_one, mul_one, add_left_inj],
   end,
@@ -167,7 +160,7 @@ begin
     norm_num at h_pow_succ,
     have h_geom'' :
       has_sum (λ (b : ℕ), (1 / ((2 * ((n : ℝ) + 1) + 1) ^ 2) ^ b.succ))
-      (1 / (2 * ((n : ℝ) + 1) + 1) ^ 2 * (1 - 1 / (2 * (↑n + 1) + 1) ^ 2)⁻¹) :=
+      (1 / (2 * ((n : ℝ) + 1) + 1) ^ 2 * (1 - 1 / (2 * ((n : ℝ) + 1) + 1) ^ 2)⁻¹) :=
     begin
       refine has_sum.has_sum_of_sum_eq _ h_geom',
       intros,
@@ -212,7 +205,7 @@ bn n.succ - bn n.succ.succ ≤ 1 / (4 * n.succ * n.succ.succ) :=
 begin
   intro n,
   refine le_trans (bn_diff_le_geo_sum n) _,
-  have h₁ : 0 < 4 * (n.succ : ℝ) * ↑(n.succ.succ) :=
+  have h₁ : 0 < 4 * (n.succ : ℝ) * (n.succ.succ : ℝ) :=
   begin
     norm_cast,
     simp only [canonically_ordered_comm_semiring.mul_pos,
@@ -234,8 +227,8 @@ begin
     exact succ_pos n},
   end,
   refine (le_div_iff' h₁).mpr _,
-  rw mul_div (4 * (n.succ : ℝ) * ↑(n.succ.succ))
-    ((1 / (2 * ↑(n.succ) + 1)) ^ 2) (1 - (1 / (2 * (n.succ : ℝ) + 1)) ^ 2),
+  rw mul_div (4 * (n.succ : ℝ) * (n.succ.succ : ℝ))
+    ((1 / (2 * (n.succ : ℝ) + 1)) ^ 2) (1 - (1 / (2 * (n.succ : ℝ) + 1)) ^ 2),
   refine (div_le_one h₂).mpr _,
   norm_num,
   rw mul_div,
@@ -355,7 +348,7 @@ begin
     exact mul_pos n.succ_pos n.factorial_pos,
   end,
   have h₂ : 0 < exp 1 ^ n.succ := (pow_pos ((1 : ℝ).exp_pos)) n.succ,
-  have h₃ : 0 < sqrt (2 : ℝ) * sqrt (↑n + 1) * (↑n + 1) ^ (n + 1) :=
+  have h₃ : 0 < sqrt (2 : ℝ) * sqrt ((n : ℝ) + 1) * ((n : ℝ) + 1) ^ (n + 1) :=
   begin
     apply mul_pos,
     { apply mul_pos,

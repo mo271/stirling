@@ -46,13 +46,14 @@ begin
   begin
     simp [wallis_inside_prod],
     intro i,
-    have hl: (2 : ℝ) * (1 + ↑i) / (2 * (1 + ↑i) - 1) = (2 * ↑i + 2) / (2 * ↑i + 1) :=
+    have hl: (2 : ℝ) * (1 + (i : ℝ)) / (2 * (1 + (i : ℝ)) - 1) =
+      (2 * (i : ℝ) + 2) / (2 * (i : ℝ) + 1) :=
     begin
       refine congr (congr_arg has_div.div _) _,
       ring,
       ring,
     end,
-    have hr: ((2 : ℝ) * (1 + ↑i) / (2 * (1 + ↑i) + 1)) = ((2 * ↑i + 2) / (2 * ↑i + 3)) :=
+    have hr: ((2 : ℝ) * (1 + (i : ℝ)) / (2 * (1 + (i : ℝ)) + 1)) = ((2 * (i : ℝ) + 2) / (2 * (i : ℝ) + 3)) :=
     begin
       refine congr (congr_arg has_div.div _) _,
       ring,
@@ -75,15 +76,15 @@ begin
 end
 
 --uses nothing?
-lemma aux2 (r : ℝ) (d : ℕ) : 1 / ↑(2 * d.succ + 1) * 
-  (r * (↑((2 * d.succ) ^ 2) / (↑(2 * d.succ) - 1) ^ 2)) =
-  (1 / ↑(2 * d + 1) * r) * (↑(2 * d.succ) / (↑(2 * d.succ) - 1) *
-  (↑(2 * d.succ) / ↑(2 * d.succ + 1))) :=
-begin 
+lemma aux2 (r : ℝ) (d : ℕ) : 1 / ((2 * d.succ + 1) : ℝ) *
+  (r * ((((2 * d.succ) ^ 2) : ℝ) / (((2 * d.succ) - 1) : ℝ) ^ 2)) =
+  (1 / ((2 * d + 1) : ℝ) * r) * (((2 * d.succ) : ℝ) / (((2 * d.succ) : ℝ) - 1) *
+  (((2 * d.succ) : ℝ) / ((2 * d.succ + 1) : ℝ))) :=
+begin
   by_cases h : r = 0,
   repeat {rw h},
   simp only [zero_mul, mul_zero],
-  have : 2 * ((d : ℝ) + 1) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},  
+  have : 2 * ((d : ℝ) + 1) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},
   have : 2 * (d : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},
   have : 2 * ((d : ℝ) + 1) - 1 ≠ 0, by {ring_nf, norm_cast, exact succ_ne_zero _},
   field_simp,
@@ -130,8 +131,8 @@ begin
 end
 
 --uses equation 4
-lemma equation4' (n : ℕ) : 1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ, 
-  ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 = 
+lemma equation4' (n : ℕ) : 1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
+  ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 =
   1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
   ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 * ((2 * k) ^ 2 / (2 * k) ^ 2) :=
 begin
@@ -153,8 +154,8 @@ begin
  succ_pos', cast_eq_zero],
  left,
  norm_cast,
- rw mul_pow _ ↑(2 * k),
- rw mul_comm _ (↑(2 * k) ^ 2),
+ rw mul_pow _ ((2 * k) : ℝ),
+ rw mul_comm _ (((2 * k) ^ 2) : ℝ),
  norm_cast,
  repeat {rw mul_assoc},
  rw congr_arg (has_mul.mul (16 : ℝ)) _,
@@ -212,12 +213,12 @@ begin
 end
 
 noncomputable def wn (n : ℕ) : ℝ :=
-  ((2 : ℝ) ^ (4 * n) * (n.factorial) ^ 4) / ((((2 * n).factorial) ^ 2) * (2 * ↑n + 1))
+  ((2 : ℝ) ^ (4 * n) * (n.factorial) ^ 4) / ((((2 * n).factorial) ^ 2) * (2 * (n : ℝ) + 1))
 
 --uses wn, wallis_inside_prod, equality1, equation3, equation4', equation5', equation6
 lemma wallis_consequence: tendsto (λ (n : ℕ), wn n) at_top (𝓝 (π/2)) :=
 begin
-  have h : tendsto (λ (k : ℕ), ∏ i in Ico 1 k.succ, wallis_inside_prod i) at_top (𝓝 (π/2)) := 
+  have h : tendsto (λ (k : ℕ), ∏ i in Ico 1 k.succ, wallis_inside_prod i) at_top (𝓝 (π/2)) :=
     equality1,
   rw tendsto_congr equation3 at h,
   rw tendsto_congr equation4' at h,

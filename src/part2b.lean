@@ -35,7 +35,7 @@ h.comp (tendsto_id.const_mul_at_top' two_pos)
 noncomputable def cn (n : ℕ) : ℝ := ((real.sqrt (2 * n) * ((n / (exp 1)) ^ n)) ^ 4) * 2 ^ (4 * n) /
   (((real.sqrt (4 * n) * (((2 * n) / (exp 1))) ^ (2 * n))) ^ 2 * (2 * n + 1))
 
---uses cn, 
+--uses cn,
 lemma rest_cancel (n : ℕ) : (n : ℝ) / (2 * n + 1) = cn n :=
 begin
   rw cn,
@@ -49,8 +49,8 @@ begin
     norm_cast,
     exact succ_ne_zero (2*n.succ),
   end,
-  have h2 : (4 * (n.succ : ℝ) * ((2 * ↑n.succ / exp 1) ^ 
-    (2 * n.succ)) ^ 2) * (2 * ↑n.succ + 1) ≠ 0 :=
+  have h2 : (4 * (n.succ : ℝ) * ((2 * (n.succ : ℝ) / exp 1) ^
+    (2 * n.succ)) ^ 2) * (2 * (n.succ : ℝ) + 1) ≠ 0 :=
   begin
     refine mul_ne_zero _ h1,
     refine mul_ne_zero _ _,
@@ -77,10 +77,10 @@ lemma rest_has_limit_one_half: tendsto
 (λ (n:ℕ), cn n) at_top (𝓝 (1/2)) :=
 begin
  apply (tendsto.congr rest_cancel),
- have h: tendsto (λ (x : ℕ), (((x:ℝ )/ (2 * ↑x + 1))⁻¹))
+ have h: tendsto (λ (x : ℕ), (((x:ℝ )/ (2 * (x : ℝ) + 1))⁻¹))
  at_top (𝓝 (((1:ℝ ) / 2))⁻¹):=
  begin
-  have hsucc: tendsto (λ (x : ℕ), (((x.succ:ℝ )/ (2 * ↑x.succ + 1))⁻¹))
+  have hsucc: tendsto (λ (x : ℕ), (((x.succ:ℝ )/ (2 * (x.succ : ℝ) + 1))⁻¹))
   at_top (𝓝 (((1:ℝ ) / 2))⁻¹):=
   begin
     -- this indirection (considering the succ) is taken,
@@ -91,7 +91,7 @@ begin
       intro x,
       have hxne: (x.succ : ℝ) ≠ 0 :=
       begin
-        exact nonzero_of_invertible ↑(succ x),
+        exact nonzero_of_invertible (x.succ : ℝ),
       end,
       field_simp,
     end,
@@ -167,15 +167,15 @@ begin
   begin
     intros m hm,
     refine mul_ne_zero _ _,
-    refine sqrt_ne_zero'.mpr _, 
-    norm_cast, 
+    refine sqrt_ne_zero'.mpr _,
+    norm_cast,
     exact nat.mul_pos two_pos (zero_lt_iff.mpr hm),
     apply pow_ne_zero,
     apply div_ne_zero _ (exp_ne_zero 1),
     exact cast_ne_zero.mpr hm,
   end,
   have hn2 : 0 < 2 * n := nat.mul_pos two_pos (zero_lt_iff.mpr hn),
-  have h2 : ((((2 * n).factorial) : ℝ) / (sqrt (2 * (((2 : ℕ) * n) : ℝ))* 
+  have h2 : ((((2 * n).factorial) : ℝ) / (sqrt (2 * (((2 : ℕ) * n) : ℝ))*
     ((((2 : ℕ) * n) : ℝ) / exp 1) ^ (2 * n)) ≠ 0) :=
   begin
     refine div_ne_zero _ _,
@@ -201,8 +201,8 @@ begin
   end,
 
   --this is now longer, but doesn't use an involved simp
-  have h5 : (real.sqrt 2 * sqrt ↑n * ↑n ^ n) ^ 4 * ((((2 * n).factorial)) * exp 1 ^ (2 * n)) ^ 2 *
-   ((exp 1 ^ n) ^ 4 * ((sqrt 4 * sqrt ↑n * (2 * ↑n) ^ (2 * n)) ^ 2 * (2 * n + 1))) ≠ 0 :=
+  have h5 : (real.sqrt 2 * sqrt (n : ℝ) * (n : ℝ) ^ n) ^ 4 * ((((2 * n).factorial)) * exp 1 ^ (2 * n)) ^ 2 *
+   ((exp 1 ^ n) ^ 4 * ((sqrt 4 * sqrt (n : ℝ) * (2 * (n : ℝ)) ^ (2 * n)) ^ 2 * (2 * n + 1))) ≠ 0 :=
    begin
     norm_cast,
     refine mul_ne_zero _ _,
@@ -226,7 +226,7 @@ begin
     apply pow_ne_zero 2,
     refine mul_ne_zero _ _,
     apply mul_ne_zero (sqrt_ne_zero'.mpr four_pos),
-    exact (sqrt_ne_zero'.mpr (cast_pos.mpr (zero_lt_iff.mpr hn))), 
+    exact (sqrt_ne_zero'.mpr (cast_pos.mpr (zero_lt_iff.mpr hn))),
     rw [cast_ne_zero, pow_ne_zero_iff hn2, ← zero_lt_iff],
     exact hn2,
     exact cancel_monoid_with_zero.to_no_zero_divisors,

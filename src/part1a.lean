@@ -60,7 +60,7 @@ lemma term_def  (x : ℝ) : term x = (λ n, ((-1) * ((-x) ^ (n + 1) / ((n : ℝ)
 
 --uses term,
 lemma log_sum_plus_minus (x : ℝ) (hx: |x| < 1) :
-  has_sum (λ k : ℕ, (2 : ℝ) * (1 / (2 * ↑k + 1)) * (x ^ (2 * k + 1))) (log (1 + x) - log(1 - x)) :=
+  has_sum (λ k : ℕ, (2 : ℝ) * (1 / (2 * (k : ℝ) + 1)) * (x ^ (2 * k + 1))) (log (1 + x) - log(1 - x)) :=
 begin
   have min_one_not_zero : (-1 : ℝ) ≠ ( 0 : ℝ), by linarith,
   have h_min_one_ne_one : (-1 : ℝ) ≠ ( 1 : ℝ), by linarith,
@@ -110,7 +110,7 @@ end
 --uses aux_log, log_sum_plus_minus
 lemma power_series_ln (n : ℕ) (hn: 0 < n) : has_sum (λ (k : ℕ),
   (2 : ℝ) * (1 / (2 * (k : ℝ) + 1)) * ((1 / (2 * (n : ℝ) + 1)) ^ (2 * k + 1)))
-  (log (↑n.succ / ↑n)) :=
+  (log ((n.succ : ℝ) / (n : ℝ))) :=
  begin
   have h₀ : 0 < (((2 * n + 1) : ℕ) : ℝ), from (cast_pos.mpr (2 * n).succ_pos),
   have h₁ : |1 / (2 * (n : ℝ) + 1)| < 1 :=
@@ -127,11 +127,11 @@ lemma power_series_ln (n : ℕ) (hn: 0 < n) : has_sum (λ (k : ℕ),
 noncomputable def bn (n : ℕ) : ℝ := log (an n)
 
 --uses nothing
-lemma zero_lt_sqrt_two_n (n : ℕ) (hn : n ≠ 0) : 0 < real.sqrt (2 * ↑n) :=
+lemma zero_lt_sqrt_two_n (n : ℕ) (hn : n ≠ 0) : 0 < real.sqrt (2 * (n : ℝ)) :=
    real.sqrt_pos.mpr (mul_pos two_pos (cast_pos.mpr (zero_lt_iff.mpr hn)))
 
 --uses nothing
-lemma n_div_exp1_pow_gt_zero (n : ℕ) : (↑n / exp 1) ^ n > 0 :=
+lemma n_div_exp1_pow_gt_zero (n : ℕ) : ((n : ℝ) / exp 1) ^ n > 0 :=
 begin
   cases n,
   rw pow_zero,
@@ -140,8 +140,8 @@ begin
 end
 
 --uses bn, n_div_exp1_pow_gt_zero, zero_lt_zwrt_two_n
-lemma bn_formula (n : ℕ): bn n.succ = (log ↑n.succ.factorial) -
-  1 / (2 : ℝ) * (log (2 * ↑n.succ)) - ↑n.succ * log (↑n.succ / (exp 1)) :=
+lemma bn_formula (n : ℕ): bn n.succ = (log (n.succ.factorial :ℝ)) -
+  1 / (2 : ℝ) * (log (2 * (n.succ : ℝ))) - (n.succ : ℝ) * log ((n.succ : ℝ) / (exp 1)) :=
 begin
   have h3, from (lt_iff_le_and_ne.mp (zero_lt_sqrt_two_n n.succ (succ_ne_zero n))),
   have h4, from (lt_iff_le_and_ne.mp (n_div_exp1_pow_gt_zero n.succ)),
