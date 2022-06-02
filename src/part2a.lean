@@ -76,10 +76,10 @@ begin
 end
 
 --uses nothing?
-lemma aux2 (r : ℝ) (d : ℕ) : 1 / ((2 * d.succ + 1) : ℝ) *
-  (r * ((((2 * d.succ) ^ 2) : ℝ) / (((2 * d.succ) - 1) : ℝ) ^ 2)) =
-  (1 / ((2 * d + 1) : ℝ) * r) * (((2 * d.succ) : ℝ) / (((2 * d.succ) : ℝ) - 1) *
-  (((2 * d.succ) : ℝ) / ((2 * d.succ + 1) : ℝ))) :=
+lemma aux2 (r : ℝ) (d : ℕ) : 1 / (((2 * d.succ + 1) : ℕ) : ℝ) *
+  (r * (((((2 * d.succ) ^ 2) : ℕ ): ℝ) / ((((2 * d.succ) : ℕ) : ℝ) - 1)  ^ 2)) =
+  (1 / (((2 * d + 1) : ℕ) : ℝ) * r) * ((((2 * d.succ) : ℕ) : ℝ) / ((((2 * d.succ) : ℕ) : ℝ) - 1) *
+  ((((2 * d.succ) : ℕ) : ℝ) / (((2 * d.succ + 1) : ℕ) : ℝ))) :=
 begin
   by_cases h : r = 0,
   repeat {rw h},
@@ -105,7 +105,7 @@ begin
   rw wallis_inside_prod,
   symmetry,
   rw prod_Ico_succ_top,
-  {norm_cast,rw aux2,},
+  {norm_cast,rw aux2, },
   apply zero_lt_succ,
   apply zero_lt_succ,
 end
@@ -154,8 +154,8 @@ begin
  succ_pos', cast_eq_zero],
  left,
  norm_cast,
- rw mul_pow _ ((2 * k) : ℝ),
- rw mul_comm _ (((2 * k) ^ 2) : ℝ),
+ rw mul_pow _ (((2 * k) : ℕ) : ℝ),
+ rw mul_comm _ ((((2 * k) : ℕ) : ℝ) ^ 2),
  norm_cast,
  repeat {rw mul_assoc},
  rw congr_arg (has_mul.mul (16 : ℝ)) _,
