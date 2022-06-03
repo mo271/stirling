@@ -23,14 +23,16 @@ open nat
 open filter
 
 
-
+/-- Perhaps something to add as rat.cast_sum in more generality (see below) in mathlib?!-/
 lemma rat_cast_sum (s : finset ℕ) (f : ℕ → ℚ) :
   ↑(∑ x in s, f x : ℚ) = (∑ x in s, (f x : ℝ)) :=
   (rat.cast_hom ℝ).map_sum f s
--- @[simp, norm_cast] lemma rat_cast_sum [add_comm_monoid β] [has_one β] (s : finset α) (f : α → ℚ) :
+-- @[simp, norm_cast] lemma rat_cast_sum [add_comm_monoid β] [has_one β]
+-- (s : finset α) (f : α → ℚ) :
 -- ↑(∑ x in s, f x : ℚ) = (∑ x in s, (f x : β)) := by sorry
 
 /-- **Sum of the Reciprocals of the Triangular Numbers** -/
+/-- from archive TODO: include in some form mathlib-/
 lemma inverse_triangle_sum :
   ∀ n, ∑ k in range n, (2 : ℚ) / (k * (k + 1)) = if n = 0 then 0 else 2 - (2 : ℚ) / n :=
 begin
@@ -43,8 +45,6 @@ begin
   ring,
 end
 
-
---TODO: use /archive/100-theorems-list/42_inverse_triangle_sum.lean and delete lemma above.
 lemma partial_sum_consecutive_reciprocals:
  ∀ n, ∑ k in range n, (1 : ℚ) / (k.succ * (k.succ.succ)) ≤ 1 :=
  begin
