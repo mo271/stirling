@@ -321,7 +321,8 @@ begin
    use 3 / (4 : ℝ) - 1 / 2 * log 2,
    intros,
    rw lower_bounds,
-   simp only [set.mem_range, forall_exists_index, forall_apply_eq_imp_iff', set.mem_set_of_eq],
+   rw [set.mem_set_of_eq],
+   simp only [set.mem_range, forall_apply_eq_imp_iff', forall_exists_index],
    exact bn_bounded_by_constant,
 end
 
@@ -346,19 +347,9 @@ lemma an'_pos : ∀ (n : ℕ), 0 < an n.succ :=
 begin
   intro n,
   rw an,
-  have : 0 < (n.succ.factorial : ℝ) := cast_pos.mpr (factorial_pos n.succ),
-  have : 0 < real.sqrt (2 * ↑(n.succ)) :=
-  begin
-    refine (real.sqrt_pos).mpr (mul_pos two_pos _),
-    exact cast_pos.mpr (succ_pos n),
-  end,
-  have : 0 < (↑(n.succ) / exp 1) ^ n.succ :=
-  begin
-    apply pow_pos,
-    refine div_pos _ (exp_pos 1),
-    exact cast_pos.mpr (succ_pos n),
-  end,
-  refine div_pos _ (mul_pos _ _); assumption,
+  exact div_pos (cast_pos.mpr (factorial_pos n.succ))
+    (mul_pos ((real.sqrt_pos).mpr (mul_pos two_pos (cast_pos.mpr (succ_pos n))))
+    (pow_pos (div_pos (cast_pos.mpr (succ_pos n)) (exp_pos 1)) n.succ)),
 end
 
 --uses an, bn_bounded_by_constant
@@ -391,15 +382,9 @@ begin
 end
 
 --uses an'_antitone, an'_has_lower_bound,
-lemma an'_has_limit_a :  ∃ (a : ℝ), tendsto (λ (n : ℕ), an n.succ) at_top (𝓝 a) :=
-begin
-  exact monotone_convergence (λ (k : ℕ), an k.succ) an'_antitone an'_has_lower_bound,
-end
-
---uses an'_has_limit_a
 lemma an_has_limit_a : ∃ (a : ℝ), tendsto (λ (n : ℕ), an n) at_top (𝓝 a) :=
 begin
-  have ha := an'_has_limit_a,
+  have ha := monotone_convergence (λ (k : ℕ), an k.succ) an'_antitone an'_has_lower_bound,
   cases ha with x hx,
   rw ← tendsto_succ an x at hx,
   use x,
@@ -415,7 +400,6 @@ begin
   split,
   let an' : ℕ → ℝ := λ n, an n.succ,
   rw tendsto_succ an a at ha,
-  have a_is_glb : is_glb (set.range an') a := is_glb_of_tendsto_at_top an'_antitone ha,
   have e_lower_bound : exp (3 / (4 : ℝ) - 1 / 2 * log 2) ∈ lower_bounds (set.range an') :=
   begin
     intros x hx,
@@ -424,8 +408,7 @@ begin
     rw ←hk,
     exact an'_bounded_by_pos_constant k,
   end,
-  have e_le : exp (3 / (4 : ℝ) - 1 / 2 * log 2) ≤ a := (le_is_glb_iff a_is_glb).mpr e_lower_bound,
-  have e_pos : 0 < exp (3 / (4 : ℝ) - 1 / 2 * log 2) := (3 / 4 - 1 / 2 * log 2).exp_pos,
-  exact gt_of_ge_of_gt e_le e_pos,
+  exact gt_of_ge_of_gt ((le_is_glb_iff (is_glb_of_tendsto_at_top an'_antitone ha)).mpr
+    e_lower_bound) (3 / 4 - 1 / 2 * log 2).exp_pos,
   exact ha,
 end
