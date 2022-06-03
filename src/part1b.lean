@@ -287,7 +287,14 @@ begin
    begin
      refine (mul_le_mul_left _).mpr _,
      exact div_pos one_pos four_pos,
-     exact partial_sum_consecutive_reciprocals n,
+     have g: (((∑ (k : ℕ) in range n, 1 / ((((k.succ))) * ((k.succ.succ)))):ℚ):ℝ)
+     ≤ ((1:ℚ):ℝ)  :=
+     rat.cast_le.mpr (partial_sum_consecutive_reciprocals n),
+     rw rat_cast_sum at g,
+     rw rat.cast_one at g,
+     push_cast at g,
+     push_cast,
+     exact g,
    end
    ... = 1 / 4 : by rw mul_one,
 end
