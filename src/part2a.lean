@@ -166,35 +166,22 @@ lemma equation6 (n : ℕ) : 1 / ((2 : ℝ) * n + 1) * ∏ (k : ℕ) in Ico 1 n.s
   ((2 : ℝ) ^ (4 * n) * n.factorial ^ 4) / (((2 * n).factorial ^ 2) * (2 * n + 1)) :=
 begin
   induction n with d hd,
-  simp only [cast_zero, mul_zero, zero_add, Ico_self,
-   prod_empty, mul_one, pow_zero, factorial_zero, cast_one,
-    one_pow],
+    rw [Ico_self, prod_empty, cast_zero, mul_zero, mul_zero, mul_zero, factorial_zero],
+    rw [zero_add, pow_zero, cast_one, one_pow, one_pow, mul_one, mul_one],
   replace hd := congr_arg (has_mul.mul (2*(d:ℝ)+1)) hd,
   have : 2 * (d : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2 * d)},
   rw [← mul_assoc, mul_one_div_cancel this, one_mul] at hd,
-  rw prod_Ico_succ_top,
-  rw hd,
-  rw [mul_succ 2],
+  rw [prod_Ico_succ_top (succ_le_succ (zero_le d)), hd, mul_succ 2],
   repeat {rw factorial_succ},
-  have : (((2 * d + 1 + 1) * ((2 * d + 1) * (2 * d).factorial)) : ℝ) ≠ 0,
-    begin
-    norm_cast,
-    exact mul_ne_zero (succ_ne_zero (2 * d + 1))
-      (mul_ne_zero (succ_ne_zero (2 * d)) (factorial_ne_zero (2 * d))),
-    end,
-  have : (2 * (d.succ : ℝ) + 1) ≠ 0, by {norm_cast, exact succ_ne_zero (2 * d.succ)},
-  have : (2 * ((d : ℝ) + 1) + 1) ≠ 0, by {norm_cast, exact succ_ne_zero (2 * (d + 1))},
-  have : (((2 * d).factorial) : ℝ) ^ 2 ≠ 0,
-    by {norm_cast, exact pow_ne_zero 2 (factorial_ne_zero (2 * d))},
-  have : (2 * ((d : ℝ) + 1) - 1) ≠ 0, by {ring_nf, norm_cast, exact succ_ne_zero (2 * d)},
-  have : (2 * ((d : ℝ) + 1)) ≠ 0, by {norm_cast, exact (mul_ne_zero two_ne_zero (succ_ne_zero d))},
+  have : 2 * (d:ℝ) + 1 + 1  ≠ 0, by {norm_cast, exact succ_ne_zero (2 * d + 1)},
+  have : 2 * (d.succ : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2 * d.succ)},
+  have : 2 * ((d : ℝ) + 1) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2 * (d + 1))},
+  have : ((2 * d).factorial : ℝ)  ≠ 0, by {norm_cast, exact factorial_ne_zero (2 * d)},
+  have : 2 * ((d : ℝ) + 1) - 1 ≠ 0, by {ring_nf, norm_cast, exact succ_ne_zero (2 * d)},
+  have : 2 * ((d : ℝ) + 1) ≠ 0, by {norm_cast, exact mul_ne_zero two_ne_zero (succ_ne_zero d)},
   field_simp,
   rw [mul_succ 4 d, pow_add _ (4 * d) 4],
-  generalize g₀ : d.factorial = x,
-  generalize g₁ : (2 * d).factorial = y,
-  generalize g₂ : 2 ^ d = z,
-  ring_nf,
-  exact succ_le_succ (zero_le d),
+  ring_nf, --this one might be quite heavy without "generalize" before
 end
 
 noncomputable def wn (n : ℕ) : ℝ :=
