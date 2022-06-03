@@ -121,7 +121,7 @@ lemma power_series_ln (n : ℕ) (hn: 0 < n) : has_sum (λ (k : ℕ),
     exact div_pos one_pos h₀,
   end,
   rw aux_log n (ne_of_gt hn),
-    exact log_sum_plus_minus (1 / (2 * (n : ℝ) + 1)) h₁,
+  exact log_sum_plus_minus (1 / (2 * (n : ℝ) + 1)) h₁,
  end
 
 noncomputable def bn (n : ℕ) : ℝ := log (an n)
