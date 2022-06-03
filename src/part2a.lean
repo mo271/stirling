@@ -134,18 +134,19 @@ end
 lemma equation5 (n : ℕ) : ((2 : ℝ) * n) ^ 2 / (2 * n - 1) ^ 2 * ((2 * n) ^ 2 / (2 * n) ^ 2) =
   ((2 : ℝ) ^ 4 * n ^ 4) / (((2 * n - 1) * (2 * n)) ^ 2) :=
 begin
+  cases n with d hd,
+    rw [cast_zero, mul_zero, zero_pow two_pos, zero_div, zero_mul],
+    rw [zero_pow four_pos, mul_zero, zero_div],
+  have : 2 * (d.succ : ℝ) - 1 ≠ 0 :=
+  begin
+    rw [cast_succ],
+    ring_nf,
+    norm_cast,
+    exact succ_ne_zero (2*d),
+  end,
+  have : (d.succ : ℝ) ≠ 0 := cast_ne_zero.mpr (succ_ne_zero d),
+ field_simp,
  ring_nf,
- simp only [mul_eq_mul_right_iff, pow_eq_zero_iff,
- succ_pos', cast_eq_zero],
- left,
- norm_cast,
- rw mul_pow _ (((2 * n) : ℕ) : ℝ),
- rw mul_comm _ ((((2 * n) : ℕ) : ℝ) ^ 2),
- norm_cast,
- repeat {rw mul_assoc},
- rw congr_arg (has_mul.mul (16 : ℝ)) _,
- simp only [cast_pow, cast_mul, cast_bit0, cast_one],
- rw ←mul_inv₀,
 end
 
 --uses equation5,
