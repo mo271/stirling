@@ -55,7 +55,7 @@ noncomputable def an (n : ℕ) : ℝ := (n.factorial : ℝ) / ((real.sqrt(2 * n)
 noncomputable def term (x : ℝ) (n : ℕ) : ℝ :=
   ((-1) * ((-x) ^ (n + 1) / ((n : ℝ) + 1)) + (x ^ (n + 1) / ((n : ℝ) + 1)))
 
-lemma term_def  (x : ℝ) : term x = (λ n, ((-1) * ((-x) ^ (n + 1) / ((n : ℝ) + 1)) +
+lemma term_def (x : ℝ) : term x = (λ n, ((-1) * ((-x) ^ (n + 1) / ((n : ℝ) + 1)) +
   (x ^ (n + 1) / ((n : ℝ) + 1)))) := by refl
 
 --uses term,
@@ -140,7 +140,7 @@ begin
 end
 
 --uses bn, n_div_exp1_pow_gt_zero, zero_lt_zwrt_two_n
-lemma bn_formula (n : ℕ): bn n.succ = (log (n.succ.factorial :ℝ)) -
+lemma bn_formula (n : ℕ): bn n.succ = (log (n.succ.factorial : ℝ)) -
   1 / (2 : ℝ) * (log (2 * (n.succ : ℝ))) - (n.succ : ℝ) * log ((n.succ : ℝ) / (exp 1)) :=
 begin
   have h3, from (lt_iff_le_and_ne.mp (zero_lt_sqrt_two_n n.succ (succ_ne_zero n))),

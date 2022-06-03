@@ -110,7 +110,7 @@ begin
 end
 
 --uses bn, bn_diff_has_sum
-lemma bn_antitone : ∀ (a b : ℕ), a ≤ b → bn b.succ ≤ bn a.succ :=
+lemma bn_antitone : ∀ (n m : ℕ), n ≤ m → bn m.succ ≤ bn n.succ :=
 begin
   apply antitone_nat_of_succ_le,
   intro n,
@@ -119,12 +119,12 @@ begin
   refine has_sum.nonneg _ (bn_diff_has_sum n),
   norm_num,
   simp only [one_div],
-  intro b,
+  intro m,
   refine mul_nonneg _ _,
   all_goals {refine inv_nonneg.mpr _},
   all_goals {norm_cast},
-  exact zero_le (2 * (b + 1) + 1),
-  exact zero_le (((2 * (n + 1) + 1) ^ 2) ^ succ b),
+  exact zero_le (2 * (m + 1) + 1),
+  exact zero_le (((2 * (n + 1) + 1) ^ 2) ^ succ m),
 end
 
 --uses bn, bn_diff_has_sum,
@@ -187,7 +187,7 @@ begin
       norm_cast,
       exact zero_le',
     end,
-    have h_left : 1 / (2 * (k.succ:ℝ) + 1) ≤ 1 :=
+    have h_left : 1 / (2 * (k.succ : ℝ) + 1) ≤ 1 :=
     begin
       simp only [cast_succ, one_div],
       refine inv_le_one _,
@@ -319,8 +319,8 @@ begin
 end
 
 --not in lib?
-lemma monotone_convergence (bn : ℕ → ℝ) (h_sd: ∀ (a b : ℕ), a ≤ b → bn b ≤ bn a)
-  (h_bounded : (lower_bounds (set.range bn)).nonempty) : ∃ (b : ℝ), tendsto bn at_top (𝓝 b) :=
+lemma monotone_convergence (bn : ℕ → ℝ) (h_sd: ∀ (n m : ℕ), n ≤ m → bn m ≤ bn n)
+  (h_bounded : (lower_bounds (set.range bn)).nonempty) : ∃ (m : ℝ), tendsto bn at_top (𝓝 m) :=
 begin
  use Inf (set.range bn),
  refine tendsto_at_top_is_glb h_sd (real.is_glb_Inf (set.range bn)
@@ -328,8 +328,8 @@ begin
 end
 
 --uses bn, bn_antitone, bn_has_lower_bound
-lemma bn_has_limit_b : ∃ (b : ℝ),
-tendsto (λ (n : ℕ),  bn n.succ) at_top (𝓝 b) :=
+lemma bn_has_limit_b : ∃ (n : ℝ),
+tendsto (λ (m : ℕ),  bn m.succ) at_top (𝓝 n) :=
 begin
   exact monotone_convergence (λ (k : ℕ), bn k.succ) bn_antitone bn_has_lower_bound,
 end
@@ -339,13 +339,13 @@ lemma an'_pos : ∀ (n : ℕ), 0 < an n.succ :=
 begin
   intro n,
   rw an,
-  have : 0 < (n.succ.factorial :ℝ) := cast_pos.mpr (factorial_pos n.succ),
+  have : 0 < (n.succ.factorial : ℝ) := cast_pos.mpr (factorial_pos n.succ),
   have : 0 < real.sqrt (2 * ↑(n.succ)) :=
   begin
     refine (real.sqrt_pos).mpr (mul_pos two_pos _),
     exact cast_pos.mpr (succ_pos n),
   end,
-  have : 0 <(↑(n.succ) / exp 1) ^ n.succ :=
+  have : 0 < (↑(n.succ) / exp 1) ^ n.succ :=
   begin
     apply pow_pos,
     refine div_pos _ (exp_pos 1),
@@ -363,14 +363,14 @@ begin
 end
 
 --uses an, bn, bn_antitone, an'
-lemma an'_antitone : ∀ (a b : ℕ), a ≤ b → an b.succ ≤ an a.succ :=
+lemma an'_antitone : ∀ (n m : ℕ), n ≤ m → an m.succ ≤ an n.succ :=
 begin
-  intros a b,
+  intros n m,
   intro hab,
-  have h := bn_antitone a b hab,
+  have h := bn_antitone n m hab,
   rw bn at h,
   rw bn at h,
-  exact (log_le_log (an'_pos b) (an'_pos a)).mp h,
+  exact (log_le_log (an'_pos m) (an'_pos n)).mp h,
 end
 
 --uses an, an'_bounded_by_pos_constant

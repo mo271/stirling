@@ -49,7 +49,7 @@ begin
     norm_cast,
     exact succ_ne_zero (2*n.succ),
   end,
-  have h₂: exp 1  ≠ 0, from exp_ne_zero 1,
+  have h₂ : exp 1 ≠ 0, from exp_ne_zero 1,
   have h₃ : (n.succ : ℝ) ≠ 0, by exact cast_ne_zero.mpr (succ_ne_zero n),
   field_simp,
   repeat {rw [← pow_mul]},
@@ -60,49 +60,44 @@ begin
 end
 
 --uses : cn, rest_cancel ,
-lemma rest_has_limit_one_half: tendsto
-(λ (n:ℕ), cn n) at_top (𝓝 (1/2)) :=
+lemma rest_has_limit_one_half: tendsto (λ (n : ℕ), cn n) at_top (𝓝 (1 / 2)) :=
 begin
- apply (tendsto.congr rest_cancel),
- have h: tendsto (λ (x : ℕ), (((x:ℝ )/ (2 * (x : ℝ) + 1))⁻¹))
- at_top (𝓝 (((1:ℝ ) / 2))⁻¹):=
- begin
-  have hsucc: tendsto (λ (x : ℕ), (((x.succ:ℝ )/ (2 * (x.succ : ℝ) + 1))⁻¹))
-  at_top (𝓝 (((1:ℝ ) / 2))⁻¹):=
+  apply (tendsto.congr rest_cancel),
+  have h : tendsto (λ (x : ℕ), (((x : ℝ) / (2 * (x : ℝ) + 1))⁻¹))
+    at_top (𝓝 (((1 : ℝ) / 2))⁻¹) :=
   begin
-    -- this indirection (considering the succ) is taken,
-    -- becuase otherwise we would have a hard time
-    -- proving hxne
-    have hx: ∀ (x:ℕ), (2:ℝ) + x.succ⁻¹ = ((x.succ : ℝ) / (2 * x.succ + 1))⁻¹  :=
+    have hsucc: tendsto (λ (x : ℕ), (((x.succ : ℝ) / (2 * (x.succ : ℝ) + 1))⁻¹)) at_top 
+      (𝓝 (((1 : ℝ) / 2))⁻¹) :=
     begin
-      intro x,
-      have hxne: (x.succ : ℝ) ≠ 0 :=
+      have hx: ∀ (x : ℕ), (2 : ℝ) + x.succ⁻¹ = ((x.succ : ℝ) / (2 * x.succ + 1))⁻¹ :=
       begin
-        exact nonzero_of_invertible (x.succ : ℝ),
+        intro x,
+        have hxne : (x.succ : ℝ) ≠ 0 :=
+        begin
+          exact nonzero_of_invertible (x.succ : ℝ),
+        end,
+        field_simp,
       end,
-      field_simp,
+      simp only [one_div, inv_inv],
+      apply (tendsto.congr hx),
+      have h_right : tendsto (λ (x : ℕ), ((x : ℝ))⁻¹) at_top (𝓝 0) :=
+        tendsto_inverse_at_top_nhds_0_nat,
+      have h_left : tendsto (λ (x : ℕ), ((2 : ℝ))) at_top (𝓝 2) := tendsto_const_nhds,
+      have g := tendsto.add h_left ((tendsto_add_at_top_iff_nat 1).mpr h_right),
+      simp only [add_zero] at g,
+      exact g,
     end,
-    simp only [one_div, inv_inv],
-    apply (tendsto.congr (hx)),
-    have h_right: tendsto (λ (x : ℕ), ((x : ℝ))⁻¹) at_top (𝓝 0)
-      :=tendsto_inverse_at_top_nhds_0_nat,
-    have h_left: tendsto (λ (x : ℕ), ((2 : ℝ))) at_top (𝓝 2):=
-  tendsto_const_nhds,
-    have g:= tendsto.add h_left ((tendsto_add_at_top_iff_nat 1).mpr h_right),
-    simp only [add_zero] at g,
-    exact g,
+    exact (tendsto_add_at_top_iff_nat 1).mp hsucc,
   end,
-  exact (tendsto_add_at_top_iff_nat 1).mp hsucc,
- end,
- have h2: ((1:ℝ )/2)⁻¹ ≠ 0 :=
- begin
-   simp only [one_div, inv_inv, ne.def, bit0_eq_zero,
-   one_ne_zero, not_false_iff],
- end,
- have g:= tendsto.inv₀ h h2,
- simp only [inv_inv, one_div] at g,
- simp only [one_div],
- exact g,
+  have h2: ((1 : ℝ) / 2)⁻¹ ≠ 0 :=
+  begin
+    simp only [one_div, inv_inv, ne.def, bit0_eq_zero,
+    one_ne_zero, not_false_iff],
+  end,
+  have g:= tendsto.inv₀ h h2,
+  simp only [inv_inv, one_div] at g,
+  simp only [one_div],
+  exact g,
 end
 
 --uses an,
@@ -113,7 +108,7 @@ begin
 end
 
 --uses : an
-lemma an_aux3 (a : ℝ) (hane: a ≠ 0) (ha : tendsto (λ (n : ℕ),  an n) at_top (𝓝  a)) :
+lemma an_aux3 (a : ℝ) (hane: a ≠ 0) (ha : tendsto (λ (n : ℕ), an n) at_top (𝓝  a)) :
   tendsto (λ (n : ℕ), (1 / (an n)) ^ 2) at_top (𝓝 ((1 / a) ^ 2)) :=
 begin
  have h := tendsto.inv₀ ha hane,
@@ -136,13 +131,11 @@ end
 lemma expand_in_limit (n : ℕ) (hn : n ≠ 0) : (an n) ^ 4 * (1 / (an (2 * n))) ^ 2 * cn n = wn n :=
 begin
   rw [an, an, cn, wn],
-
   have : (4 : ℝ) = (2 : ℝ) * 2, by norm_cast,
   rw this,
   rw [cast_mul 2 n, cast_two, ←mul_assoc],
   rw sqrt_mul (mul_self_nonneg 2) (n : ℝ),
   rw sqrt_mul_self zero_le_two,
-
   have h₀ : (n : ℝ) ≠ 0, from cast_ne_zero.mpr hn,
   have h₁ : sqrt (2 * (n : ℝ)) ≠ 0,
     from sqrt_ne_zero'.mpr (mul_pos two_pos (cast_pos.mpr (zero_lt_iff.mpr hn))),
@@ -154,7 +147,6 @@ begin
   have h₆ : sqrt (4 * (n : ℝ)) ≠ 0,
     from sqrt_ne_zero'.mpr (mul_pos four_pos (cast_pos.mpr (zero_lt_iff.mpr hn))),
   have h₇ : 2 * (n : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2*n)},
-
   field_simp,
   ring_nf,
 end
@@ -169,12 +161,12 @@ lemma expand_in_limit' (n : ℕ) :
 
 --uses: rest_has_limit_one_half, expand_in_limit', wn, an_aux1, an_aux4
 lemma second_wallis_limit (a : ℝ) (hane : a ≠ 0) (ha : tendsto an at_top (𝓝 a)) :
-  tendsto wn at_top (𝓝 (a^2/2)):=
+  tendsto wn at_top (𝓝 (a ^ 2 / 2)):=
 begin
   rw tendsto_succ wn (a ^ 2 / 2),
   apply tendsto.congr expand_in_limit',
   let qn := λ (x : ℕ), an x ^ 4 * (1 / an (2 * x)) ^ 2 * cn x,
-  have hqn : ∀  (x : ℕ), qn x.succ = an x.succ ^ 4 * (1 / an (2 * x.succ)) ^ 2 * cn x.succ := by tauto,
+  have hqn : ∀ (x : ℕ), qn x.succ = an x.succ ^ 4 * (1 / an (2 * x.succ)) ^ 2 * cn x.succ := by tauto,
   apply tendsto.congr hqn,
   rw ←tendsto_succ qn (a ^ 2 / 2),
   have hcn := rest_has_limit_one_half,

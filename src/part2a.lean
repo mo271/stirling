@@ -76,17 +76,17 @@ begin
 end
 
 --uses nothing?
-lemma aux2 (r : ℝ) (d : ℕ) : 1 / (((2 * d.succ + 1) : ℕ) : ℝ) *
-  (r * (((((2 * d.succ) ^ 2) : ℕ ): ℝ) / ((((2 * d.succ) : ℕ) : ℝ) - 1)  ^ 2)) =
-  (1 / (((2 * d + 1) : ℕ) : ℝ) * r) * ((((2 * d.succ) : ℕ) : ℝ) / ((((2 * d.succ) : ℕ) : ℝ) - 1) *
-  ((((2 * d.succ) : ℕ) : ℝ) / (((2 * d.succ + 1) : ℕ) : ℝ))) :=
+lemma aux2 (r : ℝ) (n : ℕ) : 1 / (((2 * n.succ + 1) : ℕ) : ℝ) *
+  (r * (((((2 * n.succ) ^ 2) : ℕ ): ℝ) / ((((2 * n.succ) : ℕ) : ℝ) - 1)  ^ 2)) =
+  (1 / (((2 * n + 1) : ℕ) : ℝ) * r) * ((((2 * n.succ) : ℕ) : ℝ) / ((((2 * n.succ) : ℕ) : ℝ) - 1) *
+  ((((2 * n.succ) : ℕ) : ℝ) / (((2 * n.succ + 1) : ℕ) : ℝ))) :=
 begin
   by_cases h : r = 0,
   repeat {rw h},
   simp only [zero_mul, mul_zero],
-  have : 2 * ((d : ℝ) + 1) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},
-  have : 2 * (d : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},
-  have : 2 * ((d : ℝ) + 1) - 1 ≠ 0, by {ring_nf, norm_cast, exact succ_ne_zero _},
+  have : 2 * ((n : ℝ) + 1) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},
+  have : 2 * (n : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},
+  have : 2 * ((n : ℝ) + 1) - 1 ≠ 0, by {ring_nf, norm_cast, exact succ_ne_zero _},
   field_simp,
   ring_nf,
 end
@@ -111,10 +111,10 @@ begin
 end
 
 --uses nothing?
-lemma equation4 (k : ℕ) (hk : k ≠ 0) : ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 =
-  ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 * ((2 * k) ^ 2 / (2 * k) ^ 2) :=
+lemma equation4 (n : ℕ) (hk : n ≠ 0) : ((2 : ℝ) * n) ^ 2 / (2 * n - 1) ^ 2 =
+  ((2 : ℝ) * n) ^ 2 / (2 * n - 1) ^ 2 * ((2 * n) ^ 2 / (2 * n) ^ 2) :=
 begin
-  have hk2 : ((2 : ℝ) * k) ^ 2 ≠ 0,
+  have hk2 : ((2 : ℝ) * n) ^ 2 ≠ 0,
     from pow_ne_zero 2 (mul_ne_zero two_ne_zero (cast_ne_zero.mpr hk)),
   rw div_self hk2,
   rw mul_one,
@@ -135,16 +135,16 @@ begin
 end
 
 --uses nothing?
-lemma equation5 (k : ℕ) : ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 * ((2 * k) ^ 2 / (2 * k) ^ 2) =
-  ((2 : ℝ) ^ 4 * k ^ 4) / (((2 * k - 1) * (2 * k)) ^ 2) :=
+lemma equation5 (n : ℕ) : ((2 : ℝ) * n) ^ 2 / (2 * n - 1) ^ 2 * ((2 * n) ^ 2 / (2 * n) ^ 2) =
+  ((2 : ℝ) ^ 4 * n ^ 4) / (((2 * n - 1) * (2 * n)) ^ 2) :=
 begin
  ring_nf,
  simp only [mul_eq_mul_right_iff, pow_eq_zero_iff,
  succ_pos', cast_eq_zero],
  left,
  norm_cast,
- rw mul_pow _ (((2 * k) : ℕ) : ℝ),
- rw mul_comm _ ((((2 * k) : ℕ) : ℝ) ^ 2),
+ rw mul_pow _ (((2 * n) : ℕ) : ℝ),
+ rw mul_comm _ ((((2 * n) : ℕ) : ℝ) ^ 2),
  norm_cast,
  repeat {rw mul_assoc},
  rw congr_arg (has_mul.mul (16 : ℝ)) _,
