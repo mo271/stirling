@@ -98,16 +98,13 @@ begin
   induction n with d hd,
   simp only [Ico_self, prod_empty, cast_zero, mul_zero,
   zero_add, div_one, mul_one],
-  rw succ_eq_add_one,
+  rw [succ_eq_add_one],
   norm_cast,
-  rw prod_Ico_succ_top,
-  rw hd,
-  rw wallis_inside_prod,
+  rw [prod_Ico_succ_top, hd, wallis_inside_prod],
   symmetry,
   rw prod_Ico_succ_top,
   {norm_cast,rw aux2, },
-  apply zero_lt_succ,
-  apply zero_lt_succ,
+  all_goals {apply zero_lt_succ},
 end
 
 --uses nothing?
@@ -126,8 +123,7 @@ lemma equation4' (n : ℕ) : 1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
   1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
   ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 * ((2 * k) ^ 2 / (2 * k) ^ 2) :=
 begin
-  rw prod_congr,
-  refl,
+  rw prod_congr rfl,
   intros d hd,
   rw ←equation4,
   rw mem_Ico at hd,
@@ -158,8 +154,7 @@ lemma equation5' (n : ℕ) : 1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
   1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
   ((2 : ℝ) ^ 4 * k ^ 4) / (((2 * k - 1) * (2 * k)) ^ 2) :=
 begin
-  rw prod_congr,
-  refl,
+  rw prod_congr rfl,
   intros d hd,
   rw ←equation5,
 end

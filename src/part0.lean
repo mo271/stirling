@@ -31,8 +31,8 @@ lemma rat_cast_sum (s : finset ℕ) (f : ℕ → ℚ) :
 -- (s : finset α) (f : α → ℚ) :
 -- ↑(∑ x in s, f x : ℚ) = (∑ x in s, (f x : β)) := by sorry
 
-/-- **Sum of the Reciprocals of the Triangular Numbers** -/
-/-- from archive TODO: include in some form mathlib-/
+/-- **Sum of the Reciprocals of the Triangular Numbers**
+ from archive TODO: include in some form mathlib-/
 lemma inverse_triangle_sum :
   ∀ n, ∑ k in range n, (2 : ℚ) / (k * (k + 1)) = if n = 0 then 0 else 2 - (2 : ℚ) / n :=
 begin

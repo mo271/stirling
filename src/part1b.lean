@@ -105,8 +105,8 @@ begin
   simp only [add_neg_cancel_right] at h_sum,
   rw tactic.ring.add_neg_eq_sub _ (1 : ℝ) at h_sum,
   rw ← hx at h_sum,
-  refine (summable.has_sum_iff_tendsto_nat _).mpr h_sum,
-  exact (summable_nat_add_iff 1).mpr (has_sum.summable h_sum₁),
+  refine (summable.has_sum_iff_tendsto_nat
+    ((summable_nat_add_iff 1).mpr (has_sum.summable h_sum₁))).mpr h_sum,
 end
 
 --uses bn, bn_diff_has_sum
@@ -204,7 +204,6 @@ lemma bn_sub_bn_succ : ∀ (n : ℕ),
 bn n.succ - bn n.succ.succ ≤ 1 / (4 * n.succ * n.succ.succ) :=
 begin
   intro n,
-  refine le_trans (bn_diff_le_geo_sum n) _,
   have h₁ : 0 < 4 * (n.succ : ℝ) * (n.succ.succ : ℝ) :=
   begin
     norm_cast,
@@ -226,7 +225,7 @@ begin
     refine (1 : ℕ).succ_mul_pos _,
     exact succ_pos n},
   end,
-  refine (le_div_iff' h₁).mpr _,
+  refine le_trans (bn_diff_le_geo_sum n) ((le_div_iff' h₁).mpr _),
   rw mul_div (4 * (n.succ : ℝ) * (n.succ.succ : ℝ))
     ((1 / (2 * (n.succ : ℝ) + 1)) ^ 2) (1 - (1 / (2 * (n.succ : ℝ) + 1)) ^ 2),
   refine (div_le_one h₂).mpr _,
@@ -244,9 +243,8 @@ begin
   norm_num,
   refine le_sub.mp _,
   rw mul_one_div,
-  refine (div_le_iff' h₃).mpr _,
-  refine (le_mul_iff_one_le_right h₃).mpr _,
-  refine le_sub_iff_add_le.mpr _,
+  refine (div_le_iff' h₃).mpr ((le_mul_iff_one_le_right h₃).mpr
+    (le_sub_iff_add_le.mpr _)),
   norm_cast,
   rw sq,
   linarith,

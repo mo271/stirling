@@ -66,16 +66,13 @@ begin
   have h : tendsto (λ (x : ℕ), (((x : ℝ) / (2 * (x : ℝ) + 1))⁻¹))
     at_top (𝓝 (((1 : ℝ) / 2))⁻¹) :=
   begin
-    have hsucc: tendsto (λ (x : ℕ), (((x.succ : ℝ) / (2 * (x.succ : ℝ) + 1))⁻¹)) at_top 
+    have hsucc: tendsto (λ (x : ℕ), (((x.succ : ℝ) / (2 * (x.succ : ℝ) + 1))⁻¹)) at_top
       (𝓝 (((1 : ℝ) / 2))⁻¹) :=
     begin
       have hx: ∀ (x : ℕ), (2 : ℝ) + x.succ⁻¹ = ((x.succ : ℝ) / (2 * x.succ + 1))⁻¹ :=
       begin
         intro x,
-        have hxne : (x.succ : ℝ) ≠ 0 :=
-        begin
-          exact nonzero_of_invertible (x.succ : ℝ),
-        end,
+        have hxne : (x.succ : ℝ) ≠ 0 := nonzero_of_invertible (x.succ : ℝ),
         field_simp,
       end,
       simp only [one_div, inv_inv],
@@ -100,13 +97,6 @@ begin
   exact g,
 end
 
---uses an,
-lemma an_aux1 (a : ℝ) (ha : tendsto (λ (n : ℕ),  an n) at_top (𝓝  a)) :
-  tendsto (λ (n : ℕ), (an n) ^ 4) at_top (𝓝 (a ^ 4)) :=
-begin
- exact tendsto.pow ha 4,
-end
-
 --uses : an
 lemma an_aux3 (a : ℝ) (hane: a ≠ 0) (ha : tendsto (λ (n : ℕ), an n) at_top (𝓝  a)) :
   tendsto (λ (n : ℕ), (1 / (an n)) ^ 2) at_top (𝓝 ((1 / a) ^ 2)) :=
@@ -125,8 +115,6 @@ end
 
 
 --uses: an, cn, wn -- that's it??
--- added the assumption hn. Without that the statement is false (I think).
--- With the new assumption, the lemma below does not work anymore...
 --One can still save some calculations by reordering the haves
 lemma expand_in_limit (n : ℕ) (hn : n ≠ 0) : (an n) ^ 4 * (1 / (an (2 * n))) ^ 2 * cn n = wn n :=
 begin
@@ -155,11 +143,10 @@ end
 lemma expand_in_limit' (n : ℕ) :
   (an n.succ) ^ 4 * (1 / (an (2 * n.succ))) ^ 2 * cn n.succ = wn n.succ :=
  begin
-   have hn: n.succ ≠ 0 := succ_ne_zero n,
-   exact expand_in_limit n.succ hn,
+   exact expand_in_limit n.succ (succ_ne_zero n),
  end
 
---uses: rest_has_limit_one_half, expand_in_limit', wn, an_aux1, an_aux4
+--uses: rest_has_limit_one_half, expand_in_limit', wn, an_aux4
 lemma second_wallis_limit (a : ℝ) (hane : a ≠ 0) (ha : tendsto an at_top (𝓝 a)) :
   tendsto wn at_top (𝓝 (a ^ 2 / 2)):=
 begin
@@ -169,11 +156,10 @@ begin
   have hqn : ∀ (x : ℕ), qn x.succ = an x.succ ^ 4 * (1 / an (2 * x.succ)) ^ 2 * cn x.succ := by tauto,
   apply tendsto.congr hqn,
   rw ←tendsto_succ qn (a ^ 2 / 2),
-  have hcn := rest_has_limit_one_half,
   have has : tendsto (λ (n : ℕ), an n ^ 4 * (1 / an (2 * n)) ^ 2) at_top (𝓝 (a ^ 2)) :=
   begin
     have haright := sub_seq_tendsto (an_aux3 a hane ha),
-    have haleft := an_aux1 a ha,
+    have haleft := (tendsto.pow ha 4),
     have g := tendsto.mul  haleft haright,
     have a_pow : a ^ 4 * (1 / a) ^ 2  = a ^ 2 :=
     begin
@@ -183,37 +169,24 @@ begin
     rw a_pow at g,
     exact g,
   end,
-  have h := tendsto.mul has hcn,
+  have h := tendsto.mul has rest_has_limit_one_half,
   rw one_div (2 : ℝ) at h,
   rw div_eq_mul_inv _,
   exact h,
 end
 
 --uses : second_wallis_limit, wallis_consequence, an
-lemma pi_and_a (a : ℝ) (hane : a ≠ 0) (ha : tendsto (λ (n : ℕ),  an n) at_top (𝓝  a)) :
-  π / 2 = a ^ 2 / 2 :=
-begin
-  have h := second_wallis_limit a hane ha,
-  have g := wallis_consequence,
-  exact tendsto_nhds_unique g h,
-end
-
-
 --uses : an_has_pos_limit_a,  pi_and_a, an
 lemma an_has_limit_sqrt_pi : tendsto (λ (n : ℕ), an n) at_top (𝓝 (sqrt π)) :=
 begin
   have ha := an_has_pos_limit_a,
   cases ha with a ha,
   cases ha with hapos halimit,
-  have hπ : π / 2 = a ^ 2 / 2 := pi_and_a a _ halimit,
+  have hπ : π / 2 = a ^ 2 / 2 := tendsto_nhds_unique wallis_consequence
+    (second_wallis_limit a (ne_of_gt hapos) halimit),
   field_simp at hπ,
-  have zero_le_pi: 0 ≤ π :=
-  begin
-    exact le_of_lt pi_pos,
-  end,
-  rw ← (sq_sqrt zero_le_pi) at hπ,
+  rw ← (sq_sqrt (le_of_lt pi_pos)) at hπ,
   have h := (sq_eq_sq (sqrt_nonneg π) (le_of_lt hapos)).mp hπ,
   rw ← h at halimit,
   exact halimit,
-  exact ne_of_gt hapos,
 end
