@@ -25,7 +25,7 @@ open filter
 
 /-- Perhaps something to add as rat.cast_sum in more generality (see below) in mathlib?!-/
 lemma rat_cast_sum (s : finset ℕ) (f : ℕ → ℚ) :
-  ↑(∑ x in s, f x : ℚ) = (∑ x in s, (f x : ℝ)) :=
+  ↑(∑ n in s, f n : ℚ) = (∑ n in s, (f n : ℝ)) :=
   (rat.cast_hom ℝ).map_sum f s
 -- @[simp, norm_cast] lemma rat_cast_sum [add_comm_monoid β] [has_one β]
 -- (s : finset α) (f : α → ℚ) :
@@ -261,18 +261,18 @@ begin
   end,
   have h_sum₂ := has_sum.tendsto_sum_nat h_sum₁,
   have h_sum : tendsto
-    (λ (n : ℕ), ∑ (i : ℕ) in range n.succ,
-    (λ (b : ℕ), 1 / (2 * (b : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ b) i)
+    (λ (n : ℕ), ∑ (k : ℕ) in range n.succ,
+    (λ (b : ℕ), 1 / (2 * (b : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ b) k)
     at_top
     (𝓝 (((m.succ : ℝ) + 1 / 2) * log ((m.succ.succ : ℝ) / (m.succ : ℝ)))) :=
     h_sum₂.comp (tendsto_add_at_top_nat 1),
-  have split_zero: ∀ (n : ℕ), ∑ (i : ℕ) in range n.succ,
-  1 / (2 * (i : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ i =
-  (∑ (i : ℕ) in range n,
-  1 / (2 * (i.succ:ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ i.succ) + 1 :=
+  have split_zero: ∀ (n : ℕ), ∑ (k : ℕ) in range n.succ,
+  1 / (2 * (k : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k =
+  (∑ (k : ℕ) in range n,
+  1 / (2 * (k.succ:ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k.succ) + 1 :=
   begin
     intro n,
-    rw sum_range_succ' (λ (k : ℕ), 1 / (2 * (k:ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k) n,
+    rw sum_range_succ' (λ (k : ℕ), 1 / (2 * (k : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k) n,
     simp only [one_div, cast_succ, inv_pow₀, cast_zero, mul_zero, zero_add, pow_zero,
     inv_one, mul_one, add_left_inj],
   end,
@@ -433,36 +433,34 @@ begin
   intro n,
   calc
   bn 1 - bn n.succ = bn' 0 - bn' n : rfl
-   ... = ∑ i in range n, (bn' i - bn' (i + 1))          : by rw ← (sum_range_sub' bn' n)
-   ... = ∑ i in range n, (bn i.succ - bn i.succ.succ)   : rfl
-   ... ≤ ∑ i in range n, 1 / (4 * i.succ * i.succ.succ) :
+   ... = ∑ k in range n, (bn' k - bn' (k + 1))          : by rw ← (sum_range_sub' bn' n)
+   ... = ∑ k in range n, (bn k.succ - bn k.succ.succ)   : rfl
+   ... ≤ ∑ k in range n, 1 / (4 * k.succ * k.succ.succ) :
    begin
      refine sum_le_sum _,
      intros k hk,
      exact bn_sub_bn_succ k,
    end
-   ... = ∑ i in range n, (1 / 4) * (1 / (i.succ * i.succ.succ)) :
+   ... = ∑ k in range n, (1 / 4) * (1 / (k.succ * k.succ.succ)) :
    begin
-     have hi : ∀ (i : ℕ), (1 : ℝ) / (4 * i.succ * i.succ.succ) =
-      (1 / 4) * (1 / (i.succ * i.succ.succ)) :=
+     have hi : ∀ (k : ℕ), (1 : ℝ) / (4 * k.succ * k.succ.succ) =
+      (1 / 4) * (1 / (k.succ * k.succ.succ)) :=
      begin
-       intro i,
+       intro k,
        norm_cast,
        field_simp,
        simp only [one_div, inv_inj],
        ring_nf,
      end,
-    refine sum_congr rfl _,
-    intros k hk,
-    exact hi k,
+    refine sum_congr rfl (λ k, λ hk, hi k),
    end
-   ... = 1 / 4 * ∑ i in range n, 1 / (i.succ * i.succ.succ) : by rw mul_sum
+   ... = 1 / 4 * ∑ k in range n, 1 / (k.succ * k.succ.succ) : by rw mul_sum
    ... ≤ 1 / 4 * 1 :
    begin
      refine (mul_le_mul_left _).mpr _,
      exact div_pos one_pos four_pos,
-     have g: (((∑ (k : ℕ) in range n, 1 / ((((k.succ))) * ((k.succ.succ)))):ℚ):ℝ)
-     ≤ ((1:ℚ):ℝ)  :=
+     have g : (((∑ (k : ℕ) in range n, 1 / ((((k.succ))) * ((k.succ.succ)))):ℚ):ℝ)
+     ≤ ((1 : ℚ) : ℝ)  :=
      rat.cast_le.mpr (partial_sum_consecutive_reciprocals n),
      rw rat_cast_sum at g,
      rw rat.cast_one at g,
@@ -613,8 +611,8 @@ begin
     end,
     rw [hl, hr],
   end,
-  have h_prod : ∀ k, ∏ (i : ℕ) in range k, wallis_inside_prod (1 + i) =
-    ∏ (i : ℕ) in range k, (((2 : ℝ) * i + 2) / (2 * i + 1)) * ((2 * i + 2) / (2 * i + 3)) :=
+  have h_prod : ∀ k, ∏ (m : ℕ) in range k, wallis_inside_prod (1 + m) =
+    ∏ (m : ℕ) in range k, (((2 : ℝ) * m + 2) / (2 * m + 1)) * ((2 * m + 2) / (2 * m + 3)) :=
   begin
     intro k,
     rw prod_congr (refl (range k)) _,
@@ -788,16 +786,16 @@ end
 lemma rest_has_limit_one_half: tendsto (λ (n : ℕ), cn n) at_top (𝓝 (1 / 2)) :=
 begin
   apply (tendsto.congr rest_cancel),
-  have h : tendsto (λ (x : ℕ), (((x : ℝ) / (2 * (x : ℝ) + 1))⁻¹))
+  have h : tendsto (λ (k : ℕ), (((k : ℝ) / (2 * (k : ℝ) + 1))⁻¹))
     at_top (𝓝 (((1 : ℝ) / 2))⁻¹) :=
   begin
-    have hsucc: tendsto (λ (x : ℕ), (((x.succ : ℝ) / (2 * (x.succ : ℝ) + 1))⁻¹)) at_top
+    have hsucc: tendsto (λ (k : ℕ), (((k.succ : ℝ) / (2 * (k.succ : ℝ) + 1))⁻¹)) at_top
       (𝓝 (((1 : ℝ) / 2))⁻¹) :=
     begin
-      have hx: ∀ (x : ℕ), (2 : ℝ) + x.succ⁻¹ = ((x.succ : ℝ) / (2 * x.succ + 1))⁻¹ :=
+      have hx: ∀ (k : ℕ), (2 : ℝ) + k.succ⁻¹ = ((k.succ : ℝ) / (2 * k.succ + 1))⁻¹ :=
       begin
-        intro x,
-        have hxne : (x.succ : ℝ) ≠ 0 := nonzero_of_invertible (x.succ : ℝ),
+        intro k,
+        have hxne : (k.succ : ℝ) ≠ 0 := nonzero_of_invertible (k.succ : ℝ),
         field_simp,
       end,
       simp only [one_div, inv_inv],
@@ -873,8 +871,9 @@ lemma second_wallis_limit (a : ℝ) (hane : a ≠ 0) (ha : tendsto an at_top (�
 begin
   rw tendsto_succ wn (a ^ 2 / 2),
   apply tendsto.congr expand_in_limit',
-  let qn := λ (x : ℕ), an x ^ 4 * (1 / an (2 * x)) ^ 2 * cn x,
-  have hqn : ∀ (x : ℕ), qn x.succ = an x.succ ^ 4 * (1 / an (2 * x.succ)) ^ 2 * cn x.succ := by tauto,
+  let qn := λ (n : ℕ), an n ^ 4 * (1 / an (2 * n)) ^ 2 * cn n,
+  have hqn :
+    ∀ (n : ℕ), qn n.succ = an n.succ ^ 4 * (1 / an (2 * n.succ)) ^ 2 * cn n.succ := by tauto,
   apply tendsto.congr hqn,
   rw ←tendsto_succ qn (a ^ 2 / 2),
   have has : tendsto (λ (n : ℕ), an n ^ 4 * (1 / an (2 * n)) ^ 2) at_top (𝓝 (a ^ 2)) :=
