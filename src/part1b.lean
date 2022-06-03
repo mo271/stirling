@@ -339,28 +339,19 @@ lemma an'_pos : ∀ (n : ℕ), 0 < an n.succ :=
 begin
   intro n,
   rw an,
-  norm_cast,
-  simp only [sqrt_mul', cast_nonneg, div_pow],
-  field_simp,
-  have h₁ : 0 < ((n : ℝ) + 1) * (n.factorial : ℝ) :=
+  have : 0 < (n.succ.factorial :ℝ) := cast_pos.mpr (factorial_pos n.succ),
+  have : 0 < real.sqrt (2 * ↑(n.succ)) :=
   begin
-    norm_cast,
-    exact mul_pos n.succ_pos n.factorial_pos,
+    refine (real.sqrt_pos).mpr (mul_pos two_pos _),
+    exact cast_pos.mpr (succ_pos n),
   end,
-  have h₂ : 0 < exp 1 ^ n.succ := (pow_pos ((1 : ℝ).exp_pos)) n.succ,
-  have h₃ : 0 < sqrt (2 : ℝ) * sqrt ((n : ℝ) + 1) * ((n : ℝ) + 1) ^ (n + 1) :=
+  have : 0 <(↑(n.succ) / exp 1) ^ n.succ :=
   begin
-    apply mul_pos,
-    { apply mul_pos,
-    simp only [real.sqrt_pos, zero_lt_bit0, zero_lt_one],
-    simp only [real.sqrt_pos, cast_pos],
-    norm_cast,
-    exact succ_pos n},
     apply pow_pos,
-    norm_cast,
-    exact succ_pos n,
+    refine div_pos _ (exp_pos 1),
+    exact cast_pos.mpr (succ_pos n),
   end,
-  exact mul_pos (mul_pos h₁ h₂) (inv_pos.mpr h₃),
+  refine div_pos _ (mul_pos _ _); assumption,
 end
 
 --uses an, bn_bounded_by_constant
