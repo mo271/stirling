@@ -125,18 +125,11 @@ begin
  exact tendsto.pow ha 4,
 end
 
---uses an
-lemma an_aux2 (a : ℝ) (hane: a ≠ 0) (ha : tendsto (λ (n : ℕ),  an n) at_top (𝓝  a)) :
-  tendsto (λ (n : ℕ),  (an n)⁻¹) at_top (𝓝 ((a)⁻¹)) :=
-begin
-  exact tendsto.inv₀ ha hane,
-end
-
---uses : an_aux2, an
+--uses : an
 lemma an_aux3 (a : ℝ) (hane: a ≠ 0) (ha : tendsto (λ (n : ℕ),  an n) at_top (𝓝  a)) :
   tendsto (λ (n : ℕ), (1 / (an n)) ^ 2) at_top (𝓝 ((1 / a) ^ 2)) :=
 begin
- have h := an_aux2 a hane ha,
+ have h := tendsto.inv₀ ha hane,
  rw ← one_div at h,
  have hainv : ∀ (n : ℕ), (an n)⁻¹ = 1 / (an n) :=
  begin
