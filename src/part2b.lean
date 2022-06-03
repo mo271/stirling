@@ -162,124 +162,30 @@ end
 lemma expand_in_limit (n : ℕ) (hn : n ≠ 0) : (an n) ^ 4 * (1 / (an (2 * n))) ^ 2 * cn n = wn n :=
 begin
   rw [an, an, cn, wn],
-  norm_cast,
-  have h1 : ∀ (m : ℕ), ((m ≠ 0) → (sqrt (2 * (m : ℝ)) * ((m : ℝ) / exp 1) ^ m ) ≠ 0) :=
-  begin
-    intros m hm,
-    refine mul_ne_zero _ _,
-    refine sqrt_ne_zero'.mpr _,
-    norm_cast,
-    exact nat.mul_pos two_pos (zero_lt_iff.mpr hm),
-    apply pow_ne_zero,
-    apply div_ne_zero _ (exp_ne_zero 1),
-    exact cast_ne_zero.mpr hm,
-  end,
-  have hn2 : 0 < 2 * n := nat.mul_pos two_pos (zero_lt_iff.mpr hn),
-  have h2 : ((((2 * n).factorial) : ℝ) / (sqrt (2 * (((2 : ℕ) * n) : ℝ))*
-    ((((2 : ℕ) * n) : ℝ) / exp 1) ^ (2 * n)) ≠ 0) :=
-  begin
-    refine div_ne_zero _ _,
-    norm_cast,
-    exact factorial_ne_zero (2 * n),
-    rw [← cast_mul 2 n],
-    exact h1 (2 * n) (ne_of_gt hn2), -- this is just h3...
-  end,
 
-  have h3: real.sqrt (2 * (((2 : ℕ) * n) : ℝ)) * ((((2 : ℕ) * n) : ℝ) / exp 1) ^ (2 * n) ≠ 0 :=
-  begin
-    rw [← cast_mul 2 n],
-    exact h1 (2 * n) (ne_of_gt hn2),
-  end,
+  have : (4 : ℝ) = (2 : ℝ) * 2, by norm_cast,
+  rw this,
+  rw [cast_mul 2 n, cast_two, ←mul_assoc],
+  rw sqrt_mul (mul_self_nonneg 2) (n : ℝ),
+  rw sqrt_mul_self zero_le_two,
 
-  have h4 : (((2 * n).factorial) : ℝ) ^ 2 *  (2 * n + 1) ≠ 0 :=
-  begin
-    norm_cast,
-    refine mul_ne_zero _ _,
-      apply pow_ne_zero,
-      exact factorial_ne_zero (2 * n),
-    exact succ_ne_zero (2 * n),
-  end,
+  have h₀ : (n : ℝ) ≠ 0, from cast_ne_zero.mpr hn,
+  have h₁ : sqrt (2 * (n : ℝ)) ≠ 0,
+    from sqrt_ne_zero'.mpr (mul_pos two_pos (cast_pos.mpr (zero_lt_iff.mpr hn))),
+  have h₂ : (exp 1) ≠ 0, from exp_ne_zero 1,
+  have h₃ : ((2 * n).factorial : ℝ) ≠ 0, from cast_ne_zero.mpr (factorial_ne_zero (2 * n)),
+  have h₄ : sqrt (n: ℝ) ≠ 0, from sqrt_ne_zero'.mpr (cast_pos.mpr (zero_lt_iff.mpr hn)),
+  have h₅ : (((2 * n) : ℕ) : ℝ) ≠ 0,
+    from cast_ne_zero.mpr (mul_ne_zero two_ne_zero hn),
+  have h₆ : sqrt (4 * (n : ℝ)) ≠ 0,
+    from sqrt_ne_zero'.mpr (mul_pos four_pos (cast_pos.mpr (zero_lt_iff.mpr hn))),
+  have h₇ : 2 * (n : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2*n)},
 
-  --this is now longer, but doesn't use an involved simp
-  have h5 : (real.sqrt 2 * sqrt (n : ℝ) * (n : ℝ) ^ n) ^ 4 * ((((2 * n).factorial)) * exp 1 ^ (2 * n)) ^ 2 *
-   ((exp 1 ^ n) ^ 4 * ((sqrt 4 * sqrt (n : ℝ) * (2 * (n : ℝ)) ^ (2 * n)) ^ 2 * (2 * n + 1))) ≠ 0 :=
-   begin
-    norm_cast,
-    refine mul_ne_zero _ _,
-    refine mul_ne_zero _ _,
-    apply pow_ne_zero,
-    rw mul_assoc,
-    apply mul_ne_zero (sqrt_ne_zero'.mpr two_pos),
-    refine mul_ne_zero _ _,
-    exact (sqrt_ne_zero'.mpr (cast_pos.mpr (zero_lt_iff.mpr hn))),
-    norm_cast,
-    apply pow_ne_zero,
-    exact hn,
-    apply pow_ne_zero,
-    refine mul_ne_zero _ _,
-    exact (cast_ne_zero.mpr (factorial_ne_zero (2 * n))),
-    exact pow_ne_zero (2 * n) (exp_ne_zero 1),
-    refine mul_ne_zero _ _,
-    rw ← pow_mul,
-    exact pow_ne_zero (n * 4) (exp_ne_zero 1),
-    refine mul_ne_zero _ _,
-    apply pow_ne_zero 2,
-    refine mul_ne_zero _ _,
-    apply mul_ne_zero (sqrt_ne_zero'.mpr four_pos),
-    exact (sqrt_ne_zero'.mpr (cast_pos.mpr (zero_lt_iff.mpr hn))),
-    rw [cast_ne_zero, pow_ne_zero_iff hn2, ← zero_lt_iff],
-    exact hn2,
-    exact cancel_monoid_with_zero.to_no_zero_divisors,
-    exact is_domain.to_no_zero_divisors ℝ,
-    exact cast_ne_zero.mpr (succ_ne_zero (2 * n)),
-    /-Not needed anymore, right?-/
-    --previously:
-  --   simp only [cast_pow, cast_mul, cast_bit0, cast_one, cast_add, mul_eq_zero, pow_eq_zero_iff, succ_pos', real.sqrt_eq_zero,
-  -- zero_le_bit0, zero_le_one, bit0_eq_zero, one_ne_zero, cast_nonneg, cast_eq_zero, false_or],
-  --   push_neg,
-  --   split,
-  --   split,
-  --   split,
-  --   exact hn,
-  --   norm_cast,
-  --   exact ne_of_gt (pow_pos (zero_lt_iff.mpr hn) n),
-  --   split,
-  --   exact factorial_ne_zero (2*n),
-  --   exact ne_of_gt (pow_pos (1:ℝ).exp_pos (2*n)),
-  --   split,
-  --   exact ne_of_gt (pow_pos (1:ℝ).exp_pos (n)),
-  --   split,
-  --   split,
-  --   exact hn,
-  --   norm_cast,
-  --   exact ne_of_gt (pow_pos hn2 (2*n)),
-  --   norm_cast,
-  --   exact succ_ne_zero (2*n),
-  end,
   field_simp,
   ring_nf,
-  have h6 : real.sqrt 4 ^ 2 = 4 := by simp only [sq_sqrt, zero_le_bit0, zero_le_one],
-  have h7 : real.sqrt 2 ^ 8 = 2 ^ 4 :=
-  begin
-    have h : 8 = 2 * 4 := by linarith,
-    rw h,
-    rw pow_mul,
-    have g : (0 : ℝ) ≤ 2 := zero_le_two,
-    rw sq_sqrt g,
-  end,
-  have h8 : real.sqrt 2 ^ 4 = 2 ^ 2 :=
-  begin
-    have h : 4 = 2 * 2 := by linarith,
-    rw h,
-    rw pow_mul,
-    have g : (0 : ℝ) ≤ 2 := zero_le_two,
-    rw sq_sqrt g,
-  end,
-  rw [h6, h7, h8],
-  ring,
 end
 
---usues: wn, expand_in_limit
+--uses: wn, expand_in_limit
 lemma expand_in_limit' (n : ℕ) :
   (an n.succ) ^ 4 * (1 / (an (2 * n.succ))) ^ 2 * cn n.succ = wn n.succ :=
  begin
