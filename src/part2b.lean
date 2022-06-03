@@ -42,31 +42,18 @@ begin
   have h₀ : 4 = 2 * 2, by refl,
   rw [mul_pow, mul_pow, h₀, pow_mul, sq_sqrt, sq_sqrt],
   cases n,
-  simp only [cast_zero, mul_zero, zero_div, real.sqrt_zero, zero_mul, zero_pow', ne.def,
-    bit0_eq_zero, nat.one_ne_zero, not_false_iff],
-  have h1 : 2 * (n.succ : ℝ) + 1 ≠ 0 :=
+  rw [cast_zero, zero_div, mul_zero, zero_pow, zero_mul, zero_mul, zero_div],
+  exact two_pos,
+  have h₁ : 2 * (n.succ : ℝ) + 1 ≠ 0 :=
   begin
     norm_cast,
     exact succ_ne_zero (2*n.succ),
   end,
-  have h2 : (4 * (n.succ : ℝ) * ((2 * (n.succ : ℝ) / exp 1) ^
-    (2 * n.succ)) ^ 2) * (2 * (n.succ : ℝ) + 1) ≠ 0 :=
-  begin
-    refine mul_ne_zero _ h1,
-    refine mul_ne_zero _ _,
-    exact mul_ne_zero four_ne_zero (cast_ne_zero.mpr (succ_ne_zero n)),
-    apply pow_ne_zero 2 (pow_ne_zero (2 * n.succ) _),
-    any_goals {exact is_domain.to_no_zero_divisors ℝ},
-    have : exp 1 ≠ 0, from exp_ne_zero 1,
-    have : n.succ ≠ 0, from succ_ne_zero n,
-    field_simp, norm_cast, field_simp,
-  end,
+  have h₂: exp 1  ≠ 0, from exp_ne_zero 1,
+  have h₃ : (n.succ : ℝ) ≠ 0, by exact cast_ne_zero.mpr (succ_ne_zero n),
+  field_simp,
   repeat {rw [← pow_mul]},
   rw [← h₀, mul_assoc 2 n.succ 2, mul_left_comm 2 n.succ 2, ← h₀],
-  have h3: exp 1 ^ (n.succ *4) ≠ 0, by exact pow_ne_zero (n.succ * 4) (exp_ne_zero 1),
-  have h4 :  4 ≠ 0, by exact four_ne_zero,
-  have h5 : (n.succ : ℝ) ≠ 0, by exact cast_ne_zero.mpr (succ_ne_zero n),
-  field_simp,
   rw [mul_pow (2 : ℝ) _ (n.succ * 4), mul_comm 4 n.succ],
   ring_nf,
   all_goals {norm_cast, linarith},
@@ -140,13 +127,7 @@ begin
  apply tendsto.pow h_congr 2,
 end
 
---uses an_aux3, an, sub_seq_tendsto
-lemma an_aux4 (a : ℝ) (hane : a ≠ 0) (ha : tendsto (λ (n : ℕ),  an n) at_top (𝓝  a)) :
-  tendsto (λ (n : ℕ), (1 / (an (2 * n))) ^ 2) at_top (𝓝 ((1 / a) ^ 2)) :=
-begin
-  have h := an_aux3 a hane ha,
-  exact sub_seq_tendsto h,
-end
+
 
 --uses: an, cn, wn -- that's it??
 -- added the assumption hn. Without that the statement is false (I think).
@@ -199,7 +180,7 @@ begin
   have hcn := rest_has_limit_one_half,
   have has : tendsto (λ (n : ℕ), an n ^ 4 * (1 / an (2 * n)) ^ 2) at_top (𝓝 (a ^ 2)) :=
   begin
-    have haright := an_aux4 a hane ha,
+    have haright := sub_seq_tendsto (an_aux3 a hane ha),
     have haleft := an_aux1 a ha,
     have g := tendsto.mul  haleft haright,
     have a_pow : a ^ 4 * (1 / a) ^ 2  = a ^ 2 :=

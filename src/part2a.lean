@@ -44,20 +44,20 @@ begin
   have h : ∀ i,
   wallis_inside_prod (1 + i) = (((2 : ℝ) * i + 2) / (2 * i + 1)) * ((2 * i + 2) / (2 * i + 3)) :=
   begin
-    simp [wallis_inside_prod],
     intro i,
-    have hl: (2 : ℝ) * (1 + (i : ℝ)) / (2 * (1 + (i : ℝ)) - 1) =
+    rw [wallis_inside_prod],
+    rw [cast_add, cast_one],
+    have hl: (2 : ℝ) * (1 + (i : ℝ)) / (2 * (1 + (i: ℝ)) - 1) =
       (2 * (i : ℝ) + 2) / (2 * (i : ℝ) + 1) :=
     begin
-      refine congr (congr_arg has_div.div _) _,
-      ring,
-      ring,
+      refine congr (congr_arg has_div.div _) _;
+        ring_nf,
     end,
-    have hr: ((2 : ℝ) * (1 + (i : ℝ)) / (2 * (1 + (i : ℝ)) + 1)) = ((2 * (i : ℝ) + 2) / (2 * (i : ℝ) + 3)) :=
+    have hr: (2 : ℝ) * (1 + (i : ℝ)) / (2 * (1 + (i: ℝ)) + 1) =
+      ((2 * (i : ℝ) + 2) / (2 * (i : ℝ) + 3)) :=
     begin
-      refine congr (congr_arg has_div.div _) _,
-      ring,
-      ring,
+      refine congr (congr_arg has_div.div _) _;
+        ring_nf,
     end,
     rw [hl],
     rw [hr],
@@ -114,20 +114,10 @@ end
 lemma equation4 (k : ℕ) (hk : k ≠ 0) : ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 =
   ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 * ((2 * k) ^ 2 / (2 * k) ^ 2) :=
 begin
-  have h : (((2 : ℝ) * k) ^ 2 / (2 * k) ^ 2) = 1 :=
-  begin
-    have hk2 : ((2 : ℝ) * k) ^ 2 ≠ 0 :=
-    begin
-      simp only [ne.def, pow_eq_zero_iff, succ_pos',
-       mul_eq_zero, bit0_eq_zero, one_ne_zero, cast_eq_zero,
-       false_or],
-      exact hk,
-    end,
-    rw div_eq_inv_mul,
-    rw inv_mul_cancel hk2,
-  end,
-  rw h,
-  simp only [mul_one],
+  have hk2 : ((2 : ℝ) * k) ^ 2 ≠ 0,
+    from pow_ne_zero 2 (mul_ne_zero two_ne_zero (cast_ne_zero.mpr hk)),
+  rw div_self hk2,
+  rw mul_one,
 end
 
 --uses equation 4
@@ -140,9 +130,8 @@ begin
   refl,
   intros d hd,
   rw ←equation4,
-  simp only [mem_Ico] at hd,
-  cases hd,
-  exact one_le_iff_ne_zero.mp hd_left,
+  rw mem_Ico at hd,
+  exact one_le_iff_ne_zero.mp hd.left,
 end
 
 --uses nothing?
