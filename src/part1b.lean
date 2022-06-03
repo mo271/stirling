@@ -286,7 +286,7 @@ begin
    ... ≤ 1 / 4 * 1 :
    begin
      refine (mul_le_mul_left _).mpr _,
-     simp only [one_div, inv_pos, zero_lt_bit0, zero_lt_one],
+     exact div_pos one_pos four_pos,
      exact partial_sum_consecutive_reciprocals n,
    end
    ... = 1 / 4 : by rw mul_one,
