@@ -32,7 +32,7 @@ lemma rat_cast_sum (s : finset ℕ) (f : ℕ → ℚ) :
 -- ↑(∑ x in s, f x : ℚ) = (∑ x in s, (f x : β)) := by sorry
 
 /-- **Sum of the Reciprocals of the Triangular Numbers**
- from archive TODO: include in some form mathlib-/
+ from archive TODO: include in some form mathlib --/
 lemma inverse_triangle_sum :
   ∀ n, ∑ k in range n, (2 : ℚ) / (k * (k + 1)) = if n = 0 then 0 else 2 - (2 : ℚ) / n :=
 begin
@@ -450,7 +450,7 @@ begin
        norm_cast,
        field_simp,
        simp only [one_div, inv_inj],
-       ring,
+       ring_nf,
      end,
     refine sum_congr rfl _,
     intros k hk,
@@ -509,22 +509,11 @@ begin
    (set.range_nonempty bn) h_bounded),
 end
 
---uses bn, bn_antitone, bn_has_lower_bound
-lemma bn_has_limit_b : ∃ (n : ℝ),
-tendsto (λ (m : ℕ),  bn m.succ) at_top (𝓝 n) :=
-begin
-  exact monotone_convergence (λ (k : ℕ), bn k.succ) bn_antitone bn_has_lower_bound,
-end
-
 --uses an,
 lemma an'_pos : ∀ (n : ℕ), 0 < an n.succ :=
-begin
-  intro n,
-  rw an,
-  exact div_pos (cast_pos.mpr (factorial_pos n.succ))
+ (λ n, div_pos (cast_pos.mpr (factorial_pos n.succ))
     (mul_pos ((real.sqrt_pos).mpr (mul_pos two_pos (cast_pos.mpr (succ_pos n))))
-    (pow_pos (div_pos (cast_pos.mpr (succ_pos n)) (exp_pos 1)) n.succ)),
-end
+    (pow_pos (div_pos (cast_pos.mpr (succ_pos n)) (exp_pos 1)) n.succ)))
 
 --uses an, bn_bounded_by_constant
 lemma an'_bounded_by_pos_constant : ∀ (n : ℕ), exp (3 / (4 : ℝ) - 1 / 2 * log 2) ≤ an n.succ :=
@@ -622,15 +611,13 @@ begin
       refine congr (congr_arg has_div.div _) _;
         ring_nf,
     end,
-    rw [hl],
-    rw [hr],
+    rw [hl, hr],
   end,
   have h_prod : ∀ k, ∏ (i : ℕ) in range k, wallis_inside_prod (1 + i) =
     ∏ (i : ℕ) in range k, (((2 : ℝ) * i + 2) / (2 * i + 1)) * ((2 * i + 2) / (2 * i + 3)) :=
   begin
     intro k,
-    rw prod_congr _ _,
-    refl,
+    rw prod_congr (refl (range k)) _,
     intros x hx,
     exact h x,
   end,
@@ -815,11 +802,9 @@ begin
       end,
       simp only [one_div, inv_inv],
       apply (tendsto.congr hx),
-      have h_right : tendsto (λ (x : ℕ), ((x : ℝ))⁻¹) at_top (𝓝 0) :=
-        tendsto_inverse_at_top_nhds_0_nat,
-      have h_left : tendsto (λ (x : ℕ), ((2 : ℝ))) at_top (𝓝 2) := tendsto_const_nhds,
-      have g := tendsto.add h_left ((tendsto_add_at_top_iff_nat 1).mpr h_right),
-      simp only [add_zero] at g,
+      have g := tendsto.add tendsto_const_nhds ((tendsto_add_at_top_iff_nat 1).mpr
+        (tendsto_inverse_at_top_nhds_0_nat)),
+      rw [add_zero] at g,
       exact g,
     end,
     exact (tendsto_add_at_top_iff_nat 1).mp hsucc,
@@ -831,7 +816,7 @@ begin
   end,
   have g:= tendsto.inv₀ h h2,
   simp only [inv_inv, one_div] at g,
-  simp only [one_div],
+  rw [one_div],
   exact g,
 end
 
@@ -894,13 +879,11 @@ begin
   rw ←tendsto_succ qn (a ^ 2 / 2),
   have has : tendsto (λ (n : ℕ), an n ^ 4 * (1 / an (2 * n)) ^ 2) at_top (𝓝 (a ^ 2)) :=
   begin
-    have haright := sub_seq_tendsto (an_aux3 a hane ha),
-    have haleft := (tendsto.pow ha 4),
-    have g := tendsto.mul  haleft haright,
+    have g := tendsto.mul (tendsto.pow ha 4)  (sub_seq_tendsto (an_aux3 a hane ha)),
     have a_pow : a ^ 4 * (1 / a) ^ 2  = a ^ 2 :=
     begin
       field_simp,
-      ring,
+      ring_nf,
     end,
     rw a_pow at g,
     exact g,
