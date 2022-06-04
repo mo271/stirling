@@ -1,6 +1,5 @@
 import tactic
 import analysis.special_functions.log
-import analysis.special_functions.log_deriv
 import data.fintype.basic
 import algebra.big_operators.basic
 import algebra.big_operators.intervals
@@ -259,13 +258,12 @@ begin
     intros k hk,
     exact h_inner k,
   end,
-  have h_sum₂ := has_sum.tendsto_sum_nat h_sum₁,
   have h_sum : tendsto
     (λ (n : ℕ), ∑ (k : ℕ) in range n.succ,
     (λ (b : ℕ), 1 / (2 * (b : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ b) k)
     at_top
     (𝓝 (((m.succ : ℝ) + 1 / 2) * log ((m.succ.succ : ℝ) / (m.succ : ℝ)))) :=
-    h_sum₂.comp (tendsto_add_at_top_nat 1),
+    (has_sum.tendsto_sum_nat h_sum₁).comp (tendsto_add_at_top_nat 1),
   have split_zero: ∀ (n : ℕ), ∑ (k : ℕ) in range n.succ,
   1 / (2 * (k : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k =
   (∑ (k : ℕ) in range n,
@@ -281,7 +279,7 @@ begin
   simp only [add_neg_cancel_right] at h_sum,
   rw tactic.ring.add_neg_eq_sub _ (1 : ℝ) at h_sum,
   rw ← hx at h_sum,
-  refine (summable.has_sum_iff_tendsto_nat
+  exact (summable.has_sum_iff_tendsto_nat
     ((summable_nat_add_iff 1).mpr (has_sum.summable h_sum₁))).mpr h_sum,
 end
 
@@ -297,10 +295,7 @@ begin
   simp only [one_div],
   intro m,
   refine mul_nonneg _ _,
-  all_goals {refine inv_nonneg.mpr _},
-  all_goals {norm_cast},
-  exact zero_le (2 * (m + 1) + 1),
-  exact zero_le (((2 * (n + 1) + 1) ^ 2) ^ succ m),
+  all_goals {refine inv_nonneg.mpr _, norm_cast, exact (zero_le _)},
 end
 
 --uses bn, bn_diff_has_sum,
@@ -397,9 +392,8 @@ begin
     { refine (div_lt_one _).mpr _,
     all_goals {norm_cast},
     linarith,
-    refine lt_add_of_pos_left 1 _,
-    refine (1 : ℕ).succ_mul_pos _,
-    exact succ_pos n},
+    refine lt_add_of_pos_left 1 ((1 : ℕ).succ_mul_pos (succ_pos n)),
+    },
   end,
   refine le_trans (bn_diff_le_geo_sum n) ((le_div_iff' h₁).mpr _),
   rw mul_div (4 * (n.succ : ℝ) * (n.succ.succ : ℝ))
@@ -435,12 +429,7 @@ begin
   bn 1 - bn n.succ = bn' 0 - bn' n : rfl
    ... = ∑ k in range n, (bn' k - bn' (k + 1))          : by rw ← (sum_range_sub' bn' n)
    ... = ∑ k in range n, (bn k.succ - bn k.succ.succ)   : rfl
-   ... ≤ ∑ k in range n, 1 / (4 * k.succ * k.succ.succ) :
-   begin
-     refine sum_le_sum _,
-     intros k hk,
-     exact bn_sub_bn_succ k,
-   end
+   ... ≤ ∑ k in range n, 1 / (4 * k.succ * k.succ.succ) : sum_le_sum (λ k, λ hk, bn_sub_bn_succ k)
    ... = ∑ k in range n, (1 / 4) * (1 / (k.succ * k.succ.succ)) :
    begin
      have hi : ∀ (k : ℕ), (1 : ℝ) / (4 * k.succ * k.succ.succ) =
@@ -459,14 +448,10 @@ begin
    begin
      refine (mul_le_mul_left _).mpr _,
      exact div_pos one_pos four_pos,
-     have g : (((∑ (k : ℕ) in range n, 1 / ((((k.succ))) * ((k.succ.succ)))):ℚ):ℝ)
-     ≤ ((1 : ℚ) : ℝ)  :=
-     rat.cast_le.mpr (partial_sum_consecutive_reciprocals n),
-     rw rat_cast_sum at g,
-     rw rat.cast_one at g,
-     push_cast at g,
+     convert rat.cast_le.mpr (partial_sum_consecutive_reciprocals n),
+     rw rat_cast_sum,
      push_cast,
-     exact g,
+     exact rat.cast_one.symm,
    end
    ... = 1 / 4 : by rw mul_one,
 end
@@ -503,7 +488,7 @@ lemma monotone_convergence (bn : ℕ → ℝ) (h_sd: ∀ (n m : ℕ), n ≤ m �
   (h_bounded : (lower_bounds (set.range bn)).nonempty) : ∃ (m : ℝ), tendsto bn at_top (𝓝 m) :=
 begin
  use Inf (set.range bn),
- refine tendsto_at_top_is_glb h_sd (real.is_glb_Inf (set.range bn)
+ exact tendsto_at_top_is_glb h_sd (real.is_glb_Inf (set.range bn)
    (set.range_nonempty bn) h_bounded),
 end
 
@@ -523,14 +508,7 @@ end
 
 --uses an, bn, bn_antitone, an'
 lemma an'_antitone : ∀ (n m : ℕ), n ≤ m → an m.succ ≤ an n.succ :=
-begin
-  intros n m,
-  intro hab,
-  have h := bn_antitone n m hab,
-  rw bn at h,
-  rw bn at h,
-  exact (log_le_log (an'_pos m) (an'_pos n)).mp h,
-end
+  (λ n, λ m, λ h, (log_le_log (an'_pos m) (an'_pos n)).mp (bn_antitone n m h))
 
 --uses an, an'_bounded_by_pos_constant
 lemma an'_has_lower_bound : (lower_bounds (set.range (λ (k : ℕ), an k.succ))).nonempty :=
@@ -812,10 +790,9 @@ begin
     simp only [one_div, inv_inv, ne.def, bit0_eq_zero,
     one_ne_zero, not_false_iff],
   end,
-  have g:= tendsto.inv₀ h h2,
-  simp only [inv_inv, one_div] at g,
-  rw [one_div],
-  exact g,
+  convert tendsto.inv₀ h h2,
+  simp only [inv_inv, one_div],
+  rw inv_inv,
 end
 
 --uses : an
@@ -878,19 +855,12 @@ begin
   rw ←tendsto_succ qn (a ^ 2 / 2),
   have has : tendsto (λ (n : ℕ), an n ^ 4 * (1 / an (2 * n)) ^ 2) at_top (𝓝 (a ^ 2)) :=
   begin
-    have g := tendsto.mul (tendsto.pow ha 4)  (sub_seq_tendsto (an_aux3 a hane ha)),
-    have a_pow : a ^ 4 * (1 / a) ^ 2  = a ^ 2 :=
-    begin
-      field_simp,
-      ring_nf,
-    end,
-    rw a_pow at g,
-    exact g,
+    convert tendsto.mul (tendsto.pow ha 4)  (sub_seq_tendsto (an_aux3 a hane ha)),
+    field_simp,
+    ring_nf,
   end,
-  have h := tendsto.mul has rest_has_limit_one_half,
-  rw one_div (2 : ℝ) at h,
-  rw div_eq_mul_inv _,
-  exact h,
+  convert tendsto.mul has rest_has_limit_one_half,
+  rw [one_div, div_eq_mul_inv],
 end
 
 --uses : second_wallis_limit, wallis_consequence, an
@@ -905,6 +875,5 @@ begin
   field_simp at hπ,
   rw ← (sq_sqrt (le_of_lt pi_pos)) at hπ,
   have h := (sq_eq_sq (sqrt_nonneg π) (le_of_lt hapos)).mp hπ,
-  rw ← h at halimit,
-  exact halimit,
+  convert halimit,
 end
