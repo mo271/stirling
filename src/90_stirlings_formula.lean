@@ -22,9 +22,9 @@ import data.real.pi.wallis
 # Stirling's formula
 
 This file proves Theorem 90 from the [100 Theorem List] <https://www.cs.ru.nl/~freek/100/>.
-It states that `n! ∼ √2πn (n/e)^n `, where `∼` denotes asymptotically equal. 
+It states that `n! ∼ √2πn (n/e)^n `, where `∼` denotes asymptotically equal.
 
-The theorem was proven using the following proof outline: 
+The theorem was proven using the following proof outline:
 ## References
 
 <https://proofwiki.org/wiki/Stirling%27s_Formula>
@@ -80,7 +80,7 @@ begin
     simp only [sub_le_self_iff],
     refine (le_div_iff _).mpr (_),
     { exact (cast_lt.mpr n.succ_pos) },
-    { rw [zero_mul], exact zero_le_two } 
+    { rw [zero_mul], exact zero_le_two }
   },
   { exact rat.nontrivial },
  end
@@ -564,7 +564,7 @@ begin
       exact an'_bounded_by_pos_constant k,
     end,
     exact gt_of_ge_of_gt ((le_is_glb_iff (is_glb_of_tendsto_at_top an'_antitone ha)).mpr
-      e_lower_bound) (3 / 4 - 1 / 2 * log 2).exp_pos 
+      e_lower_bound) (3 / 4 - 1 / 2 * log 2).exp_pos
   },
   { exact ha },
 end
@@ -627,12 +627,12 @@ begin
   by_cases h : r = 0,
   { repeat {rw h},
     simp only [zero_mul, mul_zero]
-  }, 
+  },
   { have : 2 * ((n : ℝ) + 1) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},
     have : 2 * (n : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},
     have : 2 * ((n : ℝ) + 1) - 1 ≠ 0, by {ring_nf, norm_cast, exact succ_ne_zero _},
     field_simp,
-    ring_nf 
+    ring_nf
   },
 end
 
@@ -780,7 +780,7 @@ begin
     rw [← h₀, mul_assoc 2 n.succ 2, mul_left_comm 2 n.succ 2, ← h₀],
     rw [mul_pow (2 : ℝ) _ (n.succ * 4), mul_comm 4 n.succ],
     ring_nf },
-  }, 
+  },
   all_goals {norm_cast, linarith},
 end
 
