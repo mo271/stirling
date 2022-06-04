@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2022. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Moritz Firsching, Fabian Kruse, Nikolas Kuhn.
+-/
 import tactic
 import analysis.special_functions.log
 import data.fintype.basic
@@ -877,3 +882,4 @@ begin
   have h := (sq_eq_sq (sqrt_nonneg π) (le_of_lt hapos)).mp hπ,
   convert halimit,
 end
+#lint
