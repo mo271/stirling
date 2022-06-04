@@ -51,27 +51,26 @@ end
 
 lemma partial_sum_consecutive_reciprocals:
  ∀ n, ∑ k in range n, (1 : ℚ) / (k.succ * (k.succ.succ)) ≤ 1 :=
- begin
-   intro n,
-   rw [←(mul_le_mul_left (zero_lt_two)), mul_sum],
-   have h: ∀ (k : ℕ), k ∈ (range n) →
-     2*((1 : ℚ) / (k.succ * (k.succ.succ))) = 2 / (k.succ * (k.succ.succ)) :=
-   begin
-     intros k hk,
-     rw [mul_div],
-     rw [mul_one (2:ℚ)],
-  end,
-  rw finset.sum_congr rfl h,
-  have h₁ := inverse_triangle_sum n.succ,
-  rw sum_range_succ' at h₁,
-  norm_num at *,
-  rw h₁,
-  simp only [sub_le_self_iff],
-  refine (le_div_iff _).mpr (_),
-  exact (cast_lt.mpr n.succ_pos),
-  rw [zero_mul],
-  exact zero_le_two,
-  exact rat.nontrivial,
+begin
+  intro n,
+  rw [←(mul_le_mul_left (zero_lt_two)), mul_sum],
+  { have h: ∀ (k : ℕ), k ∈ (range n) →
+    2*((1 : ℚ) / (k.succ * (k.succ.succ))) = 2 / (k.succ * (k.succ.succ)) :=
+    begin
+      intros k hk,
+      rw [mul_div],
+      rw [mul_one (2:ℚ)],
+    end,
+    rw finset.sum_congr rfl h,
+    have h₁ := inverse_triangle_sum n.succ,
+    rw sum_range_succ' at h₁,
+    norm_num at *,
+    rw h₁,
+    simp only [sub_le_self_iff],
+    refine (le_div_iff _).mpr (_),
+    { exact (cast_lt.mpr n.succ_pos) },
+    { rw [zero_mul], exact zero_le_two } },
+  { exact rat.nontrivial },
  end
 
 
@@ -81,21 +80,19 @@ lemma partial_sum_consecutive_reciprocals:
 lemma tendsto_succ (an : ℕ → ℝ) (a : ℝ) : tendsto an at_top (𝓝 a) ↔
   tendsto (λ n : ℕ, (an n.succ)) at_top (𝓝 a) :=
 begin
-  have : (λ n : ℕ, (an n.succ))  = an ∘ succ, by refl,
-  rw this,
   nth_rewrite_rhs 0 ← tendsto_map'_iff,
   have h : map succ at_top = at_top :=
   begin
     rw map_at_top_eq_of_gc pred 1,
-    exact @succ_le_succ,
-    intros a b hb,
-    cases (exists_eq_succ_of_ne_zero (one_le_iff_ne_zero.mp hb)) with d hd,
-    rw [hd, pred_succ],
-    exact succ_le_succ_iff,
-    intros b hb,
-    cases (exists_eq_succ_of_ne_zero (one_le_iff_ne_zero.mp hb)) with d hd,
-    rw hd,
-    rw pred_succ,
+    { exact @succ_le_succ },
+    { intros a b hb,
+      cases (exists_eq_succ_of_ne_zero (one_le_iff_ne_zero.mp hb)) with d hd,
+      rw [hd, pred_succ],
+      exact succ_le_succ_iff },
+    { intros b hb,
+      cases (exists_eq_succ_of_ne_zero (one_le_iff_ne_zero.mp hb)) with d hd,
+      rw hd,
+      rw pred_succ },
   end,
   rw h,
 end
@@ -122,19 +119,19 @@ begin
   rw [tactic.ring.add_neg_eq_sub, ←term_def x ] at h₃,
   let g := (λ (n : ℕ), (2 * n)),
   rw ← function.injective.has_sum_iff (nat.mul_right_injective two_pos) _ at h₃,
-  suffices h_term_eq_goal : (term x ∘ g) = (λ k : ℕ, 2*(1 / (2 * (k : ℝ) + 1)) * x^(2 * k  + 1)),
+  { suffices h_term_eq_goal : (term x ∘ g) = (λ k : ℕ, 2*(1 / (2 * (k : ℝ) + 1)) * x^(2 * k  + 1)),
     by {rw h_term_eq_goal at h₃, exact h₃},
-  apply funext,
-  intro n,
-  rw [function.comp_app],
-  simp only [g],
-  rw [term],
-  rw odd.neg_pow (⟨n, rfl⟩ : odd (2 * n + 1)) x,
-  rw [neg_one_mul, neg_div, neg_neg, cast_mul, cast_two],
-  ring,
-  intros m hm,
-  rw [range_two_mul, set.mem_set_of_eq] at hm,
-  rw [term, even.neg_pow (even_succ.mpr hm), succ_eq_add_one, neg_one_mul, neg_add_self],
+    apply funext,
+    intro n,
+    rw [function.comp_app],
+    simp only [g],
+    rw [term],
+    rw odd.neg_pow (⟨n, rfl⟩ : odd (2 * n + 1)) x,
+    rw [neg_one_mul, neg_div, neg_neg, cast_mul, cast_two],
+    ring },
+  { intros m hm,
+    rw [range_two_mul, set.mem_set_of_eq] at hm,
+    rw [term, even.neg_pow (even_succ.mpr hm), succ_eq_add_one, neg_one_mul, neg_add_self] },
 end
 
 --uses nothing?
@@ -148,13 +145,13 @@ begin
     exact (2 * n).succ_ne_zero,
   end,
   rw ← log_div _ _,
-  suffices h : (n.succ : ℝ) / (n : ℝ) = (1 + 1 / (2 * n + 1)) / (1 - 1 / (2 * n + 1)),
-    from congr_arg log h,
-  rw ← one_add,
-  all_goals {field_simp},
-  ring,
-  norm_cast,
-  exact succ_ne_zero (2 * n + 1),
+  { suffices h : (n.succ : ℝ) / (n : ℝ) = (1 + 1 / (2 * n + 1)) / (1 - 1 / (2 * n + 1)),
+      from congr_arg log h,
+    rw ← one_add,
+    all_goals {field_simp} },
+  { ring },
+  { norm_cast,
+    exact succ_ne_zero (2 * n + 1) },
 end
 
 --uses aux_log, log_sum_plus_minus
@@ -184,9 +181,8 @@ lemma zero_lt_sqrt_two_n (n : ℕ) (hn : n ≠ 0) : 0 < real.sqrt (2 * (n : ℝ)
 lemma n_div_exp1_pow_gt_zero (n : ℕ) : ((n : ℝ) / exp 1) ^ n > 0 :=
 begin
   cases n,
-  rw pow_zero,
-  exact one_pos,
-  exact gt_iff_lt.mpr (pow_pos (div_pos (cast_pos.mpr n.succ_pos ) (exp_pos 1)) (n.succ)),
+  { rw pow_zero, exact one_pos, },
+  { exact gt_iff_lt.mpr (pow_pos (div_pos (cast_pos.mpr n.succ_pos ) (exp_pos 1)) (n.succ)), },
 end
 
 --uses bn, n_div_exp1_pow_gt_zero, zero_lt_zwrt_two_n
@@ -196,14 +192,14 @@ begin
   have h3, from (lt_iff_le_and_ne.mp (zero_lt_sqrt_two_n n.succ (succ_ne_zero n))),
   have h4, from (lt_iff_le_and_ne.mp (n_div_exp1_pow_gt_zero n.succ)),
   rw [bn, an, log_div, log_mul, sqrt_eq_rpow, log_rpow, log_pow],
-  linarith,
-  rw zero_lt_mul_left,
-  exact cast_lt.mpr n.succ_pos,
-  exact zero_lt_two,
-  exact h3.right.symm,
-  exact h4.right.symm,
-  exact cast_ne_zero.mpr n.succ.factorial_ne_zero,
-  apply (mul_ne_zero h3.right.symm h4.right.symm),
+  { linarith },
+  { rw zero_lt_mul_left,
+    { exact cast_lt.mpr n.succ_pos },
+    { exact zero_lt_two, }, },
+  { exact h3.right.symm, },
+  { exact h4.right.symm, },
+  { exact cast_ne_zero.mpr n.succ.factorial_ne_zero, },
+  { apply (mul_ne_zero h3.right.symm h4.right.symm) },
 end
 
 -- second section of part 1
@@ -882,4 +878,3 @@ begin
   have h := (sq_eq_sq (sqrt_nonneg π) (le_of_lt hapos)).mp hπ,
   convert halimit,
 end
-#lint
