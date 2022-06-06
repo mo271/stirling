@@ -222,11 +222,11 @@ lemma bn_diff_has_sum (m : ℕ) :
   ((bn m.succ) - (bn m.succ.succ)) :=
 begin
   have hx : ∀ (n : ℕ), (bn n.succ) - (bn n.succ.succ) =
-    ((n.succ : ℝ) + 1 / (2 : ℝ)) * log(((n.succ.succ) : ℝ) / (n.succ : ℝ)) - 1,
+    ((n.succ : ℝ) + 1 / (2 : ℝ)) * log(((n.succ.succ) : ℝ) / (n.succ : ℝ)) - 1 :=
   begin
     intro n,
-    have h_reorder : ∀ {a b c d e f : ℝ},
-    a - 1 / (2 : ℝ) * b - c -(d - 1 / (2 : ℝ) * e - f) = (a - d) - 1 / (2 : ℝ) * (b - e) - (c - f),
+    have h_reorder : ∀ {a b c d e f : ℝ}, a - 1 / (2 : ℝ) * b - c - (d - 1 / (2 : ℝ) * e - f) =
+      (a - d) - 1 / (2 : ℝ) * (b - e) - (c - f),
     by {intros, ring_nf},
     rw [bn_formula, bn_formula, h_reorder],
     repeat {rw [log_div, factorial_succ]},
@@ -266,16 +266,17 @@ begin
     intros,
     use v',
     split,
-    exact ᾰ,
-    refine sum_congr rfl _,
-    intros k hk,
-    exact h_inner k,
+    { exact ᾰ
+    },
+    { refine sum_congr rfl _,
+      intros k hk,
+      exact h_inner k
+    },
   end,
   have h_sum : tendsto
     (λ (n : ℕ), ∑ (k : ℕ) in range n.succ,
     (λ (b : ℕ), 1 / (2 * (b : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ b) k)
-    at_top
-    (𝓝 (((m.succ : ℝ) + 1 / 2) * log ((m.succ.succ : ℝ) / (m.succ : ℝ)))) :=
+    at_top (𝓝 (((m.succ : ℝ) + 1 / 2) * log ((m.succ.succ : ℝ) / (m.succ : ℝ)))) :=
     (has_sum.tendsto_sum_nat h_sum₁).comp (tendsto_add_at_top_nat 1),
   have split_zero : ∀ (n : ℕ), ∑ (k : ℕ) in range n.succ,
     1 / (2 * (k : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k =
@@ -317,12 +318,11 @@ lemma bn_diff_le_geo_sum : ∀ (n : ℕ),
 begin
   intro n,
   have h := bn_diff_has_sum n,
-  have g : has_sum
-  (λ (k : ℕ), ((1 / (2 * (n.succ : ℝ) + 1)) ^ 2) ^ k.succ)
-  ((1 / (2 * n.succ + 1)) ^ 2 / (1 - (1 / (2 * n.succ + 1)) ^ 2)) :=
+  have g : has_sum (λ (k : ℕ), ((1 / (2 * (n.succ : ℝ) + 1)) ^ 2) ^ k.succ)
+    ((1 / (2 * n.succ + 1)) ^ 2 / (1 - (1 / (2 * n.succ + 1)) ^ 2)) :=
   begin
     have h_pow_succ := λ (k : ℕ),
-    symm (pow_succ ((1 / (2 * ((n : ℝ) + 1) + 1)) ^ 2) k),
+      symm (pow_succ ((1 / (2 * ((n : ℝ) + 1) + 1)) ^ 2) k),
     have h_nonneg : 0 ≤ ((1 / (2 * (n.succ : ℝ) + 1)) ^ 2) :=
     begin
       rw [cast_succ, one_div, inv_pow₀, inv_nonneg],
@@ -352,10 +352,12 @@ begin
       intros,
       use v',
       split,
-      exact ᾰ,
-      refine sum_congr rfl _,
-      intros k hk,
-      exact h_pow_succ k,
+      { exact ᾰ
+      },
+      { refine sum_congr rfl _,
+        intros k hk,
+        exact h_pow_succ k
+      },
     end,
     norm_num,
     exact h_geom'',
@@ -459,11 +461,13 @@ begin
    ... ≤ 1 / 4 * 1 :
    begin
      refine (mul_le_mul_left _).mpr _,
-     exact div_pos one_pos four_pos,
-     convert rat.cast_le.mpr (partial_sum_consecutive_reciprocals n),
-     rw rat_cast_sum,
-     push_cast,
-     exact rat.cast_one.symm,
+     { exact div_pos one_pos four_pos
+     },
+     { convert rat.cast_le.mpr (partial_sum_consecutive_reciprocals n),
+       rw rat_cast_sum,
+       push_cast,
+       exact rat.cast_one.symm
+     },
    end
    ... = 1 / 4 : by rw mul_one,
 end
@@ -637,15 +641,17 @@ lemma equation3 (n : ℕ): ∏ k in Ico 1 n.succ, wallis_inside_prod k =
   (1 : ℝ) / (2 * n + 1) * ∏ k in Ico 1 n.succ, ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 :=
 begin
   induction n with d hd,
-  simp only [Ico_self, prod_empty, cast_zero, mul_zero,
-  zero_add, div_one, mul_one],
-  rw [succ_eq_add_one],
-  norm_cast,
-  rw [prod_Ico_succ_top, hd, wallis_inside_prod],
-  symmetry,
-  rw prod_Ico_succ_top,
-  {norm_cast,rw aux2, },
-  all_goals {apply zero_lt_succ},
+  { simp only [Ico_self, prod_empty, cast_zero, mul_zero,
+    zero_add, div_one, mul_one]
+  },
+  { rw [succ_eq_add_one],
+    norm_cast,
+    rw [prod_Ico_succ_top, hd, wallis_inside_prod],
+    symmetry,
+    rw prod_Ico_succ_top,
+    {norm_cast,rw aux2, },
+    all_goals {apply zero_lt_succ}
+  },
 end
 
 --uses nothing?
@@ -711,20 +717,21 @@ begin
   { rw [Ico_self, prod_empty, cast_zero, mul_zero, mul_zero, mul_zero, factorial_zero],
     rw [zero_add, pow_zero, cast_one, one_pow, one_pow, mul_one, mul_one]
   },
-  replace hd := congr_arg (has_mul.mul (2* (d : ℝ) + 1)) hd,
-  have : 2 * (d : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2 * d)},
-  rw [← mul_assoc, mul_one_div_cancel this, one_mul] at hd,
-  rw [prod_Ico_succ_top (succ_le_succ (zero_le d)), hd, mul_succ 2],
-  repeat {rw factorial_succ},
-  have : 2 * (d : ℝ) + 1 + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2 * d + 1)},
-  have : 2 * (d.succ : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2 * d.succ)},
-  have : 2 * ((d : ℝ) + 1) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2 * (d + 1))},
-  have : ((2 * d).factorial : ℝ) ≠ 0, by {norm_cast, exact factorial_ne_zero (2 * d)},
-  have : 2 * ((d : ℝ) + 1) - 1 ≠ 0, by {ring_nf, norm_cast, exact succ_ne_zero (2 * d)},
-  have : 2 * ((d : ℝ) + 1) ≠ 0, by {norm_cast, exact mul_ne_zero two_ne_zero (succ_ne_zero d)},
-  field_simp,
-  rw [mul_succ 4 d, pow_add _ (4 * d) 4],
-  ring_nf, --this one might be quite heavy without "generalize" before
+  { replace hd := congr_arg (has_mul.mul (2* (d : ℝ) + 1)) hd,
+    have : 2 * (d : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2 * d)},
+    rw [← mul_assoc, mul_one_div_cancel this, one_mul] at hd,
+    rw [prod_Ico_succ_top (succ_le_succ (zero_le d)), hd, mul_succ 2],
+    repeat {rw factorial_succ},
+    have : 2 * (d : ℝ) + 1 + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2 * d + 1)},
+    have : 2 * (d.succ : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2 * d.succ)},
+    have : 2 * ((d : ℝ) + 1) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2 * (d + 1))},
+    have : ((2 * d).factorial : ℝ) ≠ 0, by {norm_cast, exact factorial_ne_zero (2 * d)},
+    have : 2 * ((d : ℝ) + 1) - 1 ≠ 0, by {ring_nf, norm_cast, exact succ_ne_zero (2 * d)},
+    have : 2 * ((d : ℝ) + 1) ≠ 0, by {norm_cast, exact mul_ne_zero two_ne_zero (succ_ne_zero d)},
+    field_simp,
+    rw [mul_succ 4 d, pow_add _ (4 * d) 4],
+    ring_nf
+  }, --this one might be quite heavy without "generalize" before
 end
 
 noncomputable def wn (n : ℕ) : ℝ :=
