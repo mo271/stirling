@@ -18,9 +18,20 @@ import order.bounded_order
 import analysis.special_functions.pow
 import data.real.pi.wallis
 
+/-!
+# Stirling's formula
+
+This file proves Theorem 90 from the [100 Theorem List] <https://www.cs.ru.nl/~freek/100/>.
+It states that `n! ∼ √2πn (n/e)^n `, where `∼` denotes asymptotically equal. 
+
+The theorem was proven using the following proof outline: 
+## References
+
+<https://proofwiki.org/wiki/Stirling%27s_Formula>
+-/
+
 open_locale big_operators -- notation ∑ for finite sums
 open_locale classical real topological_space nnreal ennreal filter big_operators
-
 open real
 open finset
 open nat
@@ -49,17 +60,17 @@ begin
   ring,
 end
 
-lemma partial_sum_consecutive_reciprocals:
+lemma partial_sum_consecutive_reciprocals :
  ∀ n, ∑ k in range n, (1 : ℚ) / (k.succ * (k.succ.succ)) ≤ 1 :=
 begin
   intro n,
-  rw [←(mul_le_mul_left (zero_lt_two)), mul_sum],
-  { have h: ∀ (k : ℕ), k ∈ (range n) →
-    2*((1 : ℚ) / (k.succ * (k.succ.succ))) = 2 / (k.succ * (k.succ.succ)) :=
+  rw [← (mul_le_mul_left (zero_lt_two)), mul_sum],
+  { have h : ∀ (k : ℕ), k ∈ (range n) →
+      2 * ((1 : ℚ) / (k.succ * (k.succ.succ))) = 2 / (k.succ * (k.succ.succ)) :=
     begin
       intros k hk,
       rw [mul_div],
-      rw [mul_one (2:ℚ)],
+      rw [mul_one (2 : ℚ)],
     end,
     rw finset.sum_congr rfl h,
     have h₁ := inverse_triangle_sum n.succ,
@@ -69,7 +80,8 @@ begin
     simp only [sub_le_self_iff],
     refine (le_div_iff _).mpr (_),
     { exact (cast_lt.mpr n.succ_pos) },
-    { rw [zero_mul], exact zero_le_two } },
+    { rw [zero_mul], exact zero_le_two } 
+  },
   { exact rat.nontrivial },
  end
 
@@ -106,20 +118,20 @@ lemma term_def (x : ℝ) : term x = (λ n, ((-1) * ((-x) ^ (n + 1) / ((n : ℝ) 
   (x ^ (n + 1) / ((n : ℝ) + 1)))) := by refl
 
 --uses term,
-lemma log_sum_plus_minus (x : ℝ) (hx: |x| < 1) :
+lemma log_sum_plus_minus (x : ℝ) (hx : |x| < 1) :
   has_sum (λ k : ℕ, (2 : ℝ) * (1 / (2 * (k : ℝ) + 1)) * (x ^ (2 * k + 1))) (log (1 + x) - log(1 - x)) :=
 begin
-  have min_one_not_zero : (-1 : ℝ) ≠ ( 0 : ℝ), by linarith,
-  have h_min_one_ne_one : (-1 : ℝ) ≠ ( 1 : ℝ), by linarith,
+  have min_one_not_zero : (-1 : ℝ) ≠ (0 : ℝ), by linarith,
+  have h_min_one_ne_one : (-1 : ℝ) ≠ (1 : ℝ), by linarith,
   have h₁, from has_sum_pow_div_log_of_abs_lt_1 hx,
   have h₂, from has_sum_pow_div_log_of_abs_lt_1 (eq.trans_lt (abs_neg x) hx),
-  replace h₂ :=  (has_sum_mul_left_iff min_one_not_zero).mp h₂,
+  replace h₂ := (has_sum_mul_left_iff min_one_not_zero).mp h₂,
   rw [neg_one_mul, neg_neg, sub_neg_eq_add 1 x] at h₂,
   have h₃, from has_sum.add h₂ h₁,
   rw [tactic.ring.add_neg_eq_sub, ←term_def x ] at h₃,
   let g := (λ (n : ℕ), (2 * n)),
   rw ← function.injective.has_sum_iff (nat.mul_right_injective two_pos) _ at h₃,
-  { suffices h_term_eq_goal : (term x ∘ g) = (λ k : ℕ, 2*(1 / (2 * (k : ℝ) + 1)) * x^(2 * k  + 1)),
+  { suffices h_term_eq_goal : (term x ∘ g) = (λ k : ℕ, 2 * (1 / (2 * (k : ℝ) + 1)) * x ^ (2 * k  + 1)),
     by {rw h_term_eq_goal at h₃, exact h₃},
     apply funext,
     intro n,
@@ -145,17 +157,17 @@ begin
     exact (2 * n).succ_ne_zero,
   end,
   rw ← log_div _ _,
-  { suffices h : (n.succ : ℝ) / (n : ℝ) = (1 + 1 / (2 * n + 1)) / (1 - 1 / (2 * n + 1)),
+  suffices h : (n.succ : ℝ) / (n : ℝ) = (1 + 1 / (2 * n + 1)) / (1 - 1 / (2 * n + 1)),
       from congr_arg log h,
     rw ← one_add,
-    all_goals {field_simp} },
+    all_goals {field_simp}, /- can not use brackets for single goal, bc of all_goals -/
   { ring },
   { norm_cast,
     exact succ_ne_zero (2 * n + 1) },
 end
 
 --uses aux_log, log_sum_plus_minus
-lemma power_series_ln (n : ℕ) (hn: 0 < n) : has_sum (λ (k : ℕ),
+lemma power_series_ln (n : ℕ) (hn : 0 < n) : has_sum (λ (k : ℕ),
   (2 : ℝ) * (1 / (2 * (k : ℝ) + 1)) * ((1 / (2 * (n : ℝ) + 1)) ^ (2 * k + 1)))
   (log ((n.succ : ℝ) / (n : ℝ))) :=
  begin
@@ -164,8 +176,8 @@ lemma power_series_ln (n : ℕ) (hn: 0 < n) : has_sum (λ (k : ℕ),
   begin
     norm_cast,
     rw [abs_of_pos, div_lt_one]; norm_cast,
-    any_goals {linarith},
-    exact div_pos one_pos h₀,
+    any_goals {linarith}, /- can not use brackets for single goal, bc of any_goals -/
+    { exact div_pos one_pos h₀ },
   end,
   rw aux_log n (ne_of_gt hn),
   exact log_sum_plus_minus (1 / (2 * (n : ℝ) + 1)) h₁,
@@ -232,12 +244,12 @@ begin
   have h_nonzero : (m.succ : ℝ) + 1 / (2 : ℝ) ≠ 0,
   by {rw cast_succ, field_simp, norm_cast, linarith}, --there has to be a better way...
   rw has_sum_mul_left_iff h_nonzero at h_sum₀,
-  have h_inner: ∀ (b : ℕ) , (((m.succ : ℝ) + 1 / 2) * (2 * (1 / (2 * (b : ℝ) + 1)) *
+  have h_inner : ∀ (b : ℕ) , (((m.succ : ℝ) + 1 / 2) * (2 * (1 / (2 * (b : ℝ) + 1)) *
       (1 / (2 * (m.succ : ℝ) + 1)) ^ (2 * b + 1)))
       = (1 : ℝ) / (2 * (b : ℝ) + 1) * ((1 / (2 * m.succ + 1)) ^ 2) ^ b :=
   begin
     intro b,
-    rw [←pow_mul, pow_add],
+    rw [← pow_mul, pow_add],
     have : 2 * (b : ℝ) + 1     ≠ 0, by {norm_cast, exact succ_ne_zero (2*b)},
     have : 2 * (m.succ :ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2*m.succ)},
     field_simp,
@@ -265,10 +277,10 @@ begin
     at_top
     (𝓝 (((m.succ : ℝ) + 1 / 2) * log ((m.succ.succ : ℝ) / (m.succ : ℝ)))) :=
     (has_sum.tendsto_sum_nat h_sum₁).comp (tendsto_add_at_top_nat 1),
-  have split_zero: ∀ (n : ℕ), ∑ (k : ℕ) in range n.succ,
-  1 / (2 * (k : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k =
-  (∑ (k : ℕ) in range n,
-  1 / (2 * (k.succ:ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k.succ) + 1 :=
+  have split_zero : ∀ (n : ℕ), ∑ (k : ℕ) in range n.succ,
+    1 / (2 * (k : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k =
+    (∑ (k : ℕ) in range n,
+    1 / (2 * (k.succ : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k.succ) + 1 :=
   begin
     intro n,
     rw sum_range_succ' (λ (k : ℕ), 1 / (2 * (k : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k) n,
@@ -290,7 +302,7 @@ begin
   apply antitone_nat_of_succ_le,
   intro n,
   refine sub_nonneg.mp _,
-  rw ←succ_eq_add_one,
+  rw ← succ_eq_add_one,
   refine has_sum.nonneg _ (bn_diff_has_sum n),
   norm_num,
   simp only [one_div],
@@ -310,8 +322,8 @@ begin
   ((1 / (2 * n.succ + 1)) ^ 2 / (1 - (1 / (2 * n.succ + 1)) ^ 2)) :=
   begin
     have h_pow_succ := λ (k : ℕ),
-    symm (pow_succ ((1 / (2 * ((n : ℝ) + 1) + 1)) ^ 2)  k),
-    have h_nonneg: 0 ≤ ((1 / (2 * (n.succ:ℝ) + 1)) ^ 2) :=
+    symm (pow_succ ((1 / (2 * ((n : ℝ) + 1) + 1)) ^ 2) k),
+    have h_nonneg : 0 ≤ ((1 / (2 * (n.succ : ℝ) + 1)) ^ 2) :=
     begin
       rw [cast_succ, one_div, inv_pow₀, inv_nonneg],
       norm_cast,
@@ -387,14 +399,13 @@ begin
     refine sub_pos.mpr _,
     refine (sq_lt_one_iff _).mpr _,
     { rw one_div,
-    refine inv_nonneg.mpr _,
-    norm_cast,
-    exact zero_le (2 * succ n + 1)},
+      refine inv_nonneg.mpr _,
+      norm_cast,
+      exact zero_le (2 * succ n + 1) },
     { refine (div_lt_one _).mpr _,
-    all_goals {norm_cast},
-    linarith,
-    refine lt_add_of_pos_left 1 ((1 : ℕ).succ_mul_pos (succ_pos n)),
-    },
+      all_goals {norm_cast},
+      linarith,
+      refine lt_add_of_pos_left 1 ((1 : ℕ).succ_mul_pos (succ_pos n)), },
   end,
   refine le_trans (bn_diff_le_geo_sum n) ((le_div_iff' h₁).mpr _),
   rw mul_div (4 * (n.succ : ℝ) * (n.succ.succ : ℝ))
@@ -424,7 +435,7 @@ end
 --uses bn, bn_sub_bn_succ, partial_sum_consecutive_reciprocals
 lemma bn_bounded_aux : ∀ (n : ℕ), bn 1 - bn n.succ ≤ 1 / 4 :=
 begin
-  let bn' : (ℕ → ℝ) :=  λ (k : ℕ), bn k.succ,
+  let bn' : (ℕ → ℝ) := λ (k : ℕ), bn k.succ,
   intro n,
   calc
   bn 1 - bn n.succ = bn' 0 - bn' n : rfl
@@ -485,7 +496,7 @@ begin
 end
 
 --not in lib?
-lemma monotone_convergence (bn : ℕ → ℝ) (h_sd: ∀ (n m : ℕ), n ≤ m → bn m ≤ bn n)
+lemma monotone_convergence (bn : ℕ → ℝ) (h_sd : ∀ (n m : ℕ), n ≤ m → bn m ≤ bn n)
   (h_bounded : (lower_bounds (set.range bn)).nonempty) : ∃ (m : ℝ), tendsto bn at_top (𝓝 m) :=
 begin
  use Inf (set.range bn),
@@ -538,19 +549,20 @@ begin
   cases h with a ha,
   use a,
   split,
-  let an' : ℕ → ℝ := λ n, an n.succ,
-  rw tendsto_succ an a at ha,
-  have e_lower_bound : exp (3 / (4 : ℝ) - 1 / 2 * log 2) ∈ lower_bounds (set.range an') :=
-  begin
-    intros x hx,
-    rw [set.mem_range] at hx,
-    cases hx with k hk,
-    rw ←hk,
-    exact an'_bounded_by_pos_constant k,
-  end,
-  exact gt_of_ge_of_gt ((le_is_glb_iff (is_glb_of_tendsto_at_top an'_antitone ha)).mpr
-    e_lower_bound) (3 / 4 - 1 / 2 * log 2).exp_pos,
-  exact ha,
+  { let an' : ℕ → ℝ := λ n, an n.succ,
+    rw tendsto_succ an a at ha,
+    have e_lower_bound : exp (3 / (4 : ℝ) - 1 / 2 * log 2) ∈ lower_bounds (set.range an') :=
+    begin
+      intros x hx,
+      rw [set.mem_range] at hx,
+      cases hx with k hk,
+      rw ← hk,
+      exact an'_bounded_by_pos_constant k,
+    end,
+    exact gt_of_ge_of_gt ((le_is_glb_iff (is_glb_of_tendsto_at_top an'_antitone ha)).mpr
+      e_lower_bound) (3 / 4 - 1 / 2 * log 2).exp_pos 
+  },
+  { exact ha },
 end
 
 -- part 2 of https://proofwiki.org/wiki/Stirling%27s_Formula
@@ -576,13 +588,13 @@ begin
     intro i,
     rw [wallis_inside_prod],
     rw [cast_add, cast_one],
-    have hl: (2 : ℝ) * (1 + (i : ℝ)) / (2 * (1 + (i: ℝ)) - 1) =
+    have hl : (2 : ℝ) * (1 + (i : ℝ)) / (2 * (1 + (i : ℝ)) - 1) =
       (2 * (i : ℝ) + 2) / (2 * (i : ℝ) + 1) :=
     begin
       refine congr (congr_arg has_div.div _) _;
         ring_nf,
     end,
-    have hr: (2 : ℝ) * (1 + (i : ℝ)) / (2 * (1 + (i: ℝ)) + 1) =
+    have hr : (2 : ℝ) * (1 + (i : ℝ)) / (2 * (1 + (i : ℝ)) + 1) =
       ((2 * (i : ℝ) + 2) / (2 * (i : ℝ) + 3)) :=
     begin
       refine congr (congr_arg has_div.div _) _;
@@ -604,23 +616,25 @@ end
 
 --uses nothing?
 lemma aux2 (r : ℝ) (n : ℕ) : 1 / (((2 * n.succ + 1) : ℕ) : ℝ) *
-  (r * (((((2 * n.succ) ^ 2) : ℕ ): ℝ) / ((((2 * n.succ) : ℕ) : ℝ) - 1)  ^ 2)) =
+  (r * (((((2 * n.succ) ^ 2) : ℕ ): ℝ) / ((((2 * n.succ) : ℕ) : ℝ) - 1) ^ 2)) =
   (1 / (((2 * n + 1) : ℕ) : ℝ) * r) * ((((2 * n.succ) : ℕ) : ℝ) / ((((2 * n.succ) : ℕ) : ℝ) - 1) *
   ((((2 * n.succ) : ℕ) : ℝ) / (((2 * n.succ + 1) : ℕ) : ℝ))) :=
 begin
   by_cases h : r = 0,
-  repeat {rw h},
-  simp only [zero_mul, mul_zero],
-  have : 2 * ((n : ℝ) + 1) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},
-  have : 2 * (n : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},
-  have : 2 * ((n : ℝ) + 1) - 1 ≠ 0, by {ring_nf, norm_cast, exact succ_ne_zero _},
-  field_simp,
-  ring_nf,
+  { repeat {rw h},
+    simp only [zero_mul, mul_zero]
+  }, 
+  { have : 2 * ((n : ℝ) + 1) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},
+    have : 2 * (n : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},
+    have : 2 * ((n : ℝ) + 1) - 1 ≠ 0, by {ring_nf, norm_cast, exact succ_ne_zero _},
+    field_simp,
+    ring_nf 
+  },
 end
 
 --uses wallis_insise_prod, aux2
-lemma equation3 (n : ℕ):  ∏ k in Ico 1 n.succ, wallis_inside_prod k =
-    (1 : ℝ) / (2 * n + 1) * ∏ k in Ico 1 n.succ, ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 :=
+lemma equation3 (n : ℕ): ∏ k in Ico 1 n.succ, wallis_inside_prod k =
+  (1 : ℝ) / (2 * n + 1) * ∏ k in Ico 1 n.succ, ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 :=
 begin
   induction n with d hd,
   simp only [Ico_self, prod_empty, cast_zero, mul_zero,
@@ -652,7 +666,7 @@ lemma equation4' (n : ℕ) : 1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
 begin
   rw prod_congr rfl,
   intros d hd,
-  rw ←equation4,
+  rw ← equation4,
   rw mem_Ico at hd,
   exact one_le_iff_ne_zero.mp hd.left,
 end
@@ -662,18 +676,19 @@ lemma equation5 (n : ℕ) : ((2 : ℝ) * n) ^ 2 / (2 * n - 1) ^ 2 * ((2 * n) ^ 2
   ((2 : ℝ) ^ 4 * n ^ 4) / (((2 * n - 1) * (2 * n)) ^ 2) :=
 begin
   cases n with d hd,
-    rw [cast_zero, mul_zero, zero_pow two_pos, zero_div, zero_mul],
-    rw [zero_pow four_pos, mul_zero, zero_div],
-  have : 2 * (d.succ : ℝ) - 1 ≠ 0 :=
-  begin
-    rw [cast_succ],
-    ring_nf,
-    norm_cast,
-    exact succ_ne_zero (2*d),
-  end,
-  have : (d.succ : ℝ) ≠ 0 := cast_ne_zero.mpr (succ_ne_zero d),
- field_simp,
- ring_nf,
+  { rw [cast_zero, mul_zero, zero_pow two_pos, zero_div, zero_mul],
+    rw [zero_pow four_pos, mul_zero, zero_div] },
+  { have : 2 * (d.succ : ℝ) - 1 ≠ 0 :=
+    begin
+      rw [cast_succ],
+      ring_nf,
+      norm_cast,
+      exact succ_ne_zero (2*d),
+    end,
+    have : (d.succ : ℝ) ≠ 0 := cast_ne_zero.mpr (succ_ne_zero d),
+   field_simp,
+   ring_nf
+  },
 end
 
 --uses equation5,
@@ -684,7 +699,7 @@ lemma equation5' (n : ℕ) : 1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
 begin
   rw prod_congr rfl,
   intros d hd,
-  rw ←equation5,
+  rw ← equation5,
 end
 
 --uses nothing?
@@ -693,17 +708,18 @@ lemma equation6 (n : ℕ) : 1 / ((2 : ℝ) * n + 1) * ∏ (k : ℕ) in Ico 1 n.s
   ((2 : ℝ) ^ (4 * n) * n.factorial ^ 4) / (((2 * n).factorial ^ 2) * (2 * n + 1)) :=
 begin
   induction n with d hd,
-    rw [Ico_self, prod_empty, cast_zero, mul_zero, mul_zero, mul_zero, factorial_zero],
-    rw [zero_add, pow_zero, cast_one, one_pow, one_pow, mul_one, mul_one],
-  replace hd := congr_arg (has_mul.mul (2*(d:ℝ)+1)) hd,
+  { rw [Ico_self, prod_empty, cast_zero, mul_zero, mul_zero, mul_zero, factorial_zero],
+    rw [zero_add, pow_zero, cast_one, one_pow, one_pow, mul_one, mul_one]
+  },
+  replace hd := congr_arg (has_mul.mul (2* (d : ℝ) + 1)) hd,
   have : 2 * (d : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2 * d)},
   rw [← mul_assoc, mul_one_div_cancel this, one_mul] at hd,
   rw [prod_Ico_succ_top (succ_le_succ (zero_le d)), hd, mul_succ 2],
   repeat {rw factorial_succ},
-  have : 2 * (d:ℝ) + 1 + 1  ≠ 0, by {norm_cast, exact succ_ne_zero (2 * d + 1)},
+  have : 2 * (d : ℝ) + 1 + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2 * d + 1)},
   have : 2 * (d.succ : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2 * d.succ)},
   have : 2 * ((d : ℝ) + 1) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero (2 * (d + 1))},
-  have : ((2 * d).factorial : ℝ)  ≠ 0, by {norm_cast, exact factorial_ne_zero (2 * d)},
+  have : ((2 * d).factorial : ℝ) ≠ 0, by {norm_cast, exact factorial_ne_zero (2 * d)},
   have : 2 * ((d : ℝ) + 1) - 1 ≠ 0, by {ring_nf, norm_cast, exact succ_ne_zero (2 * d)},
   have : 2 * ((d : ℝ) + 1) ≠ 0, by {norm_cast, exact mul_ne_zero two_ne_zero (succ_ne_zero d)},
   field_simp,
@@ -715,7 +731,7 @@ noncomputable def wn (n : ℕ) : ℝ :=
   ((2 : ℝ) ^ (4 * n) * (n.factorial) ^ 4) / ((((2 * n).factorial) ^ 2) * (2 * (n : ℝ) + 1))
 
 --uses wn, wallis_inside_prod, equality1, equation3, equation4', equation5', equation6
-lemma wallis_consequence: tendsto (λ (n : ℕ), wn n) at_top (𝓝 (π/2)) :=
+lemma wallis_consequence : tendsto (λ (n : ℕ), wn n) at_top (𝓝 (π/2)) :=
 begin
   have h : tendsto (λ (k : ℕ), ∏ i in Ico 1 k.succ, wallis_inside_prod i) at_top (𝓝 (π/2)) :=
     equality1,
@@ -729,7 +745,7 @@ end
 -- part 2b of https://proofwiki.org/wiki/Stirling%27s_Formula
 
 --uses an
-lemma sub_seq_tendsto {an : ℕ → ℝ} {A : ℝ} (h: tendsto an at_top (𝓝 A)) :
+lemma sub_seq_tendsto {an : ℕ → ℝ} {A : ℝ} (h : tendsto an at_top (𝓝 A)) :
   tendsto (λ (n : ℕ), an (2 * n)) at_top (𝓝 A) :=
 h.comp (tendsto_id.const_mul_at_top' two_pos)
 
@@ -742,36 +758,37 @@ begin
   rw cn,
   have h₀ : 4 = 2 * 2, by refl,
   rw [mul_pow, mul_pow, h₀, pow_mul, sq_sqrt, sq_sqrt],
-  cases n,
-  rw [cast_zero, zero_div, mul_zero, zero_pow, zero_mul, zero_mul, zero_div],
-  exact two_pos,
-  have h₁ : 2 * (n.succ : ℝ) + 1 ≠ 0 :=
-  begin
-    norm_cast,
-    exact succ_ne_zero (2*n.succ),
-  end,
-  have h₂ : exp 1 ≠ 0, from exp_ne_zero 1,
-  have h₃ : (n.succ : ℝ) ≠ 0, by exact cast_ne_zero.mpr (succ_ne_zero n),
-  field_simp,
-  repeat {rw [← pow_mul]},
-  rw [← h₀, mul_assoc 2 n.succ 2, mul_left_comm 2 n.succ 2, ← h₀],
-  rw [mul_pow (2 : ℝ) _ (n.succ * 4), mul_comm 4 n.succ],
-  ring_nf,
+  { cases n,
+    { rw [cast_zero, zero_div, mul_zero, zero_pow, zero_mul, zero_mul, zero_div],
+    exact two_pos },
+    { have h₁ : 2 * (n.succ : ℝ) + 1 ≠ 0 :=
+    begin
+      norm_cast,
+      exact succ_ne_zero (2*n.succ),
+    end,
+    have h₂ : exp 1 ≠ 0, from exp_ne_zero 1,
+    have h₃ : (n.succ : ℝ) ≠ 0, by exact cast_ne_zero.mpr (succ_ne_zero n),
+    field_simp,
+    repeat {rw [← pow_mul]},
+    rw [← h₀, mul_assoc 2 n.succ 2, mul_left_comm 2 n.succ 2, ← h₀],
+    rw [mul_pow (2 : ℝ) _ (n.succ * 4), mul_comm 4 n.succ],
+    ring_nf },
+  }, 
   all_goals {norm_cast, linarith},
 end
 
 
 --uses : cn, rest_cancel ,
-lemma rest_has_limit_one_half: tendsto (λ (n : ℕ), cn n) at_top (𝓝 (1 / 2)) :=
+lemma rest_has_limit_one_half : tendsto (λ (n : ℕ), cn n) at_top (𝓝 (1 / 2)) :=
 begin
   apply (tendsto.congr rest_cancel),
   have h : tendsto (λ (k : ℕ), (((k : ℝ) / (2 * (k : ℝ) + 1))⁻¹))
     at_top (𝓝 (((1 : ℝ) / 2))⁻¹) :=
   begin
-    have hsucc: tendsto (λ (k : ℕ), (((k.succ : ℝ) / (2 * (k.succ : ℝ) + 1))⁻¹)) at_top
+    have hsucc : tendsto (λ (k : ℕ), (((k.succ : ℝ) / (2 * (k.succ : ℝ) + 1))⁻¹)) at_top
       (𝓝 (((1 : ℝ) / 2))⁻¹) :=
     begin
-      have hx: ∀ (k : ℕ), (2 : ℝ) + k.succ⁻¹ = ((k.succ : ℝ) / (2 * k.succ + 1))⁻¹ :=
+      have hx : ∀ (k : ℕ), (2 : ℝ) + k.succ⁻¹ = ((k.succ : ℝ) / (2 * k.succ + 1))⁻¹ :=
       begin
         intro k,
         have hxne : (k.succ : ℝ) ≠ 0 := nonzero_of_invertible (k.succ : ℝ),
@@ -792,12 +809,12 @@ begin
     one_ne_zero, not_false_iff],
   end,
   convert tendsto.inv₀ h h2,
-  simp only [inv_inv, one_div],
-  rw inv_inv,
+  { simp only [inv_inv, one_div] },
+  { rw inv_inv },
 end
 
 --uses : an
-lemma an_aux3 (a : ℝ) (hane: a ≠ 0) (ha : tendsto (λ (n : ℕ), an n) at_top (𝓝  a)) :
+lemma an_aux3 (a : ℝ) (hane : a ≠ 0) (ha : tendsto (λ (n : ℕ), an n) at_top (𝓝 a)) :
   tendsto (λ (n : ℕ), (1 / (an n)) ^ 2) at_top (𝓝 ((1 / a) ^ 2)) :=
 begin
  have h := tendsto.inv₀ ha hane,
@@ -826,7 +843,7 @@ begin
     from sqrt_ne_zero'.mpr (mul_pos two_pos (cast_pos.mpr (zero_lt_iff.mpr hn))),
   have h₂ : (exp 1) ≠ 0, from exp_ne_zero 1,
   have h₃ : ((2 * n).factorial : ℝ) ≠ 0, from cast_ne_zero.mpr (factorial_ne_zero (2 * n)),
-  have h₄ : sqrt (n: ℝ) ≠ 0, from sqrt_ne_zero'.mpr (cast_pos.mpr (zero_lt_iff.mpr hn)),
+  have h₄ : sqrt (n : ℝ) ≠ 0, from sqrt_ne_zero'.mpr (cast_pos.mpr (zero_lt_iff.mpr hn)),
   have h₅ : (((2 * n) : ℕ) : ℝ) ≠ 0,
     from cast_ne_zero.mpr (mul_ne_zero two_ne_zero hn),
   have h₆ : sqrt (4 * (n : ℝ)) ≠ 0,
@@ -856,7 +873,7 @@ begin
   rw ←tendsto_succ qn (a ^ 2 / 2),
   have has : tendsto (λ (n : ℕ), an n ^ 4 * (1 / an (2 * n)) ^ 2) at_top (𝓝 (a ^ 2)) :=
   begin
-    convert tendsto.mul (tendsto.pow ha 4)  (sub_seq_tendsto (an_aux3 a hane ha)),
+    convert tendsto.mul (tendsto.pow ha 4) (sub_seq_tendsto (an_aux3 a hane ha)),
     field_simp,
     ring_nf,
   end,
@@ -865,7 +882,7 @@ begin
 end
 
 --uses : second_wallis_limit, wallis_consequence, an
---uses : an_has_pos_limit_a,  pi_and_a, an
+--uses : an_has_pos_limit_a, pi_and_a, an
 lemma an_has_limit_sqrt_pi : tendsto (λ (n : ℕ), an n) at_top (𝓝 (sqrt π)) :=
 begin
   have ha := an_has_pos_limit_a,
