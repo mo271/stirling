@@ -61,7 +61,7 @@ lemma partial_sum_consecutive_reciprocals :
  ∀ n, ∑ k in range n, (1 : ℚ) / (k.succ * (k.succ.succ)) ≤ 1 :=
 begin
   intro n,
-  rw [← (mul_le_mul_left (zero_lt_two)), mul_sum],
+  rw [← (mul_le_mul_left (zero_lt_two)), mul_sum], swap, { exact rat.nontrivial },
   { have h : ∀ (k : ℕ), k ∈ (range n) →
       2 * ((1 : ℚ) / (k.succ * (k.succ.succ))) = 2 / (k.succ * (k.succ.succ)) :=
     begin
@@ -77,9 +77,7 @@ begin
     simp only [sub_le_self_iff],
     refine (le_div_iff _).mpr (_),
     { exact (cast_lt.mpr n.succ_pos) },
-    { rw [zero_mul], exact zero_le_two }
-  },
-  { exact rat.nontrivial },
+    { rw [zero_mul], exact zero_le_two } },
  end
 
 
