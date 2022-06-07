@@ -186,29 +186,22 @@ noncomputable def bn (n : ℕ) : ℝ := log (an n)
 lemma zero_lt_sqrt_two_n (n : ℕ) (hn : n ≠ 0) : 0 < real.sqrt (2 * (n : ℝ)) :=
    real.sqrt_pos.mpr (mul_pos two_pos (cast_pos.mpr (zero_lt_iff.mpr hn)))
 
---uses nothing
-lemma n_div_exp1_pow_gt_zero (n : ℕ) : ((n : ℝ) / exp 1) ^ n > 0 :=
-begin
-  cases n,
-  { rw pow_zero, exact one_pos, },
-  { exact gt_iff_lt.mpr (pow_pos (div_pos (cast_pos.mpr n.succ_pos ) (exp_pos 1)) (n.succ)), },
-end
-
 --uses bn, n_div_exp1_pow_gt_zero, zero_lt_zwrt_two_n
 lemma bn_formula (n : ℕ): bn n.succ = (log (n.succ.factorial : ℝ)) -
   1 / (2 : ℝ) * (log (2 * (n.succ : ℝ))) - (n.succ : ℝ) * log ((n.succ : ℝ) / (exp 1)) :=
 begin
-  have h3, from (lt_iff_le_and_ne.mp (zero_lt_sqrt_two_n n.succ (succ_ne_zero n))),
-  have h4, from (lt_iff_le_and_ne.mp (n_div_exp1_pow_gt_zero n.succ)),
+  have h3, from (lt_iff_le_and_ne.mp (zero_lt_sqrt_two_n n.succ (succ_ne_zero n))).right,
+  have h4 : 0 ≠ ((n.succ : ℝ) / exp 1) ^ n.succ :=
+    ne_of_lt ((pow_pos (div_pos (cast_pos.mpr n.succ_pos ) (exp_pos 1)) (n.succ))),
   rw [bn, an, log_div, log_mul, sqrt_eq_rpow, log_rpow, log_pow],
   { linarith },
   { rw zero_lt_mul_left,
     { exact cast_lt.mpr n.succ_pos },
     { exact zero_lt_two, }, },
-  { exact h3.right.symm, },
-  { exact h4.right.symm, },
+  { exact h3.symm, },
+  { exact h4.symm, },
   { exact cast_ne_zero.mpr n.succ.factorial_ne_zero, },
-  { apply (mul_ne_zero h3.right.symm h4.right.symm) },
+  { apply (mul_ne_zero h3.symm h4.symm) },
 end
 
 -- second section of part 1
@@ -464,7 +457,7 @@ begin
 end
 
 --uses bn_bounded_aux, bn, bn_formula
-lemma bn_bounded_by_constant : ∀ (n : ℕ), bn n.succ ≥ 3 / (4 : ℝ) - 1 / 2 * log 2 :=
+lemma bn_bounded_by_constant : ∀ (n : ℕ), 3 / (4 : ℝ) - 1 / 2 * log 2 ≤ bn n.succ :=
 begin
   intro n,
   calc
