@@ -70,7 +70,7 @@ begin
     rw sum_range_succ' at h₁,
     norm_num at *,
     rw h₁,
-    simp only [sub_le_self_iff],
+    rw [sub_le_self_iff],
     refine (le_div_iff _).mpr (_),
     { exact (cast_lt.mpr n.succ_pos), },
     { rw [zero_mul], exact zero_le_two, } },
@@ -126,7 +126,6 @@ begin
     apply funext,
     intro n,
     rw [function.comp_app],
-    simp only [g],
     rw [term],
     rw odd.neg_pow (⟨n, rfl⟩ : odd (2 * n + 1)) x,
     rw [neg_one_mul, neg_div, neg_neg, cast_mul, cast_two],
@@ -250,11 +249,11 @@ begin
     1 / (2 * (k.succ : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k.succ) + 1 := by
     { intro n,
       rw sum_range_succ' (λ (k : ℕ), 1 / (2 * (k : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k) n,
-      simp only [one_div, cast_succ, inv_pow₀, cast_zero, mul_zero, zero_add, pow_zero,
-      inv_one, mul_one, add_left_inj], },
+      dsimp only [], --beta reduce functions
+      rw [pow_zero, mul_one, cast_zero, mul_zero, zero_add, div_one] },
   replace h_sum := tendsto.congr split_zero h_sum,
   replace h_sum := tendsto.add_const (-1) h_sum,
-  simp only [add_neg_cancel_right] at h_sum,
+  simp only [add_neg_cancel_right] at h_sum, --beta reduce and rw?
   rw tactic.ring.add_neg_eq_sub _ (1 : ℝ) at h_sum,
   rw ← hx at h_sum,
   exact (summable.has_sum_iff_tendsto_nat
