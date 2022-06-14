@@ -80,6 +80,10 @@ begin
 -- part 1 of https://proofwiki.org/wiki/Stirling%27s_Formula
 -- first section of part 1
 
+/--
+A sequence of real numbers `an n` has limit `a`, if and only if only if the shifted
+sequence given by `an n.succ` has the limit `a`.
+-/
 lemma tendsto_succ (an : ℕ → ℝ) (a : ℝ) : tendsto an at_top (𝓝 a) ↔
   tendsto (λ n : ℕ, (an n.succ)) at_top (𝓝 a) :=
 begin
@@ -100,74 +104,86 @@ begin
   rw h,
 end
 
+/--
+Define `an n` as n!/ √2n (n/e)^n. Stirling's formula states precisely that this sequence
+has limit √π.
+-/
 noncomputable def an (n : ℕ) : ℝ := (n.factorial : ℝ) / ((real.sqrt(2 * n) * ((n / (exp 1))) ^ n))
 
-noncomputable def term (x : ℝ) (n : ℕ) : ℝ :=
-  ((-1) * ((-x) ^ (n + 1) / ((n : ℝ) + 1)) + (x ^ (n + 1) / ((n : ℝ) + 1)))
-
-lemma term_def (x : ℝ) : term x = (λ n, ((-1) * ((-x) ^ (n + 1) / ((n : ℝ) + 1)) +
-  (x ^ (n + 1) / ((n : ℝ) + 1)))) := by refl
-
+/--The function `log(1 + x) - log(1 - x)` has a power series expansion with k-th term
+2 x^(2k+1)/(2k+1), valid for `|x|<1`. -/
 lemma log_sum_plus_minus (x : ℝ) (hx : |x| < 1) :
   has_sum (λ k : ℕ, (2 : ℝ) * (1 / (2 * (k : ℝ) + 1)) * (x ^ (2 * k + 1))) (log (1 + x) - log(1 - x)) :=
 begin
-  have min_one_not_zero : (-1 : ℝ) ≠ (0 : ℝ), by linarith,
-  have h_min_one_ne_one : (-1 : ℝ) ≠ (1 : ℝ), by linarith,
-  have h₁, from has_sum_pow_div_log_of_abs_lt_1 hx,
+ have h₁, from has_sum_pow_div_log_of_abs_lt_1 hx,
   have h₂, from has_sum_pow_div_log_of_abs_lt_1 (eq.trans_lt (abs_neg x) hx),
-  replace h₂ := (has_sum_mul_left_iff min_one_not_zero).mp h₂,
+  replace h₂ := (has_sum_mul_left_iff  (λ h:(-1 = (0:ℝ)), one_ne_zero (neg_eq_zero.mp h))).mp h₂,
+
   rw [neg_one_mul, neg_neg, sub_neg_eq_add 1 x] at h₂,
   have h₃, from has_sum.add h₂ h₁,
-  rw [tactic.ring.add_neg_eq_sub, ←term_def x ] at h₃,
-  let g := (λ (n : ℕ), (2 * n)),
+  rw [tactic.ring.add_neg_eq_sub] at h₃,
+  set term := (λ n :ℕ, ((-1) * ((-x) ^ (n + 1) / ((n : ℝ) + 1)) + (x ^ (n + 1) / ((n : ℝ) + 1)))),
+  set two_mul := (λ (n : ℕ), (2 * n)),
   rw ← function.injective.has_sum_iff (nat.mul_right_injective two_pos) _ at h₃,
-  { suffices h_term_eq_goal : (term x ∘ g) = (λ k : ℕ, 2 * (1 / (2 * (k : ℝ) + 1)) * x ^ (2 * k  + 1)),
+  { suffices h_term_eq_goal : (term ∘ two_mul) = (λ k : ℕ, 2 * (1 / (2 * (k : ℝ) + 1)) * x ^ (2 * k  + 1)),
     by {rw h_term_eq_goal at h₃, exact h₃},
     apply funext,
     intro n,
     rw [function.comp_app],
-    rw [term],
+    dsimp only [two_mul, term],
     rw odd.neg_pow (⟨n, rfl⟩ : odd (2 * n + 1)) x,
     rw [neg_one_mul, neg_div, neg_neg, cast_mul, cast_two],
     ring },
   { intros m hm,
     rw [range_two_mul, set.mem_set_of_eq] at hm,
-    rw [term, even.neg_pow (even_succ.mpr hm), succ_eq_add_one, neg_one_mul, neg_add_self] },
+    rw [even.neg_pow (even_succ.mpr hm), succ_eq_add_one, neg_one_mul, neg_add_self] },
 end
 
+/--
+For any natural number `n ≠ 0`, we have the identity
+log ((n+1)/n) = log(1+1/(2n+1)) - log(1 - (2n+1))
+-/
 lemma aux_log (n : ℕ) (hn : n ≠ 0) :
   log (n.succ / n) = log (1 + 1 / (2 * n + 1)) - log (1 - 1 / (2 * n + 1)) :=
 begin
-  have : (n : ℝ) ≠ 0, from cast_ne_zero.mpr hn,
   have : (2 : ℝ) * n + 1 ≠ 0, by { norm_cast, exact (2 * n).succ_ne_zero, },
   rw ← log_div,
-  suffices h : (n.succ : ℝ) / (n : ℝ) = (1 + 1 / (2 * n + 1)) / (1 - 1 / (2 * n + 1)),
-      from congr_arg log h,
-    rw ← one_add,
-    all_goals {field_simp}, /- can not use brackets for single goal, bc of all_goals -/
+  suffices h, from congr_arg log h,
+    all_goals {field_simp [cast_ne_zero.mpr]}, /- can not use brackets for single goal, bc of all_goals -/
   { ring },
   { norm_cast, exact succ_ne_zero (2 * n + 1) },
 end
 
+/--
+For any natural number `n`, the expression log ((n+1)/n) has the series representation
+∑_{k=0}^{∞} (2/(2k+1))*(1/(2n+1))^(2k+1)
+-/
 lemma power_series_ln (n : ℕ) (hn : 0 < n) : has_sum (λ (k : ℕ),
   (2 : ℝ) * (1 / (2 * (k : ℝ) + 1)) * ((1 / (2 * (n : ℝ) + 1)) ^ (2 * k + 1)))
   (log ((n.succ : ℝ) / (n : ℝ))) :=
  begin
-  have h₀ : 0 < (((2 * n + 1) : ℕ) : ℝ), from (cast_pos.mpr (2 * n).succ_pos),
-  have h₁ : |1 / (2 * (n : ℝ) + 1)| < 1, by
-  { norm_cast,
-    rw [abs_of_pos, div_lt_one]; norm_cast,
+  have h₁ : |1 / (2 * (n : ℝ) + 1)| < 1, by --in library??
+  { rw [abs_of_pos, div_lt_one]; norm_cast,
     any_goals {linarith}, /- can not use brackets for single goal, bc of any_goals -/
-    { exact div_pos one_pos h₀ }, },
+    { exact div_pos one_pos (cast_pos.mpr (2 * n).succ_pos) }, },
   rw aux_log n (ne_of_gt hn),
   exact log_sum_plus_minus (1 / (2 * (n : ℝ) + 1)) h₁,
  end
 
+/--
+`bn n` is log (n!/ √2n (n/e)^n)
+-/
 noncomputable def bn (n : ℕ) : ℝ := log (an n)
 
+/--
+For each natural number `n ≠ 0`, we have 0<√2n.
+-/
 lemma zero_lt_sqrt_two_n (n : ℕ) (hn : n ≠ 0) : 0 < real.sqrt (2 * (n : ℝ)) :=
    real.sqrt_pos.mpr (mul_pos two_pos (cast_pos.mpr (zero_lt_iff.mpr hn)))
 
+/--
+We have the expression `bn (n+1)` = log (n+1)! -1/2 log(2n) - n log ((n+1)/e)
+-/
 lemma bn_formula (n : ℕ): bn n.succ = (log (n.succ.factorial : ℝ)) -
   1 / (2 : ℝ) * (log (2 * (n.succ : ℝ))) - (n.succ : ℝ) * log ((n.succ : ℝ) / (exp 1)) :=
 begin
@@ -538,7 +554,7 @@ lemma aux2 (r : ℝ) (n : ℕ) : 1 / (((2 * n.succ + 1) : ℕ) : ℝ) *
 begin
   by_cases h : r = 0,
   { repeat {rw h},
-    simp only [zero_mul, mul_zero] },
+    rw [zero_mul, mul_zero, mul_zero, zero_mul] },
   { have : 2 * ((n : ℝ) + 1) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},
     have : 2 * (n : ℝ) + 1 ≠ 0, by {norm_cast, exact succ_ne_zero _},
     have : 2 * ((n : ℝ) + 1) - 1 ≠ 0, by {ring_nf, norm_cast, exact succ_ne_zero _},
@@ -709,8 +725,7 @@ begin
   rw sqrt_mul (mul_self_nonneg 2) (n : ℝ),
   rw sqrt_mul_self zero_le_two,
   have h₀ : (n : ℝ) ≠ 0, from cast_ne_zero.mpr hn,
-  have h₁ : sqrt (2 * (n : ℝ)) ≠ 0,
-    from sqrt_ne_zero'.mpr (mul_pos two_pos (cast_pos.mpr (zero_lt_iff.mpr hn))),
+  have h₁ : sqrt (2 * (n : ℝ)) ≠ 0, from (ne_of_lt (zero_lt_sqrt_two_n n hn)).symm,
   have h₂ : (exp 1) ≠ 0, from exp_ne_zero 1,
   have h₃ : ((2 * n).factorial : ℝ) ≠ 0, from cast_ne_zero.mpr (factorial_ne_zero (2 * n)),
   have h₄ : sqrt (n : ℝ) ≠ 0, from sqrt_ne_zero'.mpr (cast_pos.mpr (zero_lt_iff.mpr hn)),
