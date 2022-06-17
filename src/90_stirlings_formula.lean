@@ -22,24 +22,24 @@ import topology.instances.ennreal
 # Stirling's formula
 
 This file proves Theorem 90 from the [100 Theorem List] <https://www.cs.ru.nl/~freek/100/>.
-It states that `n!` grows asymptotically like $\sqrt{2\pi n}(\frac{n}{e})^n$.
+It states that $n!$ grows asymptotically like $\sqrt{2\pi n}(\frac{n}{e})^n$.
 
 
 ## Proof outline
 
-The proof follows: <https://proofwiki.org/wiki/Stirling%27s_Formula>.#check
+The proof follows: <https://proofwiki.org/wiki/Stirling%27s_Formula>.
 
-We proceed in two parts.#check
+We proceed in two parts.
 ### Part 1
-We consider the fraction sequence $a_n$ of fractions `n!` over $\sqrt{2\pi n}(\frac{n}{e})^n$ and
-proves that this sequence converges against a real, positve number `a`. For this the two main
+We consider the fraction sequence $a_n$ of fractions $n!$ over $\sqrt{2n}(\frac{n}{e})^n$ and
+proves that this sequence converges against a real, positve number $a$. For this the two main
 ingredients are
  - taking the logarithm of the sequence and
- - use the series expansion of `log(1 + x)`.
+ - use the series expansion of $\log(1 + x)$.
 
 ### Part 2
-We use the fact that the series defined in part 1 converges againt a real number `a` and prove that
-`a = √π`. Here the main ingredient is the convergence of the Wallis product.
+We use the fact that the series defined in part 1 converges againt a real number $a$ and prove that
+$a = \sqrt{\pi}$. Here the main ingredient is the convergence of the Wallis product.
 -/
 
 namespace stirling
@@ -126,13 +126,13 @@ begin
 end
 
 /--
-Define `an n` as $\frac{n!}{\sqrt{2n}/(\frac{n}{e})^n.
+Define `an n` as $\frac{n!}{\sqrt{2n}/(\frac{n}{e})^n$.
 Stirling's formula states that this sequence has limit $\sqrt(π)$.
 -/
 noncomputable def an (n : ℕ) : ℝ := (n.factorial : ℝ) / ((sqrt(2 * n) * ((n / (exp 1))) ^ n))
 
-/--The function `log(1 + x) - log(1 - x)` has a power series expansion with k-th term
-2 x^(2k+1)/(2k+1), valid for `|x| < 1`. -/
+/-- The function `log(1 + x) - log(1 - x)` has a power series expansion with k-th term
+`2 * x^(2 * k + 1) / (2 * k + 1)`, valid for `|x| < 1`. -/
 lemma log_sum_plus_minus (x : ℝ) (hx : |x| < 1) : has_sum (λ k : ℕ,
   (2 : ℝ) * (1 / (2 * (k : ℝ) + 1)) * (x ^ (2 * k + 1))) (log (1 + x) - log(1 - x)) :=
 begin
@@ -177,7 +177,7 @@ end
 
 /--
 For any natural number `n`, the expression `log((n + 1) / n)` has the series expansion
-$\sum_{k=0}^{\infty} frac{2}{2k+1}(\frac{1}{2n+1})^{2k+1}$.
+$\sum_{k=0}^{\infty}\frac{2}{2k+1}(\frac{1}{2n+1})^{2k+1}$.
 -/
 lemma power_series_ln (n : ℕ) (hn : n ≠ 0) : has_sum (λ (k : ℕ),
   (2 : ℝ) * (1 / (2 * (k : ℝ) + 1)) * ((1 / (2 * (n : ℝ) + 1)) ^ (2 * k + 1)))
@@ -204,7 +204,7 @@ lemma zero_lt_sqrt_two_n (n : ℕ) (hn : n ≠ 0) : 0 < sqrt (2 * (n : ℝ)) :=
    real.sqrt_pos.mpr (mul_pos two_pos (cast_pos.mpr (zero_lt_iff.mpr hn)))
 
 /--
-We have the expression `bn (n+1)` = log(n + 1)! - 1 / 2 * log(2 * n) - n * log ((n + 1) / e)
+We have the expression `bn (n+1) = log(n + 1)! - 1 / 2 * log(2 * n) - n * log ((n + 1) / e)`.
 -/
 lemma bn_formula (n : ℕ): bn n.succ = (log (n.succ.factorial : ℝ)) -
   1 / (2 : ℝ) * (log (2 * (n.succ : ℝ))) - (n.succ : ℝ) * log ((n.succ : ℝ) / (exp 1)) :=
@@ -578,7 +578,7 @@ begin
   rw prod_Ico_add wallis_inside_prod 0 k 1,
 end
 
-/-- The wallis product $\prod_{n=1}^k \frac{2n}{(2n-1}\frac{2n}{2n+1}$
+/-- The Wallis product $\prod_{n=1}^k \frac{2n}{2n-1}\frac{2n}{2n+1}$
   converges to `π/2` as `k → ∞` -/
 lemma equality1: tendsto (λ (k : ℕ), ∏ i in Ico 1 k.succ, wallis_inside_prod i) at_top (𝓝 (π/2)) :=
 begin
@@ -654,7 +654,7 @@ end
 
 /--
 For any `n : ℕ`, we have
-1/(2n+1)*∏_{k=1}^n (2k)^2/(2k-1)^2 = 1/(2n+1) ∏_{k=1}^n (2k)^2/(2k-1)^2 * (2k)^2/(2k)^2.
+`1/(2n+1)*∏_{k=1}^n (2k)^2/(2k-1)^2 = 1/(2n+1) ∏_{k=1}^n (2k)^2/(2k-1)^2 * (2k)^2/(2k)^2`.
 -/
 lemma equation4' (n : ℕ) : 1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
   ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 =
@@ -670,7 +670,7 @@ end
 
 /--
 For any `n : ℕ`, we have
-(2n)^2/(2n-1)^2 * (2n)^2/(2n)^2 = 2^4 * n^4 / ((2n-1)*(2n))^2.
+`(2n)^2/(2n-1)^2 * (2n)^2/(2n)^2 = 2^4 * n^4 / ((2n-1)*(2n))^2`.
 -/
 lemma equation5 (n : ℕ) : ((2 : ℝ) * n) ^ 2 / (2 * n - 1) ^ 2 * ((2 * n) ^ 2 / (2 * n) ^ 2) =
   ((2 : ℝ) ^ 4 * n ^ 4) / ((2 * n - 1) * (2 * n)) ^ 2 :=
@@ -687,7 +687,7 @@ end
 
 /--
 For any `n : ℕ`, we have
-1/(2n+1) ∏_{k=1}^n (2k)^2/(2k-1)^2*(2k)^2/(2k)^2 = 1/(2n+1) ∏_{k=1}^n 2^4 k^4/ ((2k-1)(2k))^2.
+`1/(2n+1) ∏_{k=1}^n (2k)^2/(2k-1)^2*(2k)^2/(2k)^2 = 1/(2n+1) ∏_{k=1}^n 2^4 k^4/ ((2k-1)(2k))^2`.
 -/
 lemma equation5' (n : ℕ) : 1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
   ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 * ((2 * k) ^ 2 / (2 * k) ^ 2) =
@@ -699,7 +699,7 @@ end
 
 /--
 For any `n : ℕ`, we have
-1/(2n+1) ∏_{k=1}^n 2^4 k^4/ ((2k-1)(2k))^2 = 2^(4n)*(n!)^4/((2n)!^2 *(2n+1)) .
+`1/(2n+1) ∏_{k=1}^n 2^4 k^4/ ((2k-1)(2k))^2 = 2^(4n)*(n!)^4/((2n)!^2 *(2n+1))` .
 -/
 lemma equation6 (n : ℕ) : 1 / ((2 : ℝ) * n + 1) * ∏ (k : ℕ) in Ico 1 n.succ,
   (2 : ℝ) ^ 4 * k ^ 4 / ((2 * k - 1) * (2 * k)) ^ 2 =
@@ -767,7 +767,7 @@ begin
   all_goals {norm_cast, linarith},
 end
 
-/-- The sequence `cn n` has limit 1/2-/
+/-- The sequence `cn n` has limit `1/2`-/
 lemma rest_has_limit_one_half : tendsto (λ (n : ℕ), cn n) at_top (𝓝 (1 / 2)) :=
 begin
   apply (tendsto.congr rest_cancel),
@@ -797,7 +797,7 @@ end
 
 /--
 Suppose the sequence `an` (defined above) has a nonzero limit `a ≠ 0`.
-Then the sequence 1/ (an n)^2 has the limit 1/a^2.
+Then the sequence `1/ (an n)^2` has the limit `1/a^2`.
 -/
 lemma an_aux3 (a : ℝ) (hane : a ≠ 0) (ha : tendsto (λ (n : ℕ), an n) at_top (𝓝 a)) :
   tendsto (λ (n : ℕ), (1 / (an n)) ^ 2) at_top (𝓝 ((1 / a) ^ 2)) :=
@@ -806,7 +806,7 @@ begin
  rw [one_div],
 end
 
-/-- For any `n ≠ 0`, we have the identity (an n)^4/ (an (2n))^2 * (cn n) = wn n. -/
+/-- For any `n ≠ 0`, we have the identity `(an n)^4/ (an (2n))^2 * (cn n) = wn n`. -/
 lemma expand_in_limit (n : ℕ) (hn : n ≠ 0) : (an n) ^ 4 * (1 / (an (2 * n))) ^ 2 * cn n = wn n :=
 begin
   rw [an, an, cn, wn],
@@ -858,7 +858,7 @@ begin
   rw [one_div, div_eq_mul_inv],
 end
 
-/-- Stirling's Formula: The sequence `an n` = n!/ √2n (n/e)^n has limit sqrt π-/
+/-- Stirling's Formula -/
 lemma an_has_limit_sqrt_pi : tendsto (λ (n : ℕ), an n) at_top (𝓝 (sqrt π)) :=
 begin
   have ha := an_has_pos_limit_a,
