@@ -5,27 +5,44 @@ Authors: Moritz Firsching, Fabian Kruse, Nikolas Kuhn.
 -/
 import tactic
 import analysis.special_functions.log
-import data.fintype.basic
+import analysis.special_functions.pow
 import algebra.big_operators.basic
 import algebra.big_operators.intervals
 import data.finset.sum
+import data.fintype.basic
 import data.real.basic
-import topology.instances.real
-import topology.instances.ennreal
+import data.real.pi.wallis
 import order.filter
 import order.filter.basic
 import order.bounded_order
-import analysis.special_functions.pow
-import data.real.pi.wallis
+import topology.instances.real
+import topology.instances.ennreal
 
 /-!
 # Stirling's formula
 
 This file proves Theorem 90 from the [100 Theorem List] <https://www.cs.ru.nl/~freek/100/>.
-It states that `n! ∼ √2πn (n/e)^n `, where `∼` denotes asymptotically equal.
+It states that `n!` grows asymptotically like $\sqrt{2\pi n}(\frac{n}{e})^n$.
 
-The proof follows: <https://proofwiki.org/wiki/Stirling%27s_Formula>
+
+## Proof outline
+
+The proof follows: <https://proofwiki.org/wiki/Stirling%27s_Formula>.#check
+
+We proceed in two parts.#check
+### Part 1
+We consider the fraction sequence $a_n$ of fractions `n!` over $\sqrt{2\pi n}(\frac{n}{e})^n$ and
+proves that this sequence converges against a real, positve number `a`. For this the two main
+ingredients are
+ - taking the logarithm of the sequence and
+ - use the series expansion of `log(1 + x)`.
+
+### Part 2
+We use the fact that the series defined in part 1 converges againt a real number `a` and prove that
+`a = √π`. Here the main ingredient is the convergence of the Wallis product.
 -/
+
+namespace stirling
 
 open_locale big_operators -- notation ∑ for finite sums
 open_locale classical real topological_space nnreal ennreal filter big_operators
@@ -35,7 +52,7 @@ open nat
 open filter
 
 
-/-- Perhaps something to add as rat.cast_sum in more generality (see below) in mathlib?!-/
+/-- TODO: Perhaps something to add as rat.cast_sum in more generality (see below) in mathlib?!-/
 lemma rat_cast_sum (s : finset ℕ) (f : ℕ → ℚ) :
   ↑(∑ n in s, f n : ℚ) = (∑ n in s, (f n : ℝ)) :=
   (rat.cast_hom ℝ).map_sum f s
@@ -44,19 +61,21 @@ lemma rat_cast_sum (s : finset ℕ) (f : ℕ → ℚ) :
 -- ↑(∑ x in s, f x : ℚ) = (∑ x in s, (f x : β)) := by sorry
 
 /-- **Sum of the Reciprocals of the Triangular Numbers**
- from archive TODO: include in some form mathlib --/
+ (copied from archive)
+ TODO: include in some form mathlib or figure out how to import it from archive/ --/
 lemma inverse_triangle_sum :
   ∀ n, ∑ k in range n, (2 : ℚ) / (k * (k + 1)) = if n = 0 then 0 else 2 - (2 : ℚ) / n :=
 begin
   refine sum_range_induction _ _ (if_pos rfl) _,
   rintro (_|n), { rw [if_neg, if_pos]; norm_num },
-  simp_rw [if_neg (nat.succ_ne_zero _), nat.succ_eq_add_one],
+  simp_rw [if_neg (succ_ne_zero _), succ_eq_add_one],
   have A : (n + 1 + 1 : ℚ) ≠ 0, by { norm_cast, norm_num },
   push_cast,
-  field_simp [nat.cast_add_one_ne_zero],
+  field_simp [cast_add_one_ne_zero],
   ring,
 end
 
+/-- **Sum of products of consecutive reciprocals** -/
 lemma partial_sum_consecutive_reciprocals :
  ∀ n, ∑ k in range n, (1 : ℚ) / (k.succ * (k.succ.succ)) ≤ 1 :=
 begin
@@ -65,7 +84,7 @@ begin
   { have h : ∀ (k : ℕ), k ∈ (range n) →
       2 * ((1 : ℚ) / (k.succ * (k.succ.succ))) = 2 / (k.succ * (k.succ.succ)),
       by { intros k hk, rw [mul_div], rw [mul_one (2 : ℚ)] },
-    rw finset.sum_congr rfl h,
+    rw sum_congr rfl h,
     have h₁ := inverse_triangle_sum n.succ,
     rw sum_range_succ' at h₁,
     norm_num at *,
@@ -79,7 +98,7 @@ begin
 
 /-!
  ### Part 1
- Part 1 of https://proofwiki.org/wiki/Stirling%27s_Formula
+ https://proofwiki.org/wiki/Stirling%27s_Formula#Part_1
 -/
 
 /--
@@ -107,15 +126,15 @@ begin
 end
 
 /--
-Define `an n` as n!/ √2n (n/e)^n. Stirling's formula states precisely that this sequence
-has limit √π.
+Define `an n` as $\frac{n!}{\sqrt{2n}/(\frac{n}{e})^n.
+Stirling's formula states that this sequence has limit $\sqrt(π)$.
 -/
-noncomputable def an (n : ℕ) : ℝ := (n.factorial : ℝ) / ((real.sqrt(2 * n) * ((n / (exp 1))) ^ n))
+noncomputable def an (n : ℕ) : ℝ := (n.factorial : ℝ) / ((sqrt(2 * n) * ((n / (exp 1))) ^ n))
 
 /--The function `log(1 + x) - log(1 - x)` has a power series expansion with k-th term
-2 x^(2k+1)/(2k+1), valid for `|x|<1`. -/
-lemma log_sum_plus_minus (x : ℝ) (hx : |x| < 1) :
-  has_sum (λ k : ℕ, (2 : ℝ) * (1 / (2 * (k : ℝ) + 1)) * (x ^ (2 * k + 1))) (log (1 + x) - log(1 - x)) :=
+2 x^(2k+1)/(2k+1), valid for `|x| < 1`. -/
+lemma log_sum_plus_minus (x : ℝ) (hx : |x| < 1) : has_sum (λ k : ℕ,
+  (2 : ℝ) * (1 / (2 * (k : ℝ) + 1)) * (x ^ (2 * k + 1))) (log (1 + x) - log(1 - x)) :=
 begin
  have h₁, from has_sum_pow_div_log_of_abs_lt_1 hx,
   have h₂, from has_sum_pow_div_log_of_abs_lt_1 (eq.trans_lt (abs_neg x) hx),
@@ -125,8 +144,9 @@ begin
   rw [tactic.ring.add_neg_eq_sub] at h₃,
   let term := (λ n :ℕ, ((-1) * ((-x) ^ (n + 1) / ((n : ℝ) + 1)) + (x ^ (n + 1) / ((n : ℝ) + 1)))),
   let two_mul := (λ (n : ℕ), (2 * n)),
-  rw ←function.injective.has_sum_iff (nat.mul_right_injective two_pos) _ at h₃,
-  { suffices h_term_eq_goal : (term ∘ two_mul) = (λ k : ℕ, 2 * (1 / (2 * (k : ℝ) + 1)) * x ^ (2 * k  + 1)),
+  rw ←function.injective.has_sum_iff (mul_right_injective two_pos) _ at h₃,
+  { suffices h_term_eq_goal :
+    (term ∘ two_mul) = (λ k : ℕ, 2 * (1 / (2 * (k : ℝ) + 1)) * x ^ (2 * k  + 1)),
     by {rw h_term_eq_goal at h₃, exact h₃},
     apply funext,
     intro n,
@@ -142,7 +162,7 @@ end
 
 /--
 For any natural number `n ≠ 0`, we have the identity
-log ((n+1)/n) = log(1+1/(2n+1)) - log(1 - 1/(2n+1))
+`log((n + 1) / n) = log(1 + 1 / (2*n + 1)) - log(1 - 1/(2*n + 1))`.
 -/
 lemma aux_log (n : ℕ) (hn : n ≠ 0) :
   log (n.succ / n) = log (1 + 1 / (2 * n + 1)) - log (1 - 1 / (2 * n + 1)) :=
@@ -150,14 +170,14 @@ begin
   have : (2 : ℝ) * n + 1 ≠ 0, by { norm_cast, exact (2 * n).succ_ne_zero, },
   rw ← log_div,
   suffices h, from congr_arg log h,
-    all_goals {field_simp [cast_ne_zero.mpr]}, /- can not use brackets for single goal, bc of all_goals -/
+    all_goals {field_simp [cast_ne_zero.mpr]}, /- all_goals prevents using brackets here -/
   { ring },
   { norm_cast, exact succ_ne_zero (2 * n + 1) },
 end
 
 /--
-For any natural number `n`, the expression log ((n+1)/n) has the series representation
-∑_{k=0}^{∞} (2/(2k+1))*(1/(2n+1))^(2k+1)
+For any natural number `n`, the expression `log((n + 1) / n)` has the series expansion
+$\sum_{k=0}^{\infty} frac{2}{2k+1}(\frac{1}{2n+1})^{2k+1}$.
 -/
 lemma power_series_ln (n : ℕ) (hn : n ≠ 0) : has_sum (λ (k : ℕ),
   (2 : ℝ) * (1 / (2 * (k : ℝ) + 1)) * ((1 / (2 * (n : ℝ) + 1)) ^ (2 * k + 1)))
@@ -173,18 +193,18 @@ lemma power_series_ln (n : ℕ) (hn : n ≠ 0) : has_sum (λ (k : ℕ),
  end
 
 /--
-`bn n` is log (n!/ √2n (n/e)^n)
+`bn n` is log of `an n`.
 -/
 noncomputable def bn (n : ℕ) : ℝ := log (an n)
 
 /--
-For each natural number `n ≠ 0`, we have 0<√2n.
+For each natural number `n ≠ 0`, we have $0<\sqrt{2n}$.
 -/
-lemma zero_lt_sqrt_two_n (n : ℕ) (hn : n ≠ 0) : 0 < real.sqrt (2 * (n : ℝ)) :=
+lemma zero_lt_sqrt_two_n (n : ℕ) (hn : n ≠ 0) : 0 < sqrt (2 * (n : ℝ)) :=
    real.sqrt_pos.mpr (mul_pos two_pos (cast_pos.mpr (zero_lt_iff.mpr hn)))
 
 /--
-We have the expression `bn (n+1)` = log (n+1)! -1/2 log(2n) - n log ((n+1)/e)
+We have the expression `bn (n+1)` = log(n + 1)! - 1 / 2 * log(2 * n) - n * log ((n + 1) / e)
 -/
 lemma bn_formula (n : ℕ): bn n.succ = (log (n.succ.factorial : ℝ)) -
   1 / (2 : ℝ) * (log (2 * (n.succ : ℝ))) - (n.succ : ℝ) * log ((n.succ : ℝ) / (exp 1)) :=
@@ -203,7 +223,8 @@ end
 
 
 /--
-The sequence `bn (m+1) -bn (m+2)` has the series expansion ∑ 1/(2(k+1)+1)*(1/2(m+1)+1)^(2(k+1))
+The sequence `bn (m + 1) - bn (m + 2)` has the series expansion
+   `∑ 1 / (2 * (k + 1) + 1) * (1 / 2 * (m + 1) + 1)^(2 * (k + 1))`
 -/
 lemma bn_diff_has_sum (m : ℕ) :
   has_sum (λ (k : ℕ), (1 : ℝ) / (2 * k.succ + 1) * ((1 / (2 * m.succ + 1)) ^ 2) ^ (k.succ))
@@ -266,7 +287,8 @@ begin
     (∑ (k : ℕ) in range n,
     1 / (2 * (k.succ : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k.succ) + 1 := by
     { intro n,
-      rw sum_range_succ' (λ (k : ℕ), 1 / (2 * (k : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k) n,
+      rw sum_range_succ' (λ (k : ℕ),
+        1 / (2 * (k : ℝ) + 1) * ((1 / (2 * (m.succ : ℝ) + 1)) ^ 2) ^ k) n,
       dsimp only [], --beta reduce functions
       rw [pow_zero, mul_one, cast_zero, mul_zero, zero_add, div_one] },
   replace h_sum := tendsto.congr split_zero h_sum,
@@ -294,7 +316,7 @@ begin
 end
 
 /--
-We have the bound  `bn n - bn (n+1)` ≤ 1/(2n+1)^2* 1/(1-(1/2n+1)^2)
+We have the bound  `bn n - bn (n+1) ≤ 1/(2n+1)^2* 1/(1-(1/2n+1)^2)`.
 -/
 lemma bn_diff_le_geo_sum : ∀ (n : ℕ),
   bn n.succ - bn n.succ.succ ≤ (1 / (2 * n.succ + 1)) ^ 2 / (1 - (1 / (2 * n.succ + 1)) ^ 2) :=
@@ -311,9 +333,8 @@ begin
     { simp only [cast_succ, one_div, inv_pow₀],
       refine inv_lt_one _,
       norm_cast,
-      simp only [nat.one_lt_pow_iff, ne.def, zero_eq_bit0,
-        nat.one_ne_zero, not_false_iff, lt_add_iff_pos_left, canonically_ordered_comm_semiring.mul_pos,
-        succ_pos', and_self], },
+      simp only [nat.one_lt_pow_iff, ne.def, zero_eq_bit0, nat.one_ne_zero, not_false_iff,
+        lt_add_iff_pos_left, canonically_ordered_comm_semiring.mul_pos, succ_pos', and_self], },
     have h_geom := has_sum_geometric_of_lt_1 h_nonneg hlt,
     have h_geom' := has_sum.mul_left ((1 / (2 * (n.succ : ℝ) + 1)) ^ 2) h_geom,
     norm_num at h_geom',
@@ -434,7 +455,7 @@ begin
    ... = 1 / 4 : by rw mul_one,
 end
 
-/-- The sequence `bn` is bounded below by 3/4 - 1/2 * log 2  for `n ≥ 1`. -/
+/-- The sequence `bn` is bounded below by `3/4 - 1/2 * log 2`  for `n ≥ 1`. -/
 lemma bn_bounded_by_constant : ∀ (n : ℕ), 3 / (4 : ℝ) - 1 / 2 * log 2 ≤ bn n.succ :=
 begin
   intro n,
@@ -473,12 +494,11 @@ begin
    (set.range_nonempty bn) h_bounded),
 end
 
-/-- The sequence `an` is positive for `n>0`  -/
+/-- The sequence `an` is positive for `n > 0`  -/
 lemma an'_pos : ∀ (n : ℕ), 0 < an n.succ :=
  (λ n, div_pos (cast_pos.mpr (factorial_pos n.succ))
     (mul_pos ((real.sqrt_pos).mpr (mul_pos two_pos (cast_pos.mpr (succ_pos n))))
     (pow_pos (div_pos (cast_pos.mpr (succ_pos n)) (exp_pos 1)) n.succ)))
-
 
 /--
 The sequence `an` has the explicit lower bound exp (3/4 - 1/2 * log 2)
@@ -538,18 +558,18 @@ end
 
 /-!
  ### Part 2
- Part 2 of https://proofwiki.org/wiki/Stirling%27s_Formula
+ https://proofwiki.org/wiki/Stirling%27s_Formula#Part_2
 -/
 
 /--
-Define `wallis_inside_prod n` as 2n/(2n-1)*2n/(2n+1), This is the term appearing inside
-the Wallis product
+Define `wallis_inside_prod n` as `2 * n / (2 * n - 1) * 2 * n/(2 * n + 1)`.
+This is the term appearing inside the Wallis product
 -/
 noncomputable def wallis_inside_prod (n : ℕ) : ℝ :=
   (((2 : ℝ) * n) / (2 * n - 1)) * ((2 * n) / (2 * n + 1))
 
 /--
-For any sequence a_i and n∈ ℕ: ∏_{i=1}^n a_{i=1} =∏_{i=0}^{n+1} a_i.
+We can shift the indexing in a product.
  -/
 lemma aux1 (k : ℕ) : ∏ i in range k, (wallis_inside_prod (1 + i)) =
     ∏ i in Ico 1 k.succ, wallis_inside_prod i :=
@@ -558,7 +578,8 @@ begin
   rw prod_Ico_add wallis_inside_prod 0 k 1,
 end
 
-/-- The wallis product ∏_{n=1}^k 2n/(2n-1)*2n/(2n+1) converges to `π/2` as k→ ∞ -/
+/-- The wallis product $\prod_{n=1}^k \frac{2n}{(2n-1}\frac{2n}{2n+1}$
+  converges to `π/2` as `k → ∞` -/
 lemma equality1: tendsto (λ (k : ℕ), ∏ i in Ico 1 k.succ, wallis_inside_prod i) at_top (𝓝 (π/2)) :=
 begin
   rw ← tendsto_congr (aux1),
@@ -583,8 +604,9 @@ begin
 end
 
 /--
-For any `n : ℕ` satisfying n>0 and any `r : ℝ`, we have
-r*(2n)^2/( (2n+1)(2n-1)^2)= r / (2(n-1) + 1) * 2n / (2n- 1) * 2n /(2n + 1)
+For any `n : ℕ` satisfying `n > 0` and any `r : ℝ`, we have
+r * (2 * n)^2 / ((2 * n + 1) * (2 * n - 1)^2) =
+r / (2* (n - 1) + 1) * 2 * n / (2 * n- 1) * 2n /(2n + 1)
 -/
 lemma aux2 (r : ℝ) (n : ℕ) : 1 / (((2 * n.succ + 1) : ℕ) : ℝ) *
   (r * (((((2 * n.succ) ^ 2) : ℕ ): ℝ) / ((((2 * n.succ) : ℕ) : ℝ) - 1) ^ 2)) =
@@ -601,7 +623,10 @@ begin
     ring_nf },
 end
 
-/-- For any `n : ℕ`, we have ∏_{k=1}^n 2n/(2n-1)*2n/(2n+1) = 1/(2n+1) ∏_{k=1}^n (2k)^2/(2*k-1)^2  -/
+/-- For any `n : ℕ`, we have
+$\prod_{k=1}^n \frac{2n}{2n-1}\frac{2n}{2n+1}
+  = \frac{1}{2n+1} \prod_{k=1}^n \frac{(2k)^2}{(2*k-1)^2}$
+-/
 lemma equation3 (n : ℕ): ∏ k in Ico 1 n.succ, wallis_inside_prod k =
   (1 : ℝ) / (2 * n + 1) * ∏ k in Ico 1 n.succ, ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 :=
 begin
@@ -617,14 +642,14 @@ begin
     all_goals {apply zero_lt_succ} },
 end
 
-/--  For any `n : ℕ` with `n ≠ 0`, we have (2n)^2/(2n-1)^2 = (2n)^2/(2n-1)^2*(2n)^2/(2n)^2 -/
+/--  For any `n : ℕ` with `n ≠ 0`, we have
+`(2* n)^2 / (2*n - 1)^2 = (2 * n)^2 / (2 * n - 1)^2*(2*n)^2 / (2*n)^2` -/
 lemma equation4 (n : ℕ) (hn : n ≠ 0) : ((2 : ℝ) * n) ^ 2 / (2 * n - 1) ^ 2 =
   ((2 : ℝ) * n) ^ 2 / (2 * n - 1) ^ 2 * ((2 * n) ^ 2 / (2 * n) ^ 2) :=
 begin
-  have hk2 : ((2 : ℝ) * n) ^ 2 ≠ 0,
+  have h : ((2 : ℝ) * n) ^ 2 ≠ 0,
     from pow_ne_zero 2 (mul_ne_zero two_ne_zero (cast_ne_zero.mpr hn)),
-  rw div_self hk2,
-  rw mul_one,
+  rw div_self h, rw mul_one,
 end
 
 /--
@@ -699,11 +724,11 @@ begin
     ring_nf }, --this one might be quite heavy without "generalize" before
 end
 
-/-- For `n : ℕ`, define `wn n` as 2^(4n) * n!^4 / ((2n)!^2 * (2n+1)) -/
+/-- For `n : ℕ`, define `wn n` as `2^(4*n) * n!^4 / ((2*n)!^2 * (2*n + 1))` -/
 noncomputable def wn (n : ℕ) : ℝ :=
   ((2 : ℝ) ^ (4 * n) * (n.factorial) ^ 4) / ((((2 * n).factorial) ^ 2) * (2 * (n : ℝ) + 1))
 
-/-- The sequence `wn n`converges to π/2-/
+/-- The sequence `wn n`converges to `π/2`-/
 lemma wallis_consequence : tendsto (λ (n : ℕ), wn n) at_top (𝓝 (π/2)) :=
 begin
   convert equality1,
@@ -718,8 +743,8 @@ lemma sub_seq_tendsto {an : ℕ → ℝ} {A : ℝ} (h : tendsto an at_top (𝓝 
 h.comp (tendsto_id.const_mul_at_top' two_pos)
 
 /-- For `n : ℕ`, define `cn n` as √2n * (n/e)^(4n) *2^(4n) / ((√4n (2n/e)^(2n))^2 * (2n+1)) -/
-noncomputable def cn (n : ℕ) : ℝ := ((real.sqrt (2 * n) * ((n / (exp 1)) ^ n)) ^ 4) * 2 ^ (4 * n) /
-  (((real.sqrt (4 * n) * (((2 * n) / (exp 1))) ^ (2 * n))) ^ 2 * (2 * n + 1))
+noncomputable def cn (n : ℕ) : ℝ := ((sqrt (2 * n) * ((n / (exp 1)) ^ n)) ^ 4) * 2 ^ (4 * n) /
+  (((sqrt (4 * n) * (((2 * n) / (exp 1))) ^ (2 * n))) ^ 2 * (2 * n + 1))
 
 /-- For any `n :ℕ`, we have `cn n` = n/(2n+1)-/
 lemma rest_cancel (n : ℕ) : (n : ℝ) / (2 * n + 1) = cn n :=
@@ -846,3 +871,5 @@ begin
   have h := (sq_eq_sq (sqrt_nonneg π) (le_of_lt hapos)).mp hπ,
   convert halimit,
 end
+
+end stirling
