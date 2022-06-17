@@ -77,8 +77,10 @@ begin
  end
 
 
--- part 1 of https://proofwiki.org/wiki/Stirling%27s_Formula
--- first section of part 1
+/-!
+ ### Part 1
+ Part 1 of https://proofwiki.org/wiki/Stirling%27s_Formula
+-/
 
 /--
 A sequence of real numbers `an n` has limit `a`, if and only if only if the shifted
@@ -118,13 +120,12 @@ begin
  have h₁, from has_sum_pow_div_log_of_abs_lt_1 hx,
   have h₂, from has_sum_pow_div_log_of_abs_lt_1 (eq.trans_lt (abs_neg x) hx),
   replace h₂ := (has_sum_mul_left_iff  (λ h:(-1 = (0:ℝ)), one_ne_zero (neg_eq_zero.mp h))).mp h₂,
-
   rw [neg_one_mul, neg_neg, sub_neg_eq_add 1 x] at h₂,
   have h₃, from has_sum.add h₂ h₁,
   rw [tactic.ring.add_neg_eq_sub] at h₃,
-  set term := (λ n :ℕ, ((-1) * ((-x) ^ (n + 1) / ((n : ℝ) + 1)) + (x ^ (n + 1) / ((n : ℝ) + 1)))),
-  set two_mul := (λ (n : ℕ), (2 * n)),
-  rw ← function.injective.has_sum_iff (nat.mul_right_injective two_pos) _ at h₃,
+  let term := (λ n :ℕ, ((-1) * ((-x) ^ (n + 1) / ((n : ℝ) + 1)) + (x ^ (n + 1) / ((n : ℝ) + 1)))),
+  let two_mul := (λ (n : ℕ), (2 * n)),
+  rw ←function.injective.has_sum_iff (nat.mul_right_injective two_pos) _ at h₃,
   { suffices h_term_eq_goal : (term ∘ two_mul) = (λ k : ℕ, 2 * (1 / (2 * (k : ℝ) + 1)) * x ^ (2 * k  + 1)),
     by {rw h_term_eq_goal at h₃, exact h₃},
     apply funext,
@@ -141,7 +142,7 @@ end
 
 /--
 For any natural number `n ≠ 0`, we have the identity
-log ((n+1)/n) = log(1+1/(2n+1)) - log(1 - (2n+1))
+log ((n+1)/n) = log(1+1/(2n+1)) - log(1 - 1/(2n+1))
 -/
 lemma aux_log (n : ℕ) (hn : n ≠ 0) :
   log (n.succ / n) = log (1 + 1 / (2 * n + 1)) - log (1 - 1 / (2 * n + 1)) :=
@@ -158,15 +159,16 @@ end
 For any natural number `n`, the expression log ((n+1)/n) has the series representation
 ∑_{k=0}^{∞} (2/(2k+1))*(1/(2n+1))^(2k+1)
 -/
-lemma power_series_ln (n : ℕ) (hn : 0 < n) : has_sum (λ (k : ℕ),
+lemma power_series_ln (n : ℕ) (hn : n ≠ 0) : has_sum (λ (k : ℕ),
   (2 : ℝ) * (1 / (2 * (k : ℝ) + 1)) * ((1 / (2 * (n : ℝ) + 1)) ^ (2 * k + 1)))
   (log ((n.succ : ℝ) / (n : ℝ))) :=
  begin
+  have h₀ : (0 < n), from zero_lt_iff.mpr hn,
   have h₁ : |1 / (2 * (n : ℝ) + 1)| < 1, by --in library??
   { rw [abs_of_pos, div_lt_one]; norm_cast,
     any_goals {linarith}, /- can not use brackets for single goal, bc of any_goals -/
     { exact div_pos one_pos (cast_pos.mpr (2 * n).succ_pos) }, },
-  rw aux_log n (ne_of_gt hn),
+  rw aux_log n (hn),
   exact log_sum_plus_minus (1 / (2 * (n : ℝ) + 1)) h₁,
  end
 
@@ -199,8 +201,10 @@ begin
   { apply (mul_ne_zero h3.symm h4.symm), },
 end
 
--- second section of part 1
 
+/--
+The sequence `bn (m+1) -bn (m+2)` has the series expansion ∑ 1/(2(k+1)+1)*(1/2(m+1)+1)^(2(k+1))
+-/
 lemma bn_diff_has_sum (m : ℕ) :
   has_sum (λ (k : ℕ), (1 : ℝ) / (2 * k.succ + 1) * ((1 / (2 * m.succ + 1)) ^ 2) ^ (k.succ))
   ((bn m.succ) - (bn m.succ.succ)) :=
@@ -223,7 +227,7 @@ begin
     any_goals {exact factorial_ne_zero n},
     any_goals {exact exp_ne_zero 1},
   end,
-  have h_sum₀, from power_series_ln m.succ (succ_pos m),
+  have h_sum₀, from power_series_ln m.succ (succ_ne_zero m),
   have h_nonzero : (m.succ : ℝ) + 1 / (2 : ℝ) ≠ 0,
   by {rw cast_succ, field_simp, norm_cast, linarith}, --there has to be a better way...
   rw has_sum_mul_left_iff h_nonzero at h_sum₀,
@@ -274,6 +278,7 @@ begin
     ((summable_nat_add_iff 1).mpr (has_sum.summable h_sum₁))).mpr h_sum,
 end
 
+/-- The sequence `bn` is monotone decreasing -/
 lemma bn_antitone : ∀ (n m : ℕ), n ≤ m → bn m.succ ≤ bn n.succ :=
 begin
   apply antitone_nat_of_succ_le,
@@ -288,6 +293,9 @@ begin
   all_goals {refine inv_nonneg.mpr _, norm_cast, exact (zero_le _)},
 end
 
+/--
+We have the bound  `bn n - bn (n+1)` ≤ 1/(2n+1)^2* 1/(1-(1/2n+1)^2)
+-/
 lemma bn_diff_le_geo_sum : ∀ (n : ℕ),
   bn n.succ - bn n.succ.succ ≤ (1 / (2 * n.succ + 1)) ^ 2 / (1 - (1 / (2 * n.succ + 1)) ^ 2) :=
 begin
@@ -343,6 +351,9 @@ begin
   exact has_sum_le hab (bn_diff_has_sum n) g,
 end
 
+/--
+We have the bound  `bn n - bn (n+1)` ≤ 1/(4n(n+1))
+-/
 lemma bn_sub_bn_succ : ∀ (n : ℕ),
 bn n.succ - bn n.succ.succ ≤ 1 / (4 * n.succ * n.succ.succ) :=
 begin
@@ -387,6 +398,7 @@ begin
   linarith,
 end
 
+/-- For any `n`, we have `bn 1 - bn n ≤ 1/4` -/
 lemma bn_bounded_aux : ∀ (n : ℕ), bn 1 - bn n.succ ≤ 1 / 4 :=
 begin
   let bn' : (ℕ → ℝ) := λ (k : ℕ), bn k.succ,
@@ -422,6 +434,7 @@ begin
    ... = 1 / 4 : by rw mul_one,
 end
 
+/-- The sequence `bn` is bounded below by 3/4 - 1/2 * log 2  for `n ≥ 1`. -/
 lemma bn_bounded_by_constant : ∀ (n : ℕ), 3 / (4 : ℝ) - 1 / 2 * log 2 ≤ bn n.succ :=
 begin
   intro n,
@@ -437,6 +450,7 @@ begin
    ... = 3 / (4 : ℝ) - 1 / 2 * log 2 : by ring,
 end
 
+/-- The sequence `bn` is bounded below. -/
 lemma bn_has_lower_bound : (lower_bounds (set.range (λ (k : ℕ), bn k.succ))).nonempty :=
 begin
    use 3 / (4 : ℝ) - 1 / 2 * log 2,
@@ -447,7 +461,10 @@ begin
    exact bn_bounded_by_constant,
 end
 
---not in lib?
+/--
+Any sequence `bn` of real numbers that is monotone decreasing and bounded below has
+a limit in the real numbers.
+-/
 lemma monotone_convergence (bn : ℕ → ℝ) (h_sd : ∀ (n m : ℕ), n ≤ m → bn m ≤ bn n)
   (h_bounded : (lower_bounds (set.range bn)).nonempty) : ∃ (m : ℝ), tendsto bn at_top (𝓝 m) :=
 begin
@@ -456,11 +473,16 @@ begin
    (set.range_nonempty bn) h_bounded),
 end
 
+/-- The sequence `an` is positive for `n>0`  -/
 lemma an'_pos : ∀ (n : ℕ), 0 < an n.succ :=
  (λ n, div_pos (cast_pos.mpr (factorial_pos n.succ))
     (mul_pos ((real.sqrt_pos).mpr (mul_pos two_pos (cast_pos.mpr (succ_pos n))))
     (pow_pos (div_pos (cast_pos.mpr (succ_pos n)) (exp_pos 1)) n.succ)))
 
+
+/--
+The sequence `an` has the explicit lower bound exp (3/4 - 1/2 * log 2)
+-/
 lemma an'_bounded_by_pos_constant : ∀ (n : ℕ), exp (3 / (4 : ℝ) - 1 / 2 * log 2) ≤ an n.succ :=
 begin
   intro n,
@@ -468,9 +490,11 @@ begin
   exact bn_bounded_by_constant n,
 end
 
+/-- The sequence `an` is monotone decreasing -/
 lemma an'_antitone : ∀ (n m : ℕ), n ≤ m → an m.succ ≤ an n.succ :=
   (λ n, λ m, λ h, (log_le_log (an'_pos m) (an'_pos n)).mp (bn_antitone n m h))
 
+/-- The sequence `an` has a lower bound -/
 lemma an'_has_lower_bound : (lower_bounds (set.range (λ (k : ℕ), an k.succ))).nonempty :=
 begin
    use exp (3 / (4 : ℝ) - 1 / 2 * log 2),
@@ -480,6 +504,7 @@ begin
    exact an'_bounded_by_pos_constant,
 end
 
+/-- The sequence `an` converges to a real number -/
 lemma an_has_limit_a : ∃ (a : ℝ), tendsto (λ (n : ℕ), an n) at_top (𝓝 a) :=
 begin
   have ha := monotone_convergence (λ (k : ℕ), an k.succ) an'_antitone an'_has_lower_bound,
@@ -489,6 +514,7 @@ begin
   exact hx,
 end
 
+/-- The limit `a` of the sequence `an` satisfies `0 < a` -/
 lemma an_has_pos_limit_a : ∃ (a : ℝ), 0 < a ∧ tendsto (λ (n : ℕ), an n) at_top (𝓝 a) :=
 begin
   have h := an_has_limit_a,
@@ -510,11 +536,21 @@ begin
   { exact ha },
 end
 
--- part 2 of https://proofwiki.org/wiki/Stirling%27s_Formula
+/-!
+ ### Part 2
+ Part 2 of https://proofwiki.org/wiki/Stirling%27s_Formula
+-/
 
+/--
+Define `wallis_inside_prod n` as 2n/(2n-1)*2n/(2n+1), This is the term appearing inside
+the Wallis product
+-/
 noncomputable def wallis_inside_prod (n : ℕ) : ℝ :=
   (((2 : ℝ) * n) / (2 * n - 1)) * ((2 * n) / (2 * n + 1))
 
+/--
+For any sequence a_i and n∈ ℕ: ∏_{i=1}^n a_{i=1} =∏_{i=0}^{n+1} a_i.
+ -/
 lemma aux1 (k : ℕ) : ∏ i in range k, (wallis_inside_prod (1 + i)) =
     ∏ i in Ico 1 k.succ, wallis_inside_prod i :=
 begin
@@ -522,6 +558,7 @@ begin
   rw prod_Ico_add wallis_inside_prod 0 k 1,
 end
 
+/-- The wallis product ∏_{n=1}^k 2n/(2n-1)*2n/(2n+1) converges to `π/2` as k→ ∞ -/
 lemma equality1: tendsto (λ (k : ℕ), ∏ i in Ico 1 k.succ, wallis_inside_prod i) at_top (𝓝 (π/2)) :=
 begin
   rw ← tendsto_congr (aux1),
@@ -545,6 +582,10 @@ begin
   exact tendsto_prod_pi_div_two,
 end
 
+/--
+For any `n : ℕ` satisfying n>0 and any `r : ℝ`, we have
+r*(2n)^2/( (2n+1)(2n-1)^2)= r / (2(n-1) + 1) * 2n / (2n- 1) * 2n /(2n + 1)
+-/
 lemma aux2 (r : ℝ) (n : ℕ) : 1 / (((2 * n.succ + 1) : ℕ) : ℝ) *
   (r * (((((2 * n.succ) ^ 2) : ℕ ): ℝ) / ((((2 * n.succ) : ℕ) : ℝ) - 1) ^ 2)) =
   (1 / (((2 * n + 1) : ℕ) : ℝ) * r) * ((((2 * n.succ) : ℕ) : ℝ) / ((((2 * n.succ) : ℕ) : ℝ) - 1) *
@@ -560,6 +601,7 @@ begin
     ring_nf },
 end
 
+/-- For any `n : ℕ`, we have ∏_{k=1}^n 2n/(2n-1)*2n/(2n+1) = 1/(2n+1) ∏_{k=1}^n (2k)^2/(2*k-1)^2  -/
 lemma equation3 (n : ℕ): ∏ k in Ico 1 n.succ, wallis_inside_prod k =
   (1 : ℝ) / (2 * n + 1) * ∏ k in Ico 1 n.succ, ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 :=
 begin
@@ -575,15 +617,20 @@ begin
     all_goals {apply zero_lt_succ} },
 end
 
-lemma equation4 (n : ℕ) (hk : n ≠ 0) : ((2 : ℝ) * n) ^ 2 / (2 * n - 1) ^ 2 =
+/--  For any `n : ℕ` with `n ≠ 0`, we have (2n)^2/(2n-1)^2 = (2n)^2/(2n-1)^2*(2n)^2/(2n)^2 -/
+lemma equation4 (n : ℕ) (hn : n ≠ 0) : ((2 : ℝ) * n) ^ 2 / (2 * n - 1) ^ 2 =
   ((2 : ℝ) * n) ^ 2 / (2 * n - 1) ^ 2 * ((2 * n) ^ 2 / (2 * n) ^ 2) :=
 begin
   have hk2 : ((2 : ℝ) * n) ^ 2 ≠ 0,
-    from pow_ne_zero 2 (mul_ne_zero two_ne_zero (cast_ne_zero.mpr hk)),
+    from pow_ne_zero 2 (mul_ne_zero two_ne_zero (cast_ne_zero.mpr hn)),
   rw div_self hk2,
   rw mul_one,
 end
 
+/--
+For any `n : ℕ`, we have
+1/(2n+1)*∏_{k=1}^n (2k)^2/(2k-1)^2 = 1/(2n+1) ∏_{k=1}^n (2k)^2/(2k-1)^2 * (2k)^2/(2k)^2.
+-/
 lemma equation4' (n : ℕ) : 1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
   ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 =
   1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
@@ -596,8 +643,12 @@ begin
   exact one_le_iff_ne_zero.mp hd.left,
 end
 
+/--
+For any `n : ℕ`, we have
+(2n)^2/(2n-1)^2 * (2n)^2/(2n)^2 = 2^4 * n^4 / ((2n-1)*(2n))^2.
+-/
 lemma equation5 (n : ℕ) : ((2 : ℝ) * n) ^ 2 / (2 * n - 1) ^ 2 * ((2 * n) ^ 2 / (2 * n) ^ 2) =
-  ((2 : ℝ) ^ 4 * n ^ 4) / (((2 * n - 1) * (2 * n)) ^ 2) :=
+  ((2 : ℝ) ^ 4 * n ^ 4) / ((2 * n - 1) * (2 * n)) ^ 2 :=
 begin
   cases n with d hd,
   { rw [cast_zero, mul_zero, zero_pow two_pos, zero_div, zero_mul],
@@ -609,17 +660,25 @@ begin
     ring_nf, },
 end
 
+/--
+For any `n : ℕ`, we have
+1/(2n+1) ∏_{k=1}^n (2k)^2/(2k-1)^2*(2k)^2/(2k)^2 = 1/(2n+1) ∏_{k=1}^n 2^4 k^4/ ((2k-1)(2k))^2.
+-/
 lemma equation5' (n : ℕ) : 1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
   ((2 : ℝ) * k) ^ 2 / (2 * k - 1) ^ 2 * ((2 * k) ^ 2 / (2 * k) ^ 2) =
   1 / (2 * (n : ℝ) + 1) * ∏ k in Ico 1 n.succ,
-  ((2 : ℝ) ^ 4 * k ^ 4) / (((2 * k - 1) * (2 * k)) ^ 2) :=
+  ((2 : ℝ) ^ 4 * k ^ 4) / ((2 * k - 1) * (2 * k)) ^ 2 :=
 begin
   rw prod_congr rfl, intros d hd, rw ← equation5,
 end
 
+/--
+For any `n : ℕ`, we have
+1/(2n+1) ∏_{k=1}^n 2^4 k^4/ ((2k-1)(2k))^2 = 2^(4n)*(n!)^4/((2n)!^2 *(2n+1)) .
+-/
 lemma equation6 (n : ℕ) : 1 / ((2 : ℝ) * n + 1) * ∏ (k : ℕ) in Ico 1 n.succ,
-  ((2 : ℝ) ^ 4 * k ^ 4) / (((2 * k - 1) * (2 * k)) ^ 2) =
-  ((2 : ℝ) ^ (4 * n) * n.factorial ^ 4) / (((2 * n).factorial ^ 2) * (2 * n + 1)) :=
+  (2 : ℝ) ^ 4 * k ^ 4 / ((2 * k - 1) * (2 * k)) ^ 2 =
+  (2 : ℝ) ^ (4 * n) * n.factorial ^ 4 / ((2 * n).factorial ^ 2 * (2 * n + 1)) :=
 begin
   induction n with d hd,
   { rw [Ico_self, prod_empty, cast_zero, mul_zero, mul_zero, mul_zero, factorial_zero],
@@ -640,24 +699,29 @@ begin
     ring_nf }, --this one might be quite heavy without "generalize" before
 end
 
+/-- For `n : ℕ`, define `wn n` as 2^(4n) * n!^4 / ((2n)!^2 * (2n+1)) -/
 noncomputable def wn (n : ℕ) : ℝ :=
   ((2 : ℝ) ^ (4 * n) * (n.factorial) ^ 4) / ((((2 * n).factorial) ^ 2) * (2 * (n : ℝ) + 1))
 
+/-- The sequence `wn n`converges to π/2-/
 lemma wallis_consequence : tendsto (λ (n : ℕ), wn n) at_top (𝓝 (π/2)) :=
 begin
   convert equality1,
   simp only [equation6, equation3, wn, equation4', equation5', wn],
 end
 
--- part 2b of https://proofwiki.org/wiki/Stirling%27s_Formula
-
+/--
+If a sequence  `an` has a limit `A`, then the subsequence of only even terms has the same limit
+-/
 lemma sub_seq_tendsto {an : ℕ → ℝ} {A : ℝ} (h : tendsto an at_top (𝓝 A)) :
   tendsto (λ (n : ℕ), an (2 * n)) at_top (𝓝 A) :=
 h.comp (tendsto_id.const_mul_at_top' two_pos)
 
+/-- For `n : ℕ`, define `cn n` as √2n * (n/e)^(4n) *2^(4n) / ((√4n (2n/e)^(2n))^2 * (2n+1)) -/
 noncomputable def cn (n : ℕ) : ℝ := ((real.sqrt (2 * n) * ((n / (exp 1)) ^ n)) ^ 4) * 2 ^ (4 * n) /
   (((real.sqrt (4 * n) * (((2 * n) / (exp 1))) ^ (2 * n))) ^ 2 * (2 * n + 1))
 
+/-- For any `n :ℕ`, we have `cn n` = n/(2n+1)-/
 lemma rest_cancel (n : ℕ) : (n : ℝ) / (2 * n + 1) = cn n :=
 begin
   rw cn,
@@ -678,7 +742,7 @@ begin
   all_goals {norm_cast, linarith},
 end
 
-
+/-- The sequence `cn n` has limit 1/2-/
 lemma rest_has_limit_one_half : tendsto (λ (n : ℕ), cn n) at_top (𝓝 (1 / 2)) :=
 begin
   apply (tendsto.congr rest_cancel),
@@ -706,6 +770,10 @@ begin
   { rw inv_inv },
 end
 
+/--
+Suppose the sequence `an` (defined above) has a nonzero limit `a ≠ 0`.
+Then the sequence 1/ (an n)^2 has the limit 1/a^2.
+-/
 lemma an_aux3 (a : ℝ) (hane : a ≠ 0) (ha : tendsto (λ (n : ℕ), an n) at_top (𝓝 a)) :
   tendsto (λ (n : ℕ), (1 / (an n)) ^ 2) at_top (𝓝 ((1 / a) ^ 2)) :=
 begin
@@ -713,7 +781,7 @@ begin
  rw [one_div],
 end
 
---One can still save some calculations by reordering the haves
+/-- For any `n ≠ 0`, we have the identity (an n)^4/ (an (2n))^2 * (cn n) = wn n. -/
 lemma expand_in_limit (n : ℕ) (hn : n ≠ 0) : (an n) ^ 4 * (1 / (an (2 * n))) ^ 2 * cn n = wn n :=
 begin
   rw [an, an, cn, wn],
@@ -736,10 +804,15 @@ begin
   ring_nf,
 end
 
+/-- For any `n : ℕ`, we have the identity (an n+1)^4/ (an (2(n+1)))^2 * (cn n+1) = wn n+1. -/
 lemma expand_in_limit' (n : ℕ) :
   (an n.succ) ^ 4 * (1 / (an (2 * n.succ))) ^ 2 * cn n.succ = wn n.succ :=
   expand_in_limit n.succ (succ_ne_zero n)
 
+/--
+Suppose the sequence `an` (defined above) has the limit `a ≠ 0`.
+Then the sequence `wn` has limit `a^2/2`
+-/
 lemma second_wallis_limit (a : ℝ) (hane : a ≠ 0) (ha : tendsto an at_top (𝓝 a)) :
   tendsto wn at_top (𝓝 (a ^ 2 / 2)):=
 begin
@@ -760,6 +833,7 @@ begin
   rw [one_div, div_eq_mul_inv],
 end
 
+/-- Stirling's Formula: The sequence `an n` = n!/ √2n (n/e)^n has limit sqrt π-/
 lemma an_has_limit_sqrt_pi : tendsto (λ (n : ℕ), an n) at_top (𝓝 (sqrt π)) :=
 begin
   have ha := an_has_pos_limit_a,
